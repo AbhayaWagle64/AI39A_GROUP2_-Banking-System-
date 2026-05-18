@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Register - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/auth.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Register</div>
+<p>This is your registration page. Create an account by filling in the details below.</p>
+<form method='post'>
+    <label>Username</label>
+    <input type='text' name='username' placeholder='Choose a username' required>
+    <label>Email</label>
+    <input type='email' name='email' placeholder='Enter your email' required>
+    <label>Password</label>
+    <input type='password' name='password' placeholder='Choose a password' required>
+    <button type='submit'>Register</button>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/auth.js') }}'></script>
+{% endblock %}

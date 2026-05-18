@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/profile.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Edit Profile</div>
+<p>This is your edit profile page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> profile/edit_profile.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/profile.js') }}'></script>
+{% endblock %}

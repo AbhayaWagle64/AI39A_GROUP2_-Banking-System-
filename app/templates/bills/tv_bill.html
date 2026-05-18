@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Tv Bill - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/bills.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Tv Bill</div>
+<p>This is your tv bill page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> bills/tv_bill.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/bills.js') }}'></script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Payment Receipt - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/payment.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Payment Receipt</div>
+<p>This is your payment receipt page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> payment/payment_receipt.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/payment.js') }}'></script>
+{% endblock %}

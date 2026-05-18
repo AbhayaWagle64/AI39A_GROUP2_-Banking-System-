@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}403 - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/errors.css') }}'>
+{% endblock %}
+{% block content %}
+<h1>403</h1>
+<p>This is the friendly 403 error page.</p>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/errors.js') }}'></script>
+{% endblock %}

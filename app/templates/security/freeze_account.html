@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Freeze Account - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/security.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Freeze Account</div>
+<p>This is your freeze account page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> security/freeze_account.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/security.js') }}'></script>
+{% endblock %}

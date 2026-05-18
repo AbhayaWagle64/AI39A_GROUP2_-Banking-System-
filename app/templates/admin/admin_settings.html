@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Admin Settings - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/admin.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Admin Settings</div>
+<p>This is your admin settings page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> admin/admin_settings.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/admin.js') }}'></script>
+{% endblock %}

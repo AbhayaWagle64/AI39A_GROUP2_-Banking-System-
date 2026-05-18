@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Upload Documents - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/profile.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Upload Documents</div>
+<p>This is your upload documents page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> profile/upload_documents.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/profile.js') }}'></script>
+{% endblock %}

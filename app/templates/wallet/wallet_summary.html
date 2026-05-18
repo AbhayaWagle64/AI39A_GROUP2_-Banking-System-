@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Wallet Summary - ePaisa{% endblock %}
+{% block section_css %}
+<link rel='stylesheet' href='{{ url_for('static', filename='css/wallet.css') }}'>
+{% endblock %}
+{% block content %}
+<div class='page-title'>Wallet Summary</div>
+<p>This is your wallet summary page.</p>
+<form method='post'>
+    <p><strong>Template path:</strong> wallet/wallet_summary.html</p>
+</form>
+{% endblock %}
+{% block section_js %}
+<script src='{{ url_for('static', filename='js/wallet.js') }}'></script>
+{% endblock %}
