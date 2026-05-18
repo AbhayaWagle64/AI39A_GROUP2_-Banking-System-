@@ -1,15 +1,313 @@
 {% extends 'base.html' %}
 {% block title %}Edit Profile - ePaisa{% endblock %}
 {% block section_css %}
-<link rel='stylesheet' href='{{ url_for('static', filename='css/profile.css') }}'>
+<link rel='stylesheet' href='{{ url_for('static', filename='css/edit_profile.css') }}'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'>
 {% endblock %}
 {% block content %}
-<div class='page-title'>Edit Profile</div>
-<p>This is your edit profile page.</p>
-<form method='post'>
-    <p><strong>Template path:</strong> profile/edit_profile.html</p>
-</form>
+<div class="page-header" style="margin-bottom: 30px;">
+    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Profile Settings</h1>
+    <p style="color: #6b7280; font-size: 14px;">Manage your personal and security information</p>
+</div>
+
+<section class="profile-wrapper">
+
+            <!-- Left Profile Card -->
+            <div class="profile-card">
+
+                <div class="profile-image-section">
+
+                    <div class="profile-avatar">
+                        <div class="profile-placeholder" id="profilePlaceholder">J</div>
+
+                        <img src="{{ url_for('static', filename='images/default-profile.png') }}"
+                             alt="Profile Image"
+                             id="profilePreview" class="profile-img" style="display: none;">
+                    </div>
+
+                    <label for="profileImage" class="upload-btn">
+                        <i class="fa-solid fa-camera"></i>
+                        Change Photo
+                    </label>
+
+                    <input type="file"
+                        id="profileImage"
+                        name="profileImage"
+                        accept="image/*"
+                        hidden>
+
+                </div>
+
+                <div class="profile-details">
+                    <h2>John Doe</h2>
+                    <p>@johndoe</p>
+
+                    <div class="verification-badge">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Verified Account
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Profile Form -->
+            <div class="profile-form-container">
+
+                <form id="profileForm"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+                    <!-- Personal Information -->
+                    <div class="form-section">
+
+                        <div class="section-title">
+                            <i class="fa-solid fa-user"></i>
+                            <h2>Personal Information</h2>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label for="fullName">Full Name *</label>
+
+                                <input type="text"
+                                    id="fullName"
+                                    name="fullName"
+                                    placeholder="Enter your full name"
+                                    required
+                                    minlength="3"
+                                    maxlength="50">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="username">Username *</label>
+
+                                <input type="text"
+                                    id="username"
+                                    name="username"
+                                    placeholder="Enter username"
+                                    required
+                                    minlength="4"
+                                    maxlength="20"
+                                    pattern="^[a-zA-Z0-9_]+$"
+                                    title="Only letters, numbers and underscores allowed">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+
+                                <input type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Enter email address"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+
+                                <input type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="98XXXXXXXX"
+                                    required
+                                    pattern="[0-9]{10}"
+                                    title="Phone number must contain exactly 10 digits">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dob">Date of Birth *</label>
+
+                                <input type="date"
+                                    id="dob"
+                                    name="dob"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gender">Gender *</label>
+
+                                <select id="gender"
+                                    name="gender"
+                                    required>
+
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="form-section">
+
+                        <div class="section-title">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <h2>Address Information</h2>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="form-group full-width">
+                                <label for="address">Address *</label>
+
+                                <textarea id="address"
+                                    name="address"
+                                    rows="4"
+                                    placeholder="Enter your full address"
+                                    required
+                                    minlength="5"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="city">City *</label>
+
+                                <input type="text"
+                                    id="city"
+                                    name="city"
+                                    placeholder="Enter city"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="country">Country *</label>
+
+                                <input type="text"
+                                    id="country"
+                                    name="country"
+                                    placeholder="Enter country"
+                                    required>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="form-section">
+
+                        <div class="section-title">
+                            <i class="fa-solid fa-lock"></i>
+                            <h2>Security Settings</h2>
+                        </div>
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label for="currentPassword">
+                                    Current Password *
+                                </label>
+
+                                <input type="password"
+                                    id="currentPassword"
+                                    name="currentPassword"
+                                    placeholder="Enter current password"
+                                    required
+                                    minlength="6">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newPassword">
+                                    New Password
+                                </label>
+
+                                <input type="password"
+                                    id="newPassword"
+                                    name="newPassword"
+                                    placeholder="Enter new password"
+                                    minlength="6">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">
+                                    Confirm Password
+                                </label>
+
+                                <input type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm new password"
+                                    minlength="6">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Account Preferences -->
+                    <div class="form-section">
+
+                        <div class="section-title">
+                            <i class="fa-solid fa-sliders"></i>
+                            <h2>Preferences</h2>
+                        </div>
+
+                        <div class="preferences">
+
+                            <div class="checkbox-group">
+                                <input type="checkbox"
+                                    id="emailNotifications"
+                                    name="emailNotifications"
+                                    checked>
+
+                                <label for="emailNotifications">
+                                    Receive email notifications
+                                </label>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox"
+                                    id="smsNotifications"
+                                    name="smsNotifications"
+                                    checked>
+
+                                <label for="smsNotifications">
+                                    Receive SMS notifications
+                                </label>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox"
+                                    id="terms"
+                                    name="terms"
+                                    required>
+
+                                <label for="terms">
+                                    I confirm the information provided is accurate *
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+
+                        <button type="reset" class="reset-btn">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            Reset
+                        </button>
+
+                        <button type="submit" class="save-btn">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
 {% endblock %}
 {% block section_js %}
-<script src='{{ url_for('static', filename='js/profile.js') }}'></script>
+<script src='{{ url_for('static', filename='js/edit_profile.js') }}'></script>
 {% endblock %}
