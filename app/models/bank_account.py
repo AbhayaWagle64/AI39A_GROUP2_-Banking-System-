@@ -1,3 +1,4 @@
+
 # app/models/bank_account.py
 # Bank account model for linked accounts.
 
