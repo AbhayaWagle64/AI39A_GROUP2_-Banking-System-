@@ -1,37 +1,40 @@
 # app/models/user_model.py
-from config.db_config import get_db_connection
+from app.extensions import db
 
-class UserModel:
+class UserModel(db.Model):
+    __tablename__ = 'users'
+
+    # Defining the columns to match your database schema
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
 
     @staticmethod
     def get_profile_by_id(user_id):
-        """Fetches user profile data from the database using the User ID."""
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True) # returns rows as a dictionary
-        
-        # Select profile details, excluding passwords for security
-        query = "SELECT id, username, email, phone FROM users WHERE id = %s"
-        cursor.execute(query, (user_id,))
-        user_profile = cursor.fetchone()
-        
-        cursor.close()
-        conn.close()
-        return user_profile
+        """Fetches user profile data from the database using SQLAlchemy."""
+        user = UserModel.query.get(user_id)
+        if user:
+            return {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "phone": user.phone
+            }
+        return None
 
     @staticmethod
     def update_profile_by_id(user_id, email, phone):
-        """Updates user profile details (email and phone) in the database."""
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        query = "UPDATE users SET email = %s, phone = %s WHERE id = %s"
-        try:
-            cursor.execute(query, (email, phone, user_id))
-            conn.commit()
-            return cursor.rowcount > 0 # Returns True if the profile was successfully updated
-        except Exception as e:
-            print(f"Database Error during profile update: {e}")
-            return False
-        finally:
-            cursor.close()
-            conn.close()
+        """Updates user profile details in the database using SQLAlchemy."""
+        user = UserModel.query.get(user_id)
+        if user:
+            try:
+                user.email = email
+                user.phone = phone
+                db.session.commit()
+                return True
+            except Exception as e:
+                db.session.rollback()
+                print(f"Database Error during profile update: {e}")
+                return False
+        return False
