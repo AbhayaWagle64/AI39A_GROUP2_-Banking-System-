@@ -1,20 +1,44 @@
-{% extends 'base.html' %}
-{% block title %}Login - ePaisa{% endblock %}
-{% block section_css %}
-<link rel='stylesheet' href='{{ url_for('static', filename='css/auth.css') }}'>
-{% endblock %}
-{% block content %}
-<div class='page-title'>Login</div>
-<p>This is your login page. Enter your username and password to sign in.</p>
-<form method='post'>
-    <label>Username</label>
-    <input type='text' name='username' placeholder='Enter username' required>
-    <label>Password</label>
-    <input type='password' name='password' placeholder='Enter password' required>
-    <button type='submit'>Login</button>
-</form>
-<p>Use <strong>admin</strong> / <strong>password</strong> to sign in for demo purposes.</p>
-{% endblock %}
-{% block section_js %}
-<script src='{{ url_for('static', filename='js/auth.js') }}'></script>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paisa Login</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="/static/auth.css">
+</head>
+<body>
+
+    <div class="login-container">
+
+        <div class="login-box">
+            <h1>E-Paisa</h1>
+            <p class="subtitle">Digital Wallet Login</p>
+
+            <form action="/login" method="POST">
+
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit">Login</button>
+
+            </form>
+
+            <p class="register-text">
+                Don't have an account?
+                <a href="#">Register</a>
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>
