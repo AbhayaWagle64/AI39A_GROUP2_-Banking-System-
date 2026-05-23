@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Profile Management</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#f4f6f9;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            padding:20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:500px;
+            background:white;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .title{
+            text-align:center;
+            margin-bottom:25px;
+            color:#333;
+        }
+
+        .profile-image{
+            display:flex;
+            justify-content:center;
+            margin-bottom:20px;
+        }
+
+        .profile-image img{
+            width:120px;
+            height:120px;
+            border-radius:50%;
+            object-fit:cover;
+            border:4px solid #4a90e2;
+        }
+
+        .form-group{
+            margin-bottom:18px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:6px;
+            color:#444;
+            font-weight:bold;
+        }
+
+        input, textarea{
+            width:100%;
+            padding:12px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            outline:none;
+            transition:0.3s;
+        }
+
+        input:focus,
+        textarea:focus{
+            border-color:#4a90e2;
+        }
+
+        textarea{
+            resize:none;
+            height:100px;
+        }
+
+        .btn-group{
+            display:flex;
+            gap:10px;
+            margin-top:20px;
+        }
+
+        button{
+            flex:1;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:16px;
+            transition:0.3s;
+        }
+
+        .save-btn{
+            background:#4a90e2;
+            color:white;
+        }
+
+        .save-btn:hover{
+            background:#357bd8;
+        }
+
+        .cancel-btn{
+            background:#e74c3c;
+            color:white;
+        }
+
+        .cancel-btn:hover{
+            background:#c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <h1 class="title">Profile Management</h1>
+
+        <div class="profile-image">
+            <img src="https://via.placeholder.com/120" alt="Profile Picture">
+        </div>
+
+        <form>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="Enter your phone number">
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                <textarea placeholder="Enter your address"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Upload Profile Picture</label>
+                <input type="file">
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <button type="reset" class="cancel-btn">Cancel</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</body>
+</html>
