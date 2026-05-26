@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookverse</title>
+  <meta charset="UTF-8">
+  <title>Login | Banking System</title>
 </head>
 <body>
-    <form action="/login" method="post"></form>
-         <input type="text" name="name" id="" placeholder="Enter your name"> <br> <br>
-         <input type="text" name="password" id="" placeholder="Enter your password"> <br> <br>
-         <input type="submit" name="" id="">  
+  <h1>Banking System Login</h1>
+  <form method="POST" action="/login">
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
 </body>
 </html>
