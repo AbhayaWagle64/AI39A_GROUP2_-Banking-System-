@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Money - E-Paisa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <span class="sidebar-logo-text">E-Paisa</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('main.wallet') }}" class="sidebar-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="{{ url_for('main.add_money') }}" class="sidebar-nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Money</span>
+                </a>
+                <a href="{{ url_for('main.withdraw_money') }}" class="sidebar-nav-item active">
+                    <i class="fas fa-minus-circle"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="{{ url_for('main.linked_accounts') }}" class="sidebar-nav-item">
+                    <i class="fas fa-university"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="{{ url_for('main.wallet') }}" class="sidebar-nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Summary</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Withdraw Money</h1>
+                    <p class="page-subtitle">Transfer funds to your bank account</p>
+                </div>
+            </div>
+
+            <!-- Balance Display -->
+            <div class="card balance-card" style="padding: 24px;">
+                <p class="balance-label">Available Balance</p>
+                <h1 class="balance-amount" style="font-size: 36px;">₹44,000.00</h1>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">Select Bank Account</label>
+                    <select class="form-select" id="bank-account">
+                        <option value="">Select account</option>
+                        {% for account in linked_accounts %}
+                        <option value="{{ account.name }}">{{ account.name }} - {{ account.number }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount to Withdraw (₹)</label>
+                    <input type="number" class="form-input" id="withdraw-amount" placeholder="Enter amount" min="1" max="44000">
+                </div>
+
+                <!-- Fee Breakdown -->
+                <div class="fee-breakdown">
+                    <div class="fee-row">
+                        <span class="fee-label">Withdrawal Amount</span>
+                        <span class="fee-value" id="fee-amount">₹0.00</span>
+                    </div>
+                    <div class="fee-row">
+                        <span class="fee-label">Processing Fee</span>
+                        <span class="fee-value">₹5.00</span>
+                    </div>
+                    <div class="fee-row">
+                        <span class="fee-label">Tax (0%)</span>
+                        <span class="fee-value">₹0.00</span>
+                    </div>
+                    <div class="fee-total">
+                        <span class="fee-total-label">Total Deduction</span>
+                        <span class="fee-total-value" id="total-deduction">₹5.00</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-full">
+                    <i class="fas fa-arrow-down"></i>
+                    Withdraw Funds
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

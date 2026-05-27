@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <span class="sidebar-logo-text">E-Paisa</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('main.wallet') }}" class="sidebar-nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Wallet</span>
+                </a>
+                <a href="{{ url_for('main.add_money') }}" class="sidebar-nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Money</span>
+                </a>
+                <a href="{{ url_for('main.withdraw_money') }}" class="sidebar-nav-item">
+                    <i class="fas fa-minus-circle"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="{{ url_for('main.linked_accounts') }}" class="sidebar-nav-item">
+                    <i class="fas fa-university"></i>
+                    <span>Accounts</span>
+                </a>
+                <a href="{{ url_for('main.wallet') }}" class="sidebar-nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Summary</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Wallet Dashboard</h1>
+                    <p class="page-subtitle">Manage your finances with ease</p>
+                </div>
+            </div>
+
+            <!-- Balance Card -->
+            <div class="card balance-card">
+                <p class="balance-label">Total Balance</p>
+                <h1 class="balance-amount">₹44,000.00</h1>
+                <div class="balance-stats">
+                    <div class="balance-stat">
+                        <div class="balance-stat-icon income">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div>
+                            <div class="balance-stat-label">Income</div>
+                            <div class="balance-stat-value">₹58,000</div>
+                        </div>
+                    </div>
+                    <div class="balance-stat">
+                        <div class="balance-stat-icon expense">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div>
+                            <div class="balance-stat-label">Expense</div>
+                            <div class="balance-stat-value">₹14,000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="{{ url_for('main.add_money') }}" class="action-btn">
+                    <div class="action-btn-icon add">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <span class="action-btn-label">Add Money</span>
+                </a>
+                <a href="{{ url_for('main.withdraw_money') }}" class="action-btn">
+                    <div class="action-btn-icon withdraw">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <span class="action-btn-label">Withdraw</span>
+                </a>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Transactions</h2>
+                    <a href="{{ url_for('main.wallet') }}" style="color: var(--primary-purple); text-decoration: none; font-weight: 600;">View All</a>
+                </div>
+                <div class="transaction-list">
+                    {% for transaction in transactions[:5] %}
+                    <div class="transaction-item">
+                        <div class="transaction-icon {{ transaction.type }}">
+                            <i class="fas fa-{{ transaction.icon }}"></i>
+                        </div>
+                        <div class="transaction-info">
+                            <div class="transaction-title">{{ transaction.title }}</div>
+                            <div class="transaction-date">{{ transaction.date }}</div>
+                        </div>
+                        <div class="transaction-amount {{ transaction.type }}">
+                            {% if transaction.amount > 0 %}+{% endif %}₹{{ "{:,.2f}".format(transaction.amount) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Linked Accounts Preview -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Linked Accounts</h2>
+                    <a href="{{ url_for('main.linked_accounts') }}" style="color: var(--primary-purple); text-decoration: none; font-weight: 600;">Manage</a>
+                </div>
+                {% for account in linked_accounts[:2] %}
+                <div class="account-card" style="margin-bottom: 12px; padding: 16px;">
+                    <div class="account-icon">
+                        <i class="fas fa-{{ account.icon }}"></i>
+                    </div>
+                    <div class="account-info">
+                        <div class="account-name">{{ account.name }}</div>
+                        <div class="account-number">{{ account.number }}</div>
+                    </div>
+                    <span class="account-status {{ account.status }}">
+                        <i class="fas fa-check-circle"></i>
+                        {{ account.status|capitalize }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
