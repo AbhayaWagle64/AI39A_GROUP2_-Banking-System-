@@ -5,7 +5,11 @@ from functools import wraps
 main = Blueprint("main", __name__)
 
 # Simple in-memory user database (in production, use a real database)
-users_db = {}
+users_db = {
+    'test': {
+        'password': generate_password_hash('test123')
+    }
+}
 
 # Sample data
 transactions = [
@@ -156,5 +160,5 @@ def withdraw_money():
 
 @main.route("/linked-accounts")
 @login_required
-def linked_accounts():
+def linked_accounts_page():
     return render_template("linked_accounts.html", linked_accounts=linked_accounts)

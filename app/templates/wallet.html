@@ -31,7 +31,7 @@
                     <i class="fas fa-minus-circle"></i>
                     <span>Withdraw</span>
                 </a>
-                <a href="{{ url_for('main.linked_accounts') }}" class="sidebar-nav-item">
+                <a href="{{ url_for('main.linked_accounts_page') }}" class="sidebar-nav-item">
                     <i class="fas fa-university"></i>
                     <span>Accounts</span>
                 </a>
@@ -121,7 +121,7 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Linked Accounts</h2>
-                    <a href="{{ url_for('main.linked_accounts') }}" style="color: var(--primary-purple); text-decoration: none; font-weight: 600;">Manage</a>
+                    <a href="{{ url_for('main.linked_accounts_page') }}" style="color: var(--primary-purple); text-decoration: none; font-weight: 600;">Manage</a>
                 </div>
                 {% for account in linked_accounts[:2] %}
                 <div class="account-card" style="margin-bottom: 12px; padding: 16px;">
