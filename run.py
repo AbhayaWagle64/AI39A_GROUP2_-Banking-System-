@@ -10,15 +10,13 @@ app = Flask(
     static_folder='app/static'
 )
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-
 @app.route('/')
 def register():
     return render_template('register.html')
 
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 @app.route('/terms')
 def terms():
