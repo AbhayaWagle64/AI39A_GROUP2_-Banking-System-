@@ -2,10 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard | Banking System</title>
+  <title>Dashboard | ePaisa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; }
+
+    /* NAV BAR */
+    .navbar {
+      background: #4CAF50;
+      padding: 14px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 { color: white; font-size: 20px; }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+    .navbar a:hover { background: rgba(255,255,255,0.35); }
+
+    /* MAIN CONTENT */
+    .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+
+    /* FLASH MESSAGES */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .alert-danger  { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .alert button  { background: none; border: none; font-size: 20px; cursor: pointer; color: inherit; }
+
+    /* WELCOME */
+    .welcome { margin-bottom: 24px; }
+    .welcome h2 { font-size: 22px; color: #333; margin-bottom: 4px; }
+    .welcome p  { font-size: 14px; color: #777; }
+
+    /* BALANCE CARD */
+    .balance-card {
+      background: #4CAF50;
+      color: white;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .balance-card p  { font-size: 13px; opacity: 0.85; margin-bottom: 6px; }
+    .balance-card h2 { font-size: 32px; font-weight: bold; }
+
+    /* QUICK ACTIONS */
+    .section-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 12px; }
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .action-card {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      text-decoration: none;
+      color: #333;
+      transition: box-shadow 0.2s;
+    }
+    .action-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .action-card .icon { font-size: 28px; margin-bottom: 8px; }
+    .action-card p { font-size: 13px; color: #555; }
+
+    /* RECENT TRANSACTIONS */
+    .transactions { background: white; border-radius: 12px; border: 1px solid #eee; padding: 20px; }
+    .transactions h3 { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 16px; }
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-label { color: #333; }
+    .tx-date  { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .tx-amount.credit { color: #4CAF50; font-weight: bold; }
+    .tx-amount.debit  { color: #f44336; font-weight: bold; }
+    .no-tx { font-size: 13px; color: #aaa; text-align: center; padding: 20px 0; }
+  </style>
 </head>
 <body>
-  <h1>Welcome to Banking Dashboard</h1>
-  <a href="/logout">Logout</a>
+
+  <!-- NAV BAR -->
+  <div class="navbar">
+    <h1>💰 ePaisa</h1>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <div class="container">
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- WELCOME -->
+    <div class="welcome">
+      <h2>Welcome back! 👋</h2>
+      <p>Here's your ePaisa overview</p>
+    </div>
+
+    <!-- BALANCE -->
+    <div class="balance-card">
+      <p>Current Balance</p>
+      <h2>Rs. {{ balance if balance else '1,000.00' }}</h2>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <p class="section-title">Quick Actions</p>
+    <div class="actions-grid">
+      <a href="/wallet" class="action-card">
+        <div class="icon">➕</div>
+        <p>Add Money</p>
+      </a>
+      <a href="/wallet" class="action-card">
+        <div class="icon">🏦</div>
+        <p>Withdraw</p>
+      </a>
+      <a href="/send" class="action-card">
+        <div class="icon">💸</div>
+        <p>Send Money</p>
+      </a>
+    </div>
+
+    <!-- RECENT TRANSACTIONS -->
+    <div class="transactions">
+      <h3>Recent Transactions</h3>
+      <div class="no-tx">No transactions yet</div>
+    </div>
+
+  </div>
+
 </body>
 </html>
