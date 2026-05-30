@@ -1,8 +1,8 @@
 from flask import Flask
 from app.routes.auth import AuthRoutes
-from app.routes.wallet import WalletRoutes  # ← ADD THIS LINE
-from app.routes.dashboard import DashboardRoutes    # ADD THIS
-
+from app.routes.wallet import WalletRoutes
+from app.routes.dashboard import DashboardRoutes
+from app.routes.password_reset import PasswordResetRoutes
 
 def create_app():
     app = Flask(__name__)
@@ -11,10 +11,13 @@ def create_app():
     auth_routes = AuthRoutes()
     app.register_blueprint(auth_routes.register())
 
-    wallet_routes = WalletRoutes()                    # ← ADD THIS LINE
-    app.register_blueprint(wallet_routes.register())  # ← ADD THIS LINE
+    wallet_routes = WalletRoutes()
+    app.register_blueprint(wallet_routes.register())
 
-    dashboard_routes = DashboardRoutes()                      # ADD THIS
-    app.register_blueprint(dashboard_routes.register())       # ADD THIS
+    dashboard_routes = DashboardRoutes()
+    app.register_blueprint(dashboard_routes.register())
+
+    password_reset_routes = PasswordResetRoutes()
+    app.register_blueprint(password_reset_routes.register())
 
     return app
