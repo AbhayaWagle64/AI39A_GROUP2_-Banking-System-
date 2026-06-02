@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paisa | Account Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'SF Pro Display', 'system-ui', 'sans-serif'],
+                        mono: ['Geist Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen antialiased selection:bg-blue-500/30">
+
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-200px] left-[-200px] w-[600px] h-[600px] bg-blue-500/15 blur-[140px] rounded-full"></div>
+        <div class="absolute bottom-[-200px] right-[-200px] w-[600px] h-[600px] bg-emerald-500/12 blur-[140px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        
+        <header class="border border-white/10 bg-slate-900/50 backdrop-blur-xl rounded-3xl p-8 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-2xl">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                    <h1 class="text-xs font-mono tracking-wider uppercase text-blue-400">System Ledger</h1>
+                </div>
+                <p class="text-3xl font-black tracking-tight text-white leading-none">
+                    Welcome, <span id="user-name" class="text-white font-black">Loading Profile...</span>
+                </p>
+            </div>
+            <div class="sm:text-right border-t sm:border-t-0 border-white/10 pt-4 sm:pt-0">
+                <p class="text-[10px] font-mono uppercase tracking-wider text-slate-500 mb-1">Available Balance</p>
+                <p id="user-balance" class="text-3xl font-mono font-bold tracking-tight text-emerald-400">Calculating...</p>
+            </div>
+        </header>
+
+        <main class="space-y-4">
+            <div class="flex items-center justify-between pl-1">
+                <h2 class="text-xs font-mono uppercase tracking-wider text-slate-400">Recent Transaction Activity</h2>
+                <span class="text-[11px] font-mono bg-slate-950 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Live Stream Data</span>
+            </div>
+            
+            <div class="overflow-hidden border border-white/10 bg-slate-900/50 rounded-3xl shadow-2xl backdrop-blur-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-white/10 bg-slate-950/40 text-slate-400 text-xs font-mono uppercase tracking-wider">
+                                <th class="p-4 font-medium">Transaction ID</th>
+                                <th class="p-4 font-medium">Reference Email</th>
+                                <th class="p-4 font-medium">Type</th>
+                                <th class="p-4 font-medium text-right">Amount</th>
+                                <th class="p-4 font-medium text-right">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-rows" class="divide-y divide-white/5 font-medium">
+                            <tr>
+                                <td colspan="5" class="p-12 text-center text-slate-500 font-normal">
+                                    <i class="fa-solid fa-spinner animate-spin mr-2 text-blue-400"></i> Fetching transaction records from secure ledger...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const userEmail = "baibhabghimire@gmail.com";
+
+        async function loadDashboardData() {
+            try {
+                const balanceResponse = await fetch(`/api/wallet/balance?email=${userEmail}`);
+                const accountData = await balanceResponse.json();
+
+                if (balanceResponse.ok) {
+                    document.getElementById('user-name').innerText = accountData.fullname;
+                    document.getElementById('user-balance').innerText = accountData.formatted_balance;
+                } else {
+                    document.getElementById('user-name').innerText = "Account Error";
+                    document.getElementById('user-balance').innerText = "NPR 0.00";
+                }
+
+                const mockTransactions = [
+                    { id: "TXN1002934", ref: "system_bonus@epaisa.com", type: "Credit", amount: "NPR 5,000.00", date: "2026-05-28 14:18:20" },
+                    { id: "TXN1002935", ref: "kalyan_store@epaisa.com", type: "Debit", amount: "NPR 1,200.00", date: "2026-05-28 15:30:11" },
+                    { id: "TXN1002936", ref: "abhaya_wallet@epaisa.com", type: "Credit", amount: "NPR 350.00", date: "2026-05-28 16:45:00" }
+                ];
+
+                const tableBody = document.getElementById('transaction-rows');
+                tableBody.innerHTML = "";
+
+                mockTransactions.forEach(txn => {
+                    const isCredit = txn.type === "Credit";
+                    const badgeClass = isCredit 
+                        ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" 
+                        : "text-rose-400 bg-rose-500/10 border-rose-500/20";
+                    
+                    const amountClass = isCredit ? "text-emerald-400" : "text-white";
+
+                    const rowHtml = `
+                        <tr class="hover:bg-white/5 transition-colors duration-150">
+                            <td class="p-4 font-mono text-xs tracking-tight text-slate-400 select-all">${txn.id}</td>
+                            <td class="p-4 text-slate-300">${txn.ref}</td>
+                            <td class="p-4">
+                                <span class="inline-flex items-center text-xs px-2.5 py-0.5 rounded-full font-mono font-semibold border ${badgeClass}">
+                                    ${txn.type.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="p-4 text-right font-mono font-semibold ${amountClass}">${txn.amount}</td>
+                            <td class="p-4 text-right font-mono text-xs text-slate-500">${txn.date}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += rowHtml;
+                });
+
+            } catch (error) {
+                console.error("Dashboard loading sequence failed:", error);
+                document.getElementById('transaction-rows').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-rose-400 font-medium bg-slate-950/20">
+                            <i class="fa-solid fa-triangle-exclamation mr-2"></i> Critical error connecting to network ledger.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        window.onload = loadDashboardData;
+    </script>
+</body>
+</html>

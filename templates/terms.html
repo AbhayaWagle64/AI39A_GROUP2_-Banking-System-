@@ -12,176 +12,159 @@
 
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen">
+<body class="bg-slate-950 text-white min-h-screen antialiased selection:bg-blue-500/30">
 
-    <!-- Background -->
-    <div class="fixed inset-0 -z-10 overflow-hidden">
-
-        <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 blur-3xl rounded-full"></div>
-
-        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 blur-3xl rounded-full"></div>
-
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-200px] left-[-200px] w-[600px] h-[600px] bg-blue-500/15 blur-[140px] rounded-full"></div>
+        <div class="absolute bottom-[-200px] right-[-200px] w-[600px] h-[600px] bg-emerald-500/12 blur-[140px] rounded-full"></div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="border-b border-white/10 bg-slate-900/70 backdrop-blur-xl">
-
-        <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+    <nav class="border-b border-white/10 bg-slate-900/70 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
             <a href="{{ url_for('register') }}"
-                class="flex items-center gap-3">
-
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center">
-                    <i class="fa-solid fa-wallet"></i>
+                class="flex items-center gap-3 group transition-transform duration-200">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-white shadow-lg group-hover:scale-[1.03] transition-transform duration-300">
+                    <i class="fa-solid fa-wallet text-sm"></i>
                 </div>
-
                 <div>
-                    <h1 class="font-bold text-xl">E-Paisa</h1>
-                    <p class="text-xs text-slate-400">
+                    <h1 class="font-black text-lg tracking-tight leading-none mb-0.5">E-Paisa</h1>
+                    <p class="text-[10px] text-slate-500 font-medium tracking-wider uppercase">
                         Secure Digital Banking
                     </p>
                 </div>
             </a>
 
             <a href="{{ url_for('register') }}"
-                class="text-sm text-blue-400 hover:text-blue-300">
-
+                class="text-xs font-mono tracking-wider uppercase text-blue-400 hover:text-blue-300 transition-colors">
                 ← Back to Register
-
             </a>
 
         </div>
     </nav>
 
-    <!-- Main -->
-    <main class="max-w-5xl mx-auto px-5 py-14">
+    <main class="max-w-5xl mx-auto px-6 py-16">
 
-        <!-- Header -->
-        <div class="text-center mb-14">
-
-            <div class="mx-auto mb-6 w-24 h-24 rounded-3xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-4xl shadow-2xl">
-                <i class="fa-solid fa-file-contract"></i>
+        <div class="max-w-3xl mb-14">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 border border-white/10 rounded-full text-xs font-mono text-blue-400 mb-6 shadow-inner">
+                <i class="fa-solid fa-file-contract"></i> LEGAL FRAMEWORK
             </div>
-
-            <h1 class="text-5xl font-black mb-5">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none text-white mb-6">
                 Terms & Conditions
             </h1>
-
-            <p class="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-slate-400 text-base md:text-lg leading-relaxed font-normal">
                 Please read these Terms and Conditions carefully before using E-Paisa digital banking services.
             </p>
-
         </div>
 
-        <!-- Card -->
-        <div class="bg-slate-900/70 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl backdrop-blur-xl">
+        <div class="bg-slate-900/50 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl backdrop-blur-xl">
 
-            <div class="space-y-10">
+            <div class="space-y-10 relative z-10">
 
-                <!-- Section -->
-                <div>
-                    <h2 class="text-2xl font-bold text-green-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-emerald-400 mb-3 flex items-center gap-3">
                         1. Acceptance of Terms
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        By creating an account with E-Paisa, you agree to comply with all terms, policies, and applicable financial regulations of Nepal.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            By creating an account with E-Paisa, you agree to comply with all terms, policies, and applicable financial regulations of Nepal.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-blue-400 mb-3 flex items-center gap-3">
                         2. Account Responsibility
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        Users are responsible for maintaining the confidentiality of their passwords, wallet PINs, OTPs, and account credentials.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            Users are responsible for maintaining the confidentiality of their passwords, wallet PINs, OTPs, and account credentials.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-green-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-emerald-400 mb-3 flex items-center gap-3">
                         3. Permitted Usage
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        E-Paisa services must only be used for legal financial activities. Fraudulent, abusive, or suspicious transactions are strictly prohibited.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            E-Paisa services must only be used for legal financial activities. Fraudulent, abusive, or suspicious transactions are strictly prohibited.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-blue-400 mb-3 flex items-center gap-3">
                         4. Transaction Security
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        All transactions are encrypted and monitored. However, users must ensure safe device usage and account security.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            All transactions are encrypted and monitored. However, users must ensure safe device usage and account security.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-green-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-emerald-400 mb-3 flex items-center gap-3">
                         5. Fees & Charges
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        Certain banking or transfer services may include service charges. These charges will always be disclosed before confirmation.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            Certain banking or transfer services may include service charges. These charges will always be disclosed before confirmation.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-blue-400 mb-3 flex items-center gap-3">
                         6. Privacy Policy
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        E-Paisa values user privacy and protects personal information according to Nepal Rastra Bank digital banking guidelines.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            E-Paisa values user privacy and protects personal information according to Nepal Rastra Bank digital banking guidelines.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-green-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-emerald-400 mb-3 flex items-center gap-3">
                         7. Account Suspension
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        E-Paisa reserves the right to suspend accounts involved in suspicious, illegal, or policy-violating activities.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            E-Paisa reserves the right to suspend accounts involved in suspicious, illegal, or policy-violating activities.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-400 mb-4">
+                <div class="group">
+                    <h2 class="text-xl font-black tracking-tight text-blue-400 mb-3 flex items-center gap-3">
                         8. Changes to Terms
                     </h2>
-
-                    <p class="text-slate-300 leading-relaxed">
-                        E-Paisa may update these Terms & Conditions at any time. Continued use of the platform constitutes acceptance of updated terms.
-                    </p>
+                    <div class="pl-0 sm:pl-6 border-l border-white/5">
+                        <p class="text-slate-300 leading-relaxed text-sm">
+                            E-Paisa may update these Terms & Conditions at any time. Continued use of the platform constitutes acceptance of updated terms.
+                        </p>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- Agreement -->
-            <div class="mt-12 pt-8 border-t border-white/10">
-
-                <div class="flex items-start gap-4">
-
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-white">
-                        <i class="fa-solid fa-shield-halved"></i>
+            <div class="mt-12 pt-8 border-t border-white/10 relative z-10">
+                <div class="flex flex-col sm:flex-row items-start gap-4 bg-slate-950/40 p-6 rounded-2xl border border-white/5">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-white shadow-xl">
+                        <i class="fa-solid fa-shield-halved text-base"></i>
                     </div>
-
                     <div>
-                        <h3 class="font-bold text-xl mb-2">
+                        <h3 class="font-bold text-lg text-white tracking-tight mb-1">
                             Secure & Regulated
                         </h3>
-
-                        <p class="text-slate-400 leading-relaxed">
+                        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">
                             E-Paisa follows secure digital banking practices and modern fintech standards for user protection and financial safety.
                         </p>
                     </div>
-
                 </div>
-
             </div>
 
         </div>
