@@ -27,3 +27,7 @@ __pycache__/
 
 # Ignore macOS
 .DS_Store
+
+
+# Ignore the SKILL.md file
+SKILL.md
