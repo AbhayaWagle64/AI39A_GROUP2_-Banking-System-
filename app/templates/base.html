@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d4a2a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="ePaisa — Your Smart Digital Wallet">
+
+    <title>
+        {% block title %}
+            ePaisa
+        {% endblock %}
+    </title>
+
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.svg') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <span class="logo-text">ePaisa</span>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="{{ url_for('main.home') }}"
+                class="{% if request.path == '/' %}active{% endif %}">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('main.profile') }}"
+                class="{% if request.path == '/profile' %}active{% endif %}">
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="/wallet"
+                data-route="main.wallet"
+                class="{% if request.endpoint == 'main.wallet' %}active{% endif %}">
+                    Wallet
+                </a>
+            </li>
+
+            <li>
+                <a href="/transactions"
+                data-route="main.transactions"
+                class="{% if request.endpoint == 'main.transactions' %}active{% endif %}">
+                    Transactions
+                </a>
+            </li>
+
+            <li>
+                <a href="/logout">Logout</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <main class="page-enter">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <div class="mobile-nav">
+
+        <div class="mobile-nav-inner">
+
+            <a href="{{ url_for('main.home') }}"
+            class="mobile-nav-item {% if request.path == '/' %}active{% endif %}">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+
+            <a href="{{ url_for('main.profile') }}"
+            class="mobile-nav-item {% if request.path == '/profile' %}active{% endif %}">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+
+            <a href="/wallet"
+            class="mobile-nav-item {% if '/wallet' in request.path %}active{% endif %}">
+                <span class="nav-icon">💳</span>
+                <span>Wallet</span>
+            </a>
+
+            <a href="/transactions"
+            class="mobile-nav-item {% if '/transactions' in request.path %}active{% endif %}">
+                <span class="nav-icon">📊</span>
+                <span>History</span>
+            </a>
+
+            <a href="/logout" class="mobile-nav-item">
+                <span class="nav-icon">🚪</span>
+                <span>Exit</span>
+            </a>
+
+        </div>
+
+    </div>
+
+    <script
+    src="{{ url_for('static', filename='js/style.js') }}">
+    </script>
+
+    {% block js %}
+    {% endblock %}
+
+</body>
+</html>

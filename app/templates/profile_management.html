@@ -1,166 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Profile Management</title>
+{% extends "base.html" %}
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial, Helvetica, sans-serif;
-        }
+{% block title %}
+Manage Profile — ePaisa
+{% endblock %}
 
-        body{
-            background:#f4f6f9;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-            padding:20px;
-        }
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_management.css') }}">
+{% endblock %}
 
-        .container{
-            width:100%;
-            max-width:500px;
-            background:white;
-            padding:30px;
-            border-radius:12px;
-            box-shadow:0 4px 12px rgba(0,0,0,0.1);
-        }
+{% block content %}
 
-        .title{
-            text-align:center;
-            margin-bottom:25px;
-            color:#333;
-        }
+<div class="pm-container">
 
-        .profile-image{
-            display:flex;
-            justify-content:center;
-            margin-bottom:20px;
-        }
+    <div class="pm-sidebar">
 
-        .profile-image img{
-            width:120px;
-            height:120px;
-            border-radius:50%;
-            object-fit:cover;
-            border:4px solid #4a90e2;
-        }
-
-        .form-group{
-            margin-bottom:18px;
-        }
-
-        label{
-            display:block;
-            margin-bottom:6px;
-            color:#444;
-            font-weight:bold;
-        }
-
-        input, textarea{
-            width:100%;
-            padding:12px;
-            border:1px solid #ccc;
-            border-radius:8px;
-            outline:none;
-            transition:0.3s;
-        }
-
-        input:focus,
-        textarea:focus{
-            border-color:#4a90e2;
-        }
-
-        textarea{
-            resize:none;
-            height:100px;
-        }
-
-        .btn-group{
-            display:flex;
-            gap:10px;
-            margin-top:20px;
-        }
-
-        button{
-            flex:1;
-            padding:12px;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-            font-size:16px;
-            transition:0.3s;
-        }
-
-        .save-btn{
-            background:#4a90e2;
-            color:white;
-        }
-
-        .save-btn:hover{
-            background:#357bd8;
-        }
-
-        .cancel-btn{
-            background:#e74c3c;
-            color:white;
-        }
-
-        .cancel-btn:hover{
-            background:#c0392b;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-
-        <h1 class="title">Profile Management</h1>
-
-        <div class="profile-image">
-            <img src="https://via.placeholder.com/120" alt="Profile Picture">
+        <div class="pm-brand">
+            <img
+            src="{{ url_for('static', filename='images/logo.svg') }}"
+            alt="ePaisa"
+            class="pm-brand-logo"
+            width="60"
+            height="60">
         </div>
 
-        <form>
+        <h2 class="pm-sidebar-title">Edit Your Profile</h2>
 
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" placeholder="Enter your name">
+        <p class="pm-sidebar-desc">
+            Update your personal information, change your password, or upload a new
+            profile picture to keep your account up to date.
+        </p>
+
+        <ul class="pm-features">
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">👤</span>
+                <span>Personal Info</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">🔐</span>
+                <span>Change Password</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">📸</span>
+                <span>Profile Photo</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">📬</span>
+                <span>Contact Details</span>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="pm-form-panel">
+
+        <form
+        action="{{ url_for('main.profile_management') }}"
+        method="POST"
+        class="pm-form-inner"
+        enctype="multipart/form-data">
+
+            <h1>Manage Profile</h1>
+
+            <div class="avatar-edit-section">
+
+                <div class="avatar-ring">
+                    <div class="avatar-ring-inner">
+                        {% if uploaded_image %}
+                        <img
+                        src="{{ url_for('static', filename='uploads/' + uploaded_image) }}"
+                        alt="Profile"
+                        class="avatar-img"
+                        id="avatarPreview">
+                        {% else %}
+                        <img
+                        src="{{ url_for('static', filename='images/default_avatar.svg') }}"
+                        alt="Default Avatar"
+                        class="avatar-img avatar-default-fit"
+                        id="avatarPreview">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <label for="profile_image" class="avatar-edit-btn">
+                    <span class="upload-icon">📁</span>
+                    {{ uploaded_image | default('Upload Photo') }}
+                </label>
+                <input
+                type="file"
+                id="profile_image"
+                name="profile_image"
+                accept="image/*"
+                class="avatar-hidden-input">
+
             </div>
 
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" placeholder="Enter your email">
+                <label for="full_name">Full Name</label>
+                <input
+                type="text"
+                id="full_name"
+                name="full_name"
+                class="input"
+                value="{{ user.full_name }}"
+                required>
             </div>
 
             <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" placeholder="Enter your phone number">
+                <label for="email">Email Address</label>
+                <input
+                type="email"
+                id="email"
+                name="email"
+                class="input"
+                value="{{ user.email }}"
+                required>
             </div>
 
             <div class="form-group">
-                <label>Address</label>
-                <textarea placeholder="Enter your address"></textarea>
+                <label for="phone">Phone Number</label>
+                <input
+                type="tel"
+                id="phone"
+                name="phone"
+                class="input"
+                value="{{ user.phone }}"
+                required>
             </div>
 
             <div class="form-group">
-                <label>Upload Profile Picture</label>
-                <input type="file">
+                <label for="address">Address</label>
+                <textarea
+                id="address"
+                name="address"
+                class="input"
+                rows="3"
+                required>{{ user.address }}</textarea>
             </div>
 
-            <div class="btn-group">
-                <button type="submit" class="save-btn">Save Changes</button>
-                <button type="reset" class="cancel-btn">Cancel</button>
+            <div class="form-group">
+                <label for="password">New Password <span class="optional-tag">(optional)</span></label>
+                <input
+                type="password"
+                id="password"
+                name="password"
+                class="input"
+                placeholder="Leave blank to keep current">
+                <div class="password-strength">
+                    <div class="password-strength-bar"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                class="input"
+                placeholder="Re-enter new password">
+            </div>
+
+            <div class="pm-actions">
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+
+                <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+
             </div>
 
         </form>
 
     </div>
 
-</body>
-</html>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/profile_management.js') }}"></script>
+{% endblock %}
