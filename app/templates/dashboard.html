@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard — ePaisa
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-wrap" style="padding:24px;">
+
+    <h1 class="dashboard-title" style="margin:0 0 8px;">Welcome back, {{ user.full_name or 'User' }}!</h1>
+    <p style="color:var(--text-secondary); margin-bottom:24px;">Manage your finances securely</p>
+
+    <!-- Balance Card -->
+    <div class="card card-elevated" style="max-width:480px; margin-bottom:24px; background:linear-gradient(135deg, var(--green-600) 0%, var(--green-800) 100%); border:none; color:white;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <p style="font-size:13px; opacity:.85; margin-bottom:4px;">Current Balance</p>
+                <h2 style="font-size:32px; font-weight:700; margin:0;">₹ {{ user.balance|default('12,450.00') }}</h2>
+            </div>
+            <div style="font-size:48px; opacity:.15;">💵</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; max-width:680px; margin-bottom:24px;">
+        <a href="/wallet" class="btn btn-primary" style="padding:18px;">
+            <span>💳</span> Add Money
+        </a>
+        <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>📤</span> Send Money
+        </a>
+        <a href="/transactions" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>📊</span> History
+        </a>
+        <a href="/profile" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>👤</span> Profile
+        </a>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card" style="max-width:680px;">
+        <h3 style="margin:0 0 16px; font-size:18px;">Recent Transactions</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-subtle);">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">📱</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Recharge - NTC</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Today, 10:30 AM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:var(--green-700); font-weight:600;">-₹ 150.00</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-subtle);">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">🏪</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Merchant Payment</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Yesterday, 2:15 PM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:var(--green-700); font-weight:600;">-₹ 2,500.00</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">💰</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Money Received</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Jan 15, 11:45 AM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:#155724; font-weight:600;">+₹ 5,000.00</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -59,7 +59,7 @@ Manage Profile — ePaisa
     <div class="pm-form-panel">
 
         <form
-        action="{{ url_for('main.profile_management') }}"
+        action="{{ url_for('user.profile_management') }}"
         method="POST"
         class="pm-form-inner"
         enctype="multipart/form-data">
@@ -171,7 +171,7 @@ Manage Profile — ePaisa
                     Save Changes
                 </button>
 
-                <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">
+                <a href="{{ url_for('user.profile') }}" class="btn btn-secondary">
                     Cancel
                 </a>
 

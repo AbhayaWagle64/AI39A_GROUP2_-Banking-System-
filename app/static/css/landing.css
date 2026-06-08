@@ -1,7 +1,8 @@
 .landing-wrapper{
     display:flex;
-    flex-direction:column;
-    min-height:calc(100vh - var(--navbar-h) - 56px);
+    flex-direction:row;
+    min-height:100vh;
+    min-height:100dvh;
     border-radius:var(--radius-xl);
     overflow:hidden;
     box-shadow:var(--shadow-xl);
@@ -12,9 +13,11 @@
 
 @media(max-width:768px){
     .landing-wrapper{
+        flex-direction:column;
         border-radius:var(--radius-lg);
         margin:8px;
-        min-height:calc(100vh - var(--navbar-h) - 40px);
+        min-height:100vh;
+        min-height:100dvh;
         box-shadow:var(--shadow-md);
     }
 }

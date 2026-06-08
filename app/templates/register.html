@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Paisa Login</title>
+    <title>E-Paisa Register</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
@@ -73,8 +73,8 @@
                         width="52"
                         height="52">
 
-                    <h2>Welcome Back</h2>
-                    <p>Sign in to continue to your wallet</p>
+                    <h2>Create Your Account</h2>
+                    <p>Start your secure digital banking journey today</p>
                 </div>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -89,19 +89,48 @@
                     {% endif %}
                 {% endwith %}
 
-                <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+                <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
 
                     <div class="form-group">
-                        <label for="username">
+                        <label for="full_name">
                             <span>👤</span>
-                            <span>Username / Email</span>
+                            <span>Full Name</span>
                         </label>
                         <input
                             type="text"
-                            id="username"
-                            name="username"
+                            id="full_name"
+                            name="fullname"
                             class="input"
-                            placeholder="Enter your username or email"
+                            placeholder="Enter your full name"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <span>📧</span>
+                            <span>Email Address</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="input"
+                            placeholder="example@gmail.com"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <span>📱</span>
+                            <span>Phone Number</span>
+                        </label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            class="input"
+                            placeholder="98XXXXXXXX"
+                            maxlength="10"
                             required>
                     </div>
 
@@ -115,19 +144,33 @@
                             id="password"
                             name="password"
                             class="input"
-                            placeholder="Enter your password"
+                            placeholder="Create a secure password"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">
+                            <span>🔒</span>
+                            <span>Confirm Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            class="input"
+                            placeholder="Re-enter password"
                             required>
                     </div>
 
                     <button type="submit" class="btn btn-primary auth-btn">
-                        Login
+                        Create Account
                     </button>
 
                     <div class="divider">OR</div>
 
                     <p class="auth-footer">
-                        Don't have an account?
-                        <a href="/register">Register</a>
+                        Already have an account?
+                        <a href="/login">Login</a>
                     </p>
                 </form>
             </div>
