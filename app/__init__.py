@@ -4,6 +4,7 @@ from app.routes.wallet import WalletRoutes
 from app.routes.dashboard import DashboardRoutes
 from app.routes.password_reset import PasswordResetRoutes
 from app.routes.mini_statement import MiniStatementRoutes
+from app.routes.transaction_otp import TransactionOTPRoutes
 
 def create_app():
     app = Flask(__name__)
@@ -23,5 +24,8 @@ def create_app():
 
     mini_statement_routes = MiniStatementRoutes()
     app.register_blueprint(mini_statement_routes.register())
+
+    transaction_otp_routes = TransactionOTPRoutes()
+    app.register_blueprint(transaction_otp_routes.register())
 
     return app
