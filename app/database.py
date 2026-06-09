@@ -1,5 +1,5 @@
-import pymysql
 import config
+import pymysql
 
 
 class Database:
@@ -44,7 +44,7 @@ class Database:
                 password VARCHAR(255) NOT NULL,
                 full_name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
-                phone VARCHAR(20) NOT NULL UNIQUE,
+                phone VARCHAR(20) NOT NULL,
                 address VARCHAR(255),
                 account_type VARCHAR(20) DEFAULT 'Savings',
                 date_joined VARCHAR(50) DEFAULT '2026-01-01'

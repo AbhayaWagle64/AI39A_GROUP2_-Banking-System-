@@ -185,7 +185,7 @@ def register():
     return render_template("register.html")
 
 
-@main.route("/logout")
+@main.route("/logout", methods=['GET', 'POST'])
 def logout():
     user_id = session.get("user_id")
     if user_id:

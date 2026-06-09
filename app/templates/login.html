@@ -81,7 +81,7 @@
                     {% if messages %}
                         <div class="flashes" style="margin-bottom:16px;">
                             {% for category, message in messages %}
-                                <div class="flash flash-{{ category }}" style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;{% if category == 'success' %}background:var(--green-50);color:var(--green-700);{% elif category == 'danger' %}background:#fee;border:1px solid #fcc;color:#c00;{% endif %}">
+                                <div class="flash flash-{{ category }}" style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;{% if category == 'success' %}background:var(--green-50);color:var(--green-700);{% elif category == 'danger' %}background:#fee;border:1px solid #fcc;color:#c00;{% elif category == 'error' %}background:#fff3cd;border:1px solid #ffc107;color:#856404;{% endif %}">
                                     {{ message }}
                                 </div>
                             {% endfor %}
