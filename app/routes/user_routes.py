@@ -1,12 +1,19 @@
 import os
 import uuid
 import re
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request, url_for
+import json
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
 from werkzeug.security import generate_password_hash
 from app.auth import login_required
 from app.database import Database
+from app.models.login_model import LoginModel
+from app.models.register_model import RegisterModel
+from app.models.wallet_model import WalletModel
 
 main = Blueprint("user", __name__)
+login_model = LoginModel()
+register_model = RegisterModel()
+wallet_model = WalletModel()
 
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -20,21 +27,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def get_customer_id(username):
-    customer_id = 10001
-    try:
-        db = Database()
-        result = db.fetch_one("SELECT COUNT(*) AS total FROM register")
-        db.close()
-        if result:
-            customer_id = 10001 + result['total']
-    except Exception:
-        pass
-    return f"SB-{customer_id}"
-
-
 def get_current_user():
-    from app.routes.auth_routes import login_model, register_model
     user_id = session.get("user_id")
     if not user_id:
         return None
@@ -42,16 +35,30 @@ def get_current_user():
     if not login_data:
         return None
     reg_data = register_model.find_by_username(user_id)
+    balance = 0.0
+    if reg_data and reg_data.get("balance"):
+        try:
+            balance = float(reg_data["balance"])
+        except (ValueError, TypeError):
+            balance = 0.0
+    epaisa_id = ""
+    if reg_data and reg_data.get("epaisa_id"):
+        epaisa_id = reg_data["epaisa_id"]
+    else:
+        epaisa_id = login_data.get("epaisa_id", "")
+    tx_count = wallet_model.get_transaction_count(user_id)
     return {
         "username": user_id,
         "full_name": login_data.get("full_name", user_id),
-        "customer_id": get_customer_id(user_id),
+        "customer_id": epaisa_id,
+        "epaisa_id": epaisa_id,
         "email": reg_data.get("email", "") if reg_data else "",
         "phone": reg_data.get("phone", "") if reg_data else "",
         "address": reg_data.get("address", "") if reg_data else "",
         "account_type": reg_data.get("account_type", "Savings") if reg_data else "Savings",
         "date_joined": reg_data.get("date_joined", "") if reg_data else "",
-        "balance": "12,450.00"
+        "balance": balance,
+        "transaction_count": tx_count
     }
 
 
@@ -150,7 +157,7 @@ def profile_management():
             "address": address,
             "account_type": user["account_type"] if user else "Savings",
             "date_joined": user["date_joined"] if user else "",
-            "balance": "12,450.00"
+            "balance": float(user["balance"]) if user and user.get("balance") else 0.0
         }
 
         flash("Profile updated successfully!", "success")
@@ -167,14 +174,104 @@ def profile_management():
 @login_required
 def wallet():
     user = get_current_user()
-    return render_template("wallet.html", user=user)
+    return render_template("wallet/wallet.html", user=user)
+
+
+@main.route("/api/send-money", methods=["POST"])
+def send_money():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    raw_data = request.get_data(as_text=True)
+    if not raw_data:
+        return jsonify({"success": False, "message": "Invalid request - no data received"}), 400
+    
+    try:
+        data = json.loads(raw_data)
+    except Exception as e:
+        return jsonify({"success": False, "message": f"JSON parse error: {str(e)}", "raw": raw_data[:200]}), 400
+    
+    if data is None or not isinstance(data, dict):
+        return jsonify({"success": False, "message": "Invalid request - empty JSON", "data_type": type(data).__name__, "raw": raw_data[:200]}), 400
+    
+    if not data.get("epaisaNumber") or not data.get("amount"):
+        return jsonify({"success": False, "message": "Missing required fields", "data": data}), 400
+
+    recipient_epaisa = data.get("epaisaNumber", "") or ""
+    recipient_epaisa = recipient_epaisa.strip() if recipient_epaisa else ""
+    amount_val = data.get("amount")
+    amount_str = str(amount_val).strip() if amount_val is not None else "0"
+    recipient_name = data.get("accountHolder", "") or ""
+    recipient_name = recipient_name.strip() if recipient_name else ""
+
+    if not recipient_epaisa:
+        return jsonify({"success": False, "message": "Recipient ePaisa ID is required"}), 400
+
+    try:
+        amount = float(amount_str) if amount_str else 0
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Invalid amount"}), 400
+
+    if amount <= 0:
+        return jsonify({"success": False, "message": "Amount must be greater than 0"}), 400
+
+    user = get_current_user()
+    if not user:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    db = Database()
+    recipient = db.fetch_one(
+        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
+        (recipient_epaisa, recipient_epaisa)
+    )
+    if not recipient:
+        db.close()
+        return jsonify({"success": False, "message": "Recipient not found"}), 400
+
+    if recipient["username"] == user["username"]:
+        db.close()
+        return jsonify({"success": False, "message": "Cannot send to yourself"}), 400
+
+    recipient_balance = float(recipient.get("balance", 0)) if recipient.get("balance") else 0.0
+    sender_balance = user.get("balance", 0.0)
+    if isinstance(sender_balance, str):
+        try:
+            sender_balance = float(sender_balance)
+        except (ValueError, TypeError):
+            sender_balance = 0.0
+    if sender_balance < amount:
+        db.close()
+        return jsonify({"success": False, "message": "Insufficient balance"}), 400
+
+    sender_balance = sender_balance - amount
+    recipient_balance = recipient_balance + amount
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
+
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    receiver_email = recipient.get("email") or ""
+    receiver_epaisa_id = recipient.get("epaisa_id") or recipient.get("customer_id") or recipient.get("username") or ""
+
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'completed')",
+        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount)
+    )
+    db.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Transfer successful",
+        "new_balance": sender_balance
+    }), 200
 
 
 @main.route("/transactions")
 @login_required
 def transactions():
     user = get_current_user()
-    return render_template("transactions.html", user=user)
+    rows = wallet_model.get_all_transactions(user["username"] if user else "")
+    return render_template("transactions.html", user=user, rows=rows)
 
 
 @main.route("/admin/users")

@@ -5,16 +5,18 @@ from flask import Blueprint, render_template, redirect, url_for, session, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.register_model import RegisterModel
 from app.models.login_model import LoginModel
+from app.models.wallet_model import WalletModel
 from app.database import Database
 
 main = Blueprint("auth", __name__)
 
 register_model = RegisterModel()
 login_model = LoginModel()
+wallet_model = WalletModel()
 
 UPLOAD_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "app", "static", "uploads"
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "static", "uploads"
 )
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
@@ -41,17 +43,40 @@ def validate_password(password):
     return True
 
 
-def get_customer_id(username):
-    customer_id = 10001
-    try:
-        db = Database()
-        result = db.fetch_one("SELECT COUNT(*) AS total FROM register")
-        db.close()
+def get_customer_id(username=None):
+    customer_id = "EP-10001"
+    db = Database()
+    if username:
+        result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = %s", (username,))
         if result:
-            customer_id = 10001 + result['total']
-    except Exception:
-        pass
-    return f"SB-{customer_id}"
+            db.close()
+            if result.get("epaisa_id"):
+                return result["epaisa_id"]
+            if result.get("customer_id"):
+                return result["customer_id"]
+            phone = result.get("phone", "")
+            if phone and phone.startswith("98") and len(phone) >= 10:
+                return f"SB-{phone}"
+            return f"EP-10001"
+    result = db.fetch_one("SELECT COUNT(*) AS total FROM register")
+    db.close()
+    if result:
+        customer_id = f"EP-{10001 + result['total']}"
+    return customer_id
+
+
+def _generate_epaisa_id(phone=None, db=None):
+    if phone and phone.startswith("98") and len(phone) >= 10:
+        return f"eP-{phone}"
+    base = 1001
+    if db:
+        result = db.fetch_one(
+            "SELECT CAST(SUBSTRING_INDEX(epaisa_id, '-', -1) AS UNSIGNED) AS num FROM register WHERE epaisa_id REGEXP %s ORDER BY num DESC LIMIT 1",
+            ("^eP-[0-9]+$",)
+        )
+        if result and result.get("num"):
+            base = int(result["num"]) + 1
+    return f"eP-{base}"
 
 
 def get_current_user():
@@ -63,16 +88,29 @@ def get_current_user():
         session.clear()
         return None
     reg_data = register_model.find_by_username(user_id)
+    balance = 0.0
+    try:
+        if reg_data and reg_data.get("balance"):
+            balance = float(reg_data["balance"])
+    except (ValueError, TypeError):
+        balance = 0.0
+    epaisa_id = ""
+    if reg_data and reg_data.get("epaisa_id"):
+        epaisa_id = reg_data["epaisa_id"]
+    else:
+        epaisa_id = login_data.get("epaisa_id", "")
     return {
         "username": user_id,
         "full_name": login_data.get("full_name", user_id),
-        "customer_id": get_customer_id(user_id),
+        "customer_id": epaisa_id,
+        "epaisa_id": epaisa_id,
         "email": reg_data.get("email", "") if reg_data else "",
         "phone": reg_data.get("phone", "") if reg_data else "",
         "address": reg_data.get("address", "") if reg_data else "",
         "account_type": reg_data.get("account_type", "Savings") if reg_data else "Savings",
         "date_joined": reg_data.get("date_joined", "") if reg_data else "",
-        "balance": "12,450.00"
+        "balance": balance,
+        "transaction_count": wallet_model.get_transaction_count(user_id)
     }
 
 
@@ -93,6 +131,11 @@ def login():
                 flash('Account not found.', 'danger')
                 return render_template("login.html")
             if check_password_hash(login_data['password'], password):
+                epaisa_id = login_data.get("epaisa_id") or ""
+                if reg_data:
+                    epaisa_id = reg_data.get("epaisa_id") or epaisa_id
+                if epaisa_id:
+                    login_model.create(username, login_data['password'], login_data['full_name'], epaisa_id=epaisa_id)
                 session['user_id'] = username
                 flash('Login successful!', 'success')
                 return redirect(url_for('user.wallet'))
@@ -110,7 +153,8 @@ def login():
         
         if reg_data:
             if check_password_hash(reg_data['password'], password):
-                login_model.create(reg_data['username'], reg_data['password'], reg_data['full_name'])
+                epaisa_id = reg_data.get("epaisa_id") or f"eP-{reg_data['phone']}"
+                login_model.create(reg_data['username'], reg_data['password'], reg_data['full_name'], epaisa_id=epaisa_id)
                 session['user_id'] = reg_data['username']
                 flash('Login successful!', 'success')
                 return redirect(url_for('user.wallet'))
@@ -173,12 +217,17 @@ def register():
 
         password_hash = generate_password_hash(password)
         db = Database()
+        epaisa_id = _generate_epaisa_id(phone=phone, db=db)
+        customer_id = f"SB-{phone}" if phone.startswith("98") else f"SB-{10001}"
         db.execute(
-            "INSERT INTO register (username, password, full_name, email, phone, address, account_type, date_joined) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            (username, password_hash, full_name, email, phone, '', 'Savings', '2026-01-01')
+            "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 1000.0, '', 'Savings', '2026-01-01')
+        )
+        db.execute(
+            "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (%s, %s, %s, %s)",
+            (username, password_hash, full_name, epaisa_id)
         )
         db.close()
-
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('auth.login'))
 

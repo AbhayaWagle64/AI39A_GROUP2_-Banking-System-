@@ -14,21 +14,33 @@ class LoginModel:
         db.close()
         return result
 
-    def create(self, username, password_hash, full_name):
+    def create(self, username, password_hash, full_name, epaisa_id=None):
         db = Database()
         existing = db.fetch_one(
             f"SELECT * FROM {self.table} WHERE username = %s", (username,)
         )
         if existing:
-            db.execute(
-                f"UPDATE {self.table} SET password = %s, full_name = %s WHERE username = %s",
-                (password_hash, full_name, username)
-            )
+            if epaisa_id:
+                db.execute(
+                    f"UPDATE {self.table} SET password = %s, full_name = %s, epaisa_id = %s WHERE username = %s",
+                    (password_hash, full_name, epaisa_id, username)
+                )
+            else:
+                db.execute(
+                    f"UPDATE {self.table} SET password = %s, full_name = %s WHERE username = %s",
+                    (password_hash, full_name, username)
+                )
         else:
-            db.execute(
-                f"INSERT INTO {self.table} (username, password, full_name) VALUES (%s, %s, %s)",
-                (username, password_hash, full_name)
-            )
+            if epaisa_id:
+                db.execute(
+                    f"INSERT INTO {self.table} (username, password, full_name, epaisa_id) VALUES (%s, %s, %s, %s)",
+                    (username, password_hash, full_name, epaisa_id)
+                )
+            else:
+                db.execute(
+                    f"INSERT INTO {self.table} (username, password, full_name) VALUES (%s, %s, %s)",
+                    (username, password_hash, full_name)
+                )
         db.close()
 
     def delete(self, username):

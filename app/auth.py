@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
 from functools import wraps
 
 
@@ -6,6 +6,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            if request.is_json or request.headers.get('Content-Type') == 'application/json':
+                return jsonify({"success": False, "message": "User not authenticated"}), 401
             flash('Please login to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
@@ -16,6 +18,8 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            if request.is_json or request.headers.get('Content-Type') == 'application/json':
+                return jsonify({"success": False, "message": "User not authenticated"}), 401
             flash('Please login to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         user = session.get('user', {})

@@ -24,7 +24,7 @@ class UserController:
 
     def wallet(self):
         user = self.get_current_user()
-        return render_template("wallet.html", user=user)
+        return render_template("wallet/wallet.html", user=user)
 
     def transactions(self):
         user = self.get_current_user()

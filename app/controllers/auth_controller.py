@@ -6,6 +6,7 @@ from app.controllers.base_controller import BaseController
 from app.database import Database
 from app.models.register_model import RegisterModel
 from app.models.login_model import LoginModel
+from app.models.wallet_model import WalletModel
 
 
 class AuthController(BaseController):
@@ -14,6 +15,7 @@ class AuthController(BaseController):
             super().__init__(app)
         self.register_model = RegisterModel()
         self.login_model = LoginModel()
+        self.wallet_model = WalletModel()
         self.customer_id_counter = 10001
 
     def validate_phone(self, phone):
@@ -38,16 +40,27 @@ class AuthController(BaseController):
         if not login_data:
             return None
         register_data = self.register_model.find_by_username(user_id)
+        balance = 0.0
+        if register_data and register_data.get("balance"):
+            try:
+                balance = float(register_data["balance"])
+            except (ValueError, TypeError):
+                balance = 0.0
+        epaisa_id = register_data.get("epaisa_id", "") if register_data else ""
+        if not epaisa_id:
+            epaisa_id = login_data.get("epaisa_id", "")
         return {
             "username": user_id,
             "full_name": login_data.get("full_name", user_id),
-            "customer_id": f"SB-{self.customer_id_counter}",
+            "customer_id": epaisa_id,
+            "epaisa_id": epaisa_id,
             "email": register_data.get("email", "") if register_data else "",
             "phone": register_data.get("phone", "") if register_data else "",
             "address": register_data.get("address", "") if register_data else "",
             "account_type": register_data.get("account_type", "Savings") if register_data else "Savings",
             "date_joined": register_data.get("date_joined", "") if register_data else "",
-            "balance": "12,450.00"
+            "balance": balance,
+            "transaction_count": self.wallet_model.get_transaction_count(user_id)
         }
 
     def login(self):
@@ -148,7 +161,8 @@ class AuthController(BaseController):
                 phone=phone,
                 address='',
                 account_type='Savings',
-                date_joined='2026-01-01'
+                date_joined='2026-01-01',
+                balance=1000.0
             )
 
             flash('Registration successful! Please login.', 'success')
