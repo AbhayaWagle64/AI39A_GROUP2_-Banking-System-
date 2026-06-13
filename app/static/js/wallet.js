@@ -12,6 +12,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let pendingFormData = null;
 
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name=csrf-token]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    async function startTransaction() {
+        const token = getCsrfToken();
+        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+        if (token) headers['X-CSRFToken'] = token;
+        const res = await fetch('/api/send-money', {
+            method: 'POST',
+            headers,
+            credentials: 'same-origin',
+            body: JSON.stringify(pendingFormData)
+        });
+        return res.json();
+    }
+
+    async function requestOtp() {
+        const token = getCsrfToken();
+        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+        if (token) headers['X-CSRFToken'] = token;
+        const res = await fetch('/api/request-otp', { method: 'POST', headers, credentials: 'same-origin', body: JSON.stringify({}) });
+        return res.json();
+    }
+
+    async function verifyOtp(code) {
+        const token = getCsrfToken();
+        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+        if (token) headers['X-CSRFToken'] = token;
+        const res = await fetch('/api/verify-otp', { method: 'POST', headers, credentials: 'same-origin', body: JSON.stringify({ otp: code }) });
+        return res.json();
+    }
+
+    function navigateTo(path) {
+        window.location.href = path;
+    }
+
     sendMoneyForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const epaisaVal = epaisaNumber.value.trim();
@@ -53,39 +91,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    confirmYes.addEventListener("click", async () => {
+    confirmYes.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         if (!pendingFormData) {
-            alert("No form data - pendingFormData is null");
+            alert("No pending transaction");
             return;
         }
-        const dataToSend = pendingFormData;
-        pendingFormData = null;
-        confirmModal.style.display = "none";
         confirmYes.disabled = true;
+        confirmNo.disabled = true;
         confirmYes.textContent = "Processing...";
 
         try {
-            const response = await fetch("/api/send-money", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "same-origin",
-                body: JSON.stringify(dataToSend)
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert("Transfer successful!");
-                const balancePill = document.querySelector(".balance-pill");
-                if (balancePill) {
-                    balancePill.textContent = "₹ " + parseFloat(result.new_balance).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            const txRes = await startTransaction();
+            if (!txRes.success) {
+                alert(txRes.message || "Could not start transaction");
+                confirmYes.disabled = false;
+                confirmNo.disabled = false;
+                confirmYes.textContent = "Yes, Send";
+                return;
+            }
+            if (txRes.next === "otp" || txRes.redirect) {
+                confirmYes.textContent = "Sending OTP...";
+                const otpRes = await requestOtp();
+                if (!otpRes || !otpRes.success) {
+                    alert(otpRes?.message || "Could not send OTP email. Please try again.");
+                    confirmYes.disabled = false;
+                    confirmNo.disabled = false;
+                    confirmYes.textContent = "Yes, Send";
+                    return;
                 }
-                sendMoneyForm.reset();
-            } else {
-                alert(result.message || "Transfer failed");
+                confirmModal.style.display = "none";
+                navigateTo(otpRes.redirect || txRes.redirect || "/verify-otp");
             }
         } catch (error) {
             alert("Error: " + error.message);
-        } finally {
             confirmYes.disabled = false;
+            confirmNo.disabled = false;
             confirmYes.textContent = "Yes, Send";
         }
     });

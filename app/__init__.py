@@ -1,5 +1,5 @@
 from flask import Flask
-from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
+from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
 
 
 def create_app():
@@ -12,13 +12,23 @@ def create_app():
     app.config["MYSQL_USER"] = MYSQL_USER
     app.config["MYSQL_PASSWORD"] = MYSQL_PASSWORD
     app.config["MYSQL_DATABASE"] = MYSQL_DATABASE
+    app.config["MAIL_SERVER"] = MAIL_SERVER
+    app.config["MAIL_PORT"] = MAIL_PORT
+    app.config["MAIL_USE_TLS"] = MAIL_USE_TLS
+    app.config["MAIL_USERNAME"] = MAIL_USERNAME
+    app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
+    app.config["MAIL_DEFAULT_SENDER"] = MAIL_DEFAULT_SENDER
 
     from app.database import Database
     from app.routes.auth_routes import main as auth_bp
     from app.routes.user_routes import main as user_bp
+    from app.utils.mailer import Mailer
 
     with app.app_context():
         Database.create_tables()
+
+    mailer = Mailer(app)
+    app.mailer = mailer
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)

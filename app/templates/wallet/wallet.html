@@ -60,7 +60,7 @@
 
 <!-- Confirmation Modal -->
 <div id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:12px; padding:28px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
+    <div class="modal-content" style="background:#fff; border-radius:12px; padding:28px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
         <div style="font-size:48px; margin-bottom:12px;">⚠️</div>
         <h3 style="margin:0 0 10px; font-size:18px; color:#1a1a2e;">Confirm Transaction</h3>
         <p id="confirmMessage" style="margin:0 0 20px; color:#555; font-size:15px; line-height:1.6;">Are you sure you want to make the transaction?</p>
@@ -74,5 +74,5 @@
 {% endblock %}
 
 {% block js %}
-<script src="{{ url_for('static', filename='js/wallet.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/wallet.js') }}?v=5"></script>
 {% endblock %}

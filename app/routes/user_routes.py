@@ -2,7 +2,10 @@ import os
 import uuid
 import re
 import json
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
+import logging
+import secrets
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify, current_app
 from werkzeug.security import generate_password_hash
 from app.auth import login_required
 from app.database import Database
@@ -14,6 +17,11 @@ main = Blueprint("user", __name__)
 login_model = LoginModel()
 register_model = RegisterModel()
 wallet_model = WalletModel()
+logger = logging.getLogger(__name__)
+
+def _get_mailer():
+    from flask import current_app
+    return getattr(current_app, "mailer", None)
 
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -243,26 +251,20 @@ def send_money():
         db.close()
         return jsonify({"success": False, "message": "Insufficient balance"}), 400
 
-    sender_balance = sender_balance - amount
-    recipient_balance = recipient_balance + amount
-    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
-    db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
-
-    sender_email = user.get("email") or ""
-    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
-    receiver_email = recipient.get("email") or ""
-    receiver_epaisa_id = recipient.get("epaisa_id") or recipient.get("customer_id") or recipient.get("username") or ""
-
-    db.execute(
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'completed')",
-        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount)
-    )
+    session["pending_transaction"] = {
+        "sender_username": user["username"],
+        "sender_balance": sender_balance,
+        "recipient_epaisa": recipient_epaisa,
+        "recipient_name": recipient_name,
+        "amount": amount,
+    }
     db.close()
 
     return jsonify({
         "success": True,
-        "message": "Transfer successful",
-        "new_balance": sender_balance
+        "message": "OK",
+        "next": "otp",
+        "redirect": url_for("user.verify_otp_page")
     }), 200
 
 
@@ -282,3 +284,177 @@ def admin_users():
     users = db.fetch_all("SELECT * FROM register ORDER BY email")
     db.close()
     return render_template("user_management.html", user=user, users=users)
+
+
+@main.route("/verify-otp")
+@main.route("/verify-otp/<error>")
+@login_required
+def verify_otp_page(error=None):
+    sender = get_current_user()
+    pending = session.get("pending_transaction")
+    if not pending or not sender or sender["username"] != pending.get("sender_username"):
+        return redirect(url_for("user.wallet"))
+    raw_email = sender.get("email", "") or ""
+    local = raw_email.split("@")[0] if "@" in raw_email else raw_email
+    domain = raw_email.split("@")[1] if "@" in raw_email else ""
+    if len(local) > 2:
+        masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
+    else:
+        masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
+    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=error)
+
+
+@main.route("/transaction-success")
+@login_required
+def transaction_success():
+    sender = get_current_user()
+    pending = session.pop("pending_transaction", None)
+    return render_template("wallet/success.html", user=sender, pending=pending)
+
+
+@main.route("/transaction-failed")
+@login_required
+def transaction_failed():
+    sender = get_current_user()
+    pending = session.pop("pending_transaction", None)
+    return render_template("wallet/failed.html", user=sender, pending=pending)
+
+
+@main.route("/api/request-otp", methods=["POST"])
+def request_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    pending = session.get("pending_transaction")
+    if not pending:
+        return jsonify({"success": False, "message": "No pending transaction"}), 400
+
+    sender = get_current_user()
+    sender_email = sender.get("email", "").strip() if sender else ""
+    if not sender_email:
+        return jsonify({"success": False, "message": "No email found for user"}), 400
+
+    mailer = _get_mailer()
+    if not mailer or not mailer.is_configured:
+        return jsonify({"success": False, "message": "Email service is not configured"}), 500
+
+    otp = f"{secrets.randbelow(1000000):06d}"
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    session["verified_otp"] = otp
+    session["otp_expires_at"] = expires_at.isoformat()
+    session["otp_attempts"] = 0
+
+    try:
+        sent = mailer.send_otp(sender_email, otp, async_send=False)
+        if not sent:
+            raise RuntimeError("Mailer returned false")
+        logger.info("OTP email sent to %s", sender_email)
+    except Exception as exc:
+        logger.exception("OTP email failed: %s", exc)
+        _clear_otp_session()
+        return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
+
+    return jsonify({
+        "success": True,
+        "message": "OTP sent to your email",
+        "redirect": url_for("user.verify_otp_page"),
+    }), 200
+
+
+@main.route("/api/verify-otp", methods=["POST"])
+def verify_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+    if request.is_json:
+        payload = request.get_json(silent=True) or {}
+        code = (payload.get("otp") or "").strip()
+    else:
+        code = (request.form.get("otp") or "").strip()
+    if not code or len(code) != 6 or not code.isdigit():
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+    stored_otp = session.get("verified_otp")
+    expires_at = session.get("otp_expires_at")
+    attempts = int(session.get("otp_attempts", 0) or 0) + 1
+    session["otp_attempts"] = attempts
+    if attempts >= 5:
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+    if not stored_otp or stored_otp != code:
+        return redirect(url_for("user.verify_otp_page", error="invalid"))
+    if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+
+    pending = session.get("pending_transaction")
+    if not pending:
+        return redirect(url_for("user.transaction_failed"))
+
+    sender_username = pending.get("sender_username") or session.get("user_id")
+    recipient_epaisa = pending.get("recipient_epaisa", "")
+    recipient_name = pending.get("recipient_name", "")
+    amount = float(pending.get("amount", 0))
+
+    user = get_current_user()
+    if not user or user["username"] != sender_username:
+        return redirect(url_for("user.transaction_failed"))
+
+    db = Database()
+    recipient = db.fetch_one(
+        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
+        (recipient_epaisa, recipient_epaisa)
+    )
+    if not recipient:
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+
+    if recipient["username"] == user["username"]:
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+
+    recipient_balance = float(recipient.get("balance", 0) or 0)
+    sender_balance = float(user.get("balance", 0) or 0)
+    if sender_balance < amount:
+        _clear_otp_session()
+        session.pop("pending_transaction", None)
+        return redirect(url_for("user.transaction_failed"))
+
+    sender_balance = sender_balance - amount
+    recipient_balance = recipient_balance + amount
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
+
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    receiver_email = recipient.get("email") or ""
+    receiver_epaisa_id = recipient.get("epaisa_id") or recipient.get("customer_id") or recipient.get("username") or ""
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'completed')",
+        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount)
+    )
+    db.close()
+    _clear_otp_session()
+    session.pop("pending_transaction", None)
+
+    return redirect(url_for("user.transaction_success"))
+
+
+def _clear_otp_session():
+    session.pop("verified_otp", None)
+    session.pop("otp_expires_at", None)
+
+
+def mask_email(email: str) -> str:
+    if not email or "@" not in email:
+        return email
+    local, domain = email.split("@", 1)
+    if len(local) <= 2:
+        masked_local = local[0] + "*" * (len(local) - 1)
+    else:
+        masked_local = local[:2] + "*" * (len(local) - 2)
+    return f"{masked_local}@{domain}"
