@@ -9,8 +9,11 @@ app = Flask(
     template_folder='app/templates',
     static_folder='app/static'
 )
-
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/register')
 def register():
     return render_template('register.html')
 
@@ -22,6 +25,9 @@ def login():
 def terms():
     return render_template('terms.html')
 
+@app.route('/sendmoney')
+def sendmoney():
+    return render_template('send_money.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

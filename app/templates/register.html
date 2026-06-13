@@ -13,8 +13,8 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/app/static/css/style.css">
-
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -375,7 +375,7 @@
         I agree to the
 
         <a
-            href="/app/templates/terms.html"
+            href="{{ url_for('terms') }}"
             target="_blank"
             class="text-green-400 hover:text-green-300 hover:underline font-medium transition"
         >
@@ -385,7 +385,7 @@
         and
 
         <a
-            href="/app/templates/login.html"
+            href="{{ url_for('login') }}"
             target="_blank"
             class="text-blue-400 hover:text-blue-300 hover:underline font-medium transition"
         >
@@ -418,10 +418,7 @@
                             <p class="text-slate-500 dark:text-slate-400">
                                 Already have an account?
 
-                                <a href="/app/templates/login.html"
-                                    class="text-blue-600 font-semibold hover:underline">
-                                    login
-                                </a>
+                            <a href="{{ url_for('login') }}">Login</a>
                             </p>
                         </div>
 
@@ -456,7 +453,7 @@
     </footer>
 
     <!-- JS -->
-    <script src="/app/static/js/register.js"></script>
+    <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 
 </body>
 </html>

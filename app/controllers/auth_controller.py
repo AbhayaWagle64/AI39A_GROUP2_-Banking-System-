@@ -1,38 +1,177 @@
 # app/controllers/auth_controller.py
-# Controllers for auth pages and login flows.
+"""
+=============================================================
+  OOP Concept: INHERITANCE & POLYMORPHISM
+=============================================================
+  - AuthController inherits BaseController.
+  - Reuses helper methods from parent class.
+=============================================================
+"""
 
-from flask import render_template, request, redirect, url_for, flash
-from ..auth import check_username_password
+from flask import (
+    Blueprint,
+    render_template,
+    request
+)
 
-
-def show_login():
-    return render_template('auth/login.html')
-
-
-def handle_login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    if check_username_password(username, password):
-        return redirect(url_for('dashboard.user_dashboard'))
-    flash('Login failed. Try admin/password.')
-    return redirect(url_for('auth.login'))
-
-
-def show_register():
-    return render_template('auth/register.html')
+from controllers.base_controller import BaseController
 
 
-def show_forgot_password():
-    return render_template('auth/forgot_password.html')
+# ======================================
+# Blueprint Creation
+# ======================================
+
+auth = Blueprint("auth", __name__)
 
 
-def show_reset_password():
-    return render_template('auth/reset_password.html')
+# ======================================
+# Auth Controller Class
+# ======================================
+
+class AuthController(BaseController):
 
 
-def show_verify_otp():
-    return render_template('auth/verify_otp.html')
+    # ======================================
+    # Register Method
+    # ======================================
+
+    def register(self):
+
+        if request.method == "POST":
+
+            (
+                fullname,
+                email,
+                phone,
+                dob,
+                password,
+                confirm_password,
+                pan,
+                referral
+
+            ) = self.get_form_data(
+
+                "fullname",
+                "email",
+                "phone",
+                "dob",
+                "password",
+                "confirm_password",
+                "pan",
+                "referral"
+            )
 
 
-def show_change_password():
-    return render_template('auth/change_password.html')
+            # ==========================
+            # Password Validation
+            # ==========================
+
+            if password != confirm_password:
+
+                return self.flash_and_redirect(
+
+                    "Passwords do not match",
+
+                    "danger",
+
+                    "auth.register"
+                )
+
+
+            # ==========================
+            # Print Data in Terminal
+            # ==========================
+
+            print("\n========== USER DATA ==========")
+
+            print("Full Name :", fullname)
+
+            print("Email     :", email)
+
+            print("Phone     :", phone)
+
+            print("DOB       :", dob)
+
+            print("PAN       :", pan)
+
+            print("Referral  :", referral)
+
+            print("================================\n")
+
+
+            # ==========================
+            # Success Message
+            # ==========================
+
+            return self.flash_and_redirect(
+
+                "Registration Successful",
+
+                "success",
+
+                "auth.login"
+            )
+
+
+        return render_template("register.html")
+
+
+    # ======================================
+    # Login Page
+    # ======================================
+
+    def login(self):
+
+        return render_template("login.html")
+
+
+    # ======================================
+    # Terms Page
+    # ======================================
+
+    def terms(self):
+
+        return render_template("terms.html")
+
+
+
+# ======================================
+# Object Creation
+# ======================================
+
+auth_controller = AuthController()
+
+
+
+# ======================================
+# Routes
+# ======================================
+
+@auth.route("/")
+def home():
+
+    return render_template("register.html")
+
+
+
+@auth.route(
+    "/register",
+    methods=["GET", "POST"]
+)
+def register():
+
+    return auth_controller.register()
+
+
+
+@auth.route("/login")
+def login():
+
+    return auth_controller.login()
+
+
+
+@auth.route("/terms")
+def terms():
+
+    return auth_controller.terms()

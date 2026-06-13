@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paisa | Home</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-green-500 flex items-center justify-center text-white text-2xl shadow-lg">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+
+                <div>
+                    <h1 class="text-2xl font-black">
+                        E-Paisa
+                    </h1>
+
+                    <p class="text-sm text-gray-500">
+                        Smart Digital Wallet
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Menu -->
+            <div class="hidden md:flex items-center gap-8 font-medium">
+
+                <a href="/" class="hover:text-blue-600 transition">
+                    Home
+                </a>
+
+                <a href="/send-money" class="hover:text-blue-600 transition">
+                    Send Money
+                </a>
+
+                <a href="/login" class="hover:text-blue-600 transition">
+                    Login
+                </a>
+
+                <a href="/register"
+                   class="bg-gradient-to-r from-blue-600 to-green-500 text-white px-5 py-2 rounded-xl shadow-lg hover:scale-105 transition">
+
+                    Register
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <!-- Hero -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+
+        <div class="grid lg:grid-cols-2 gap-14 items-center">
+
+            <!-- Left -->
+            <div>
+
+                <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
+                    Trusted Digital Wallet in Nepal
+                </span>
+
+                <h1 class="text-5xl md:text-6xl font-black leading-tight mt-6">
+
+                    Secure &
+                    Smart Digital
+                    Payments
+
+                </h1>
+
+                <p class="text-lg text-gray-600 mt-6 leading-relaxed">
+
+                    Experience fast, secure and modern banking with E-Paisa.
+                    Send money, pay bills, recharge mobiles and manage
+                    your digital wallet anytime anywhere.
+
+                </p>
+
+                <!-- Buttons -->
+                <div class="flex gap-5 mt-10">
+
+                    <a href="/register"
+                       class="bg-gradient-to-r from-blue-600 to-green-500 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition">
+
+                        Get Started
+                    </a>
+
+                    <a href="/login"
+                       class="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-2xl font-bold hover:bg-blue-600 hover:text-white transition">
+
+                        Login
+                    </a>
+
+                </div>
+
+                <!-- Features -->
+                <div class="grid grid-cols-2 gap-5 mt-14">
+
+                    <div class="feature-card">
+
+                        <i class="fa-solid fa-money-bill-transfer text-3xl text-blue-600 mb-3"></i>
+
+                        <h3 class="font-bold text-lg">
+                            Instant Transfer
+                        </h3>
+
+                        <p class="text-gray-500 text-sm mt-2">
+                            Send money instantly anywhere.
+                        </p>
+
+                    </div>
+
+                    <div class="feature-card">
+
+                        <i class="fa-solid fa-lock text-3xl text-green-600 mb-3"></i>
+
+                        <h3 class="font-bold text-lg">
+                            Secure Banking
+                        </h3>
+
+                        <p class="text-gray-500 text-sm mt-2">
+                            Protected with advanced security.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Right -->
+            <div class="relative flex justify-center">
+
+                <!-- Phone -->
+                <div class="phone-card">
+
+                    <!-- Balance -->
+                    <div class="bg-gradient-to-r from-blue-600 to-green-500 rounded-3xl p-6 text-white shadow-2xl">
+
+                        <p class="text-sm opacity-80">
+                            Available Balance
+                        </p>
+
+                        <h2 class="text-4xl font-black mt-2">
+                            Rs. 25,000
+                        </h2>
+
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+
+                        <div class="action-card">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Send</span>
+                        </div>
+
+                        <div class="action-card">
+                            <i class="fa-solid fa-qrcode"></i>
+                            <span>Scan QR</span>
+                        </div>
+
+                        <div class="action-card">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                            <span>Recharge</span>
+                        </div>
+
+                        <div class="action-card">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                            <span>Bills</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white mt-20">
+
+        <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between gap-6">
+
+            <div>
+
+                <h2 class="text-2xl font-bold">
+                    E-Paisa
+                </h2>
+
+                <p class="text-gray-400 mt-2">
+                    Smart & Secure Digital Wallet for Nepal
+                </p>
+
+            </div>
+
+            <div class="flex gap-6 text-gray-400">
+
+                <a href="#" class="hover:text-white transition">
+                    Privacy
+                </a>
+
+                <a href="#" class="hover:text-white transition">
+                    Terms
+                </a>
+
+                <a href="#" class="hover:text-white transition">
+                    Support
+                </a>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

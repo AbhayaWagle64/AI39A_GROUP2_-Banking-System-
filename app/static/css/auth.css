@@ -13,6 +13,7 @@ body{
     background: linear-gradient(to right, #0f172a, #1e293b);
 }
 
+/* container */
 .login-container{
     width: 100%;
     display: flex;
@@ -20,73 +21,98 @@ body{
     align-items: center;
 }
 
+/* login box (glass-like modern look) */
 .login-box{
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     padding: 40px;
-    width: 350px;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+    width: 360px;
+    border-radius: 16px;
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
 }
 
 .login-box h1{
     text-align: center;
     color: #0f172a;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .subtitle{
     text-align: center;
     margin-bottom: 25px;
-    color: gray;
+    color: #64748b;
+    font-size: 0.9rem;
 }
 
+/* INPUT GROUP */
 .input-group{
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .input-group label{
     display: block;
     margin-bottom: 6px;
-    color: #333;
-    font-weight: bold;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
+/* MODERN INPUT FIELD STYLE */
 .input-group input{
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(255,255,255,0.8);
+    padding: 0.95rem 1rem;
+    transition: all 0.3s ease;
     outline: none;
-    transition: 0.3s;
+    color: #0f172a;
 }
 
+/* focus effect */
 .input-group input:focus{
     border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    background: #ffffff;
 }
 
+/* BUTTON */
 button{
     width: 100%;
     padding: 12px;
     background: #2563eb;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.3s ease;
 }
 
 button:hover{
     background: #1d4ed8;
+    transform: translateY(-1px);
 }
 
+/* REGISTER TEXT */
 .register-text{
     text-align: center;
     margin-top: 15px;
+    font-size: 0.9rem;
 }
 
 .register-text a{
     color: #2563eb;
     text-decoration: none;
     font-weight: bold;
+}
+
+.register-text a:hover{
+    text-decoration: underline;
+}
+
+.error-message{
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
 }
