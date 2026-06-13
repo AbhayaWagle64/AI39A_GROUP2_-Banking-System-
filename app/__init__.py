@@ -28,4 +28,9 @@ def create_app():
     transaction_otp_routes = TransactionOTPRoutes()
     app.register_blueprint(transaction_otp_routes.register())
 
+    from app.routes.mobile_recharge import MobileRechargeRoutes
+
+    mobile_recharge_routes = MobileRechargeRoutes()
+    app.register_blueprint(mobile_recharge_routes.register())
+
     return app
