@@ -1,27 +1,229 @@
-.input-field {
-    width: 100%;
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    background: rgba(255,255,255,0.8);
-    padding: 0.95rem 1rem;
-    transition: all 0.3s ease;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+/* ============================================
+   BASE TYPOGRAPHY & RENDERING
+============================================ */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Dark mode scrollbar - more visible */
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155; /* slate-700 - visible against slate-950 */
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569; /* slate-600 */
+}
+
+/* Light mode scrollbar */
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1; /* slate-300 */
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; /* slate-400 */
+}
+
+/* ============================================
+   ANIMATION KEYFRAMES
+============================================ */
+
+/* Fade in for modals */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+}
+
+/* Slide in from right for toasts */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Shake for invalid fields */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Pulse for loading states */
+@keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* Spin for loaders */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   UTILITY CLASSES
+============================================ */
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.2s ease-in forwards;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+.animate-slide-out {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+.animate-spin-slow {
+    animation: spin 1s linear infinite;
+}
+
+/* Glassmorphism card effect */
+.glass {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Light mode glass */
+.glass-light {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Custom focus ring */
+.focus-ring:focus {
     outline: none;
-    color: #0f172a;
+    ring: 2px;
+    ring-offset: 2px;
+    ring-color: #10b981; /* emerald-500 */
 }
 
-.dark .input-field {
-    background: rgba(15, 23, 42, 0.8);
-    color: white;
-    border-color: rgba(255,255,255,0.08);
+/* Button press effect */
+.btn-press:active {
+    transform: scale(0.98);
 }
 
-.input-field:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.error-message {
-    color: #ef4444;
-    font-size: 0.85rem;
-    margin-top: 0.4rem;
+/* Red accent for send modal */
+.red-accent-text {
+    color: #dc2626; /* red-600 */
+}
+
+.red-accent-border {
+    border-color: #f87171; /* red-400 */
+}
+
+.red-accent-bg {
+    background-color: #dc2626;
+}
+
+/* ============================================
+   FORM INPUT STYLES (for red underline inputs)
+============================================ */
+.input-red-line {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(248, 113, 113, 0.3);
+    transition: border-color 0.2s ease;
+}
+
+.input-red-line:focus {
+    outline: none;
+    border-bottom-color: #dc2626;
+}
+
+.input-red-line::placeholder {
+    color: #9ca3af;
+}
+
+/* ============================================
+   LOADING SKELETON
+============================================ */
+.skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 0.5rem;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+============================================ */
+@media (max-width: 640px) {
+    .hide-mobile {
+        display: none;
+    }
+}
+
+@media (min-width: 641px) {
+    .hide-desktop {
+        display: none;
+    }
 }

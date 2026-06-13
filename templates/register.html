@@ -4,471 +4,141 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>E-Paisa | Secure Registration</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#020617',
-                        secondary: '#3b82f6',
-                        accent: '#10b981',
-                    },
-                    animation: {
-                        float: 'float 6s ease-in-out infinite'
-                    },
-                    keyframes: {
-                        float: {
-                            '0%,100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-8px)' }
-                        }
+                        brandGreen: '#00b669',
+                        brandGreenHover: '#009856',
+                        brandNavy: '#063147',
+                        darkBg: '#03141f',
+                        darkCard: '#072230'
                     }
                 }
             }
         }
     </script>
+<base target="_blank">
 </head>
+<body class="bg-slate-50 text-slate-900 dark:bg-darkBg dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white min-h-screen antialiased selection:bg-blue-500/30 transition-colors duration-200">
-
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-100px] left-[-100px] w-[600px] h-[600px] bg-blue-500/15 blur-[140px] rounded-full"></div>
-        <div class="absolute bottom-[-100px] right-[-100px] w-[600px] h-[600px] bg-emerald-500/12 blur-[140px] rounded-full"></div>
-    </div>
-
-    <nav class="border-b border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-200">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-            <a href="/" class="flex items-center gap-3 group transition-transform duration-200">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/10 group-hover:scale-[1.03] transition-transform duration-300">
-                    <i class="fa-solid fa-wallet text-sm"></i>
-                </div>
-
-                <div>
-                    <h1 class="font-black text-lg tracking-tight leading-none mb-0.5 text-slate-900 dark:text-white">E-Paisa</h1>
-                    <p class="text-[10px] text-slate-500 font-medium tracking-wider uppercase">
-                        Secure Digital Banking
-                    </p>
-                </div>
-            </a>
-
-            <div class="flex items-center gap-4">
-
-                <div class="hidden md:flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-4 py-1.5 rounded-full text-xs font-mono border border-emerald-500/20">
-                    <i class="fa-solid fa-lock text-[10px]"></i>
-                    SSL Secured
-                </div>
-
-                <button id="themeToggle"
-                    class="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:scale-105 transition flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white shadow-sm">
-                    <i class="fa-solid fa-moon dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:inline"></i>
-                </button>
+    <nav class="border-b border-slate-200/60 dark:border-slate-800/60 bg-white/70 dark:bg-darkCard/70 backdrop-blur-xl sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="bg-brandGreen text-white font-extrabold px-3 py-1 rounded-xl text-xl font-heading">eP</span>
+                <span class="text-xl font-bold text-brandNavy dark:text-white font-heading tracking-tight">E-Paisa</span>
             </div>
+            <button id="toggleTheme" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:scale-105 transition-all">
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:block"></i>
+            </button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-6 py-16">
-
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-
-            <section class="hidden lg:block">
-
-                <div class="max-w-xl">
-                    <span class="inline-flex items-center gap-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-4 py-1.5 rounded-full text-xs font-mono border border-blue-500/20 mb-6">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        Trusted Nepali Digital Wallet
-                    </span>
-
-                    <h1 class="text-5xl font-black tracking-tight leading-none mb-6 text-slate-900 dark:text-white">
-                        Smart Banking
-                        <span class="bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-blue-400 dark:to-emerald-400 bg-clip-text text-transparent block mt-2">
-                            For Nepal
-                        </span>
-                    </h1>
-
-                    <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed mb-10 font-normal">
-                        Send money, pay bills, manage your wallet and experience secure digital finance with E-Paisa.
-                    </p>
-
+    <main class="flex-grow flex items-center justify-center px-4 py-12 relative overflow-hidden">
+        <div class="w-full max-w-4xl bg-white dark:bg-darkCard rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden grid md:grid-size md:grid-cols-12 transition-all">
+            
+            <div class="md:col-span-5 bg-gradient-to-br from-brandNavy to-slate-900 p-8 text-white flex flex-col justify-between relative">
+                <div>
+                    <h2 class="text-2xl font-bold font-heading mb-4 leading-tight">Join the Future of Digital Payments</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6">Create a secure banking account profile and enjoy immediate, zero-fee electronic remittances instantly.</p>
+                    
                     <div class="space-y-4">
-
-                        <div class="flex gap-4 p-5 rounded-3xl bg-white/80 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl transition-colors duration-200">
-                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                                <i class="fa-solid fa-mobile-screen-button"></i>
-                            </div>
-
-                            <div>
-                                <h3 class="font-bold text-slate-900 dark:text-white tracking-tight">Instant Payments</h3>
-                                <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                                    Fast & secure wallet transfers.
-                                </p>
-                            </div>
+                        <div class="flex items-center gap-3 text-sm">
+                            <div class="w-8 h-8 rounded-lg bg-brandGreen/20 flex items-center justify-center text-brandGreen"><i class="fa-solid fa-shield"></i></div>
+                            <span class="text-slate-200">Bank-Grade Data Protocols</span>
                         </div>
-
-                        <div class="flex gap-4 p-5 rounded-3xl bg-white/80 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl transition-colors duration-200">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                <i class="fa-solid fa-lock"></i>
-                            </div>
-
-                            <div>
-                                <h3 class="font-bold text-slate-900 dark:text-white tracking-tight">Bank-Level Security</h3>
-                                <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                                    Protected with encrypted authentication.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4 p-5 rounded-3xl bg-white/80 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl transition-colors duration-200">
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                                <i class="fa-solid fa-building-columns"></i>
-                            </div>
-
-                            <div>
-                                <h3 class="font-bold text-slate-900 dark:text-white tracking-tight">नेपालमै विश्वास</h3>
-                                <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                                    Built for Nepali users and businesses.
-                                </p>
-                            </div>
+                        <div class="flex items-center gap-3 text-sm">
+                            <div class="w-8 h-8 rounded-lg bg-brandGreen/20 flex items-center justify-center text-brandGreen"><i class="fa-solid fa-bolt"></i></div>
+                            <span class="text-slate-200">Real-Time Account Settling</span>
                         </div>
                     </div>
                 </div>
-            </section>
+                <div class="mt-8 pt-6 border-t border-white/10 text-xs text-slate-400">
+                    Need technical assistance? <a href="#" class="text-brandGreen hover:underline">Contact Support</a>
+                </div>
+            </div>
 
-            <section class="w-full">
+            <div class="md:col-span-7 p-8 sm:p-10">
+                <h3 class="text-2xl font-bold font-heading text-brandNavy dark:text-white mb-2">Create Account</h3>
+                <p class="text-slate-400 text-sm mb-6">Fill in the required information down below to get started.</p>
 
-                <div class="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-3xl p-8 md:p-12 transition-colors duration-200">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, msg in messages %}
+                            <div class="mb-4 p-4 rounded-xl text-sm {% if category == 'success' %} bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 {% else %} bg-rose-500/10 text-rose-500 border border-rose-500/20 {% endif %}">
+                                {{ msg }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
 
-                    <div class="text-center mb-8">
-
-                        <div class="mx-auto mb-5 w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 flex items-center justify-center text-white text-2xl shadow-xl animate-float shadow-blue-500/10">
-                            <i class="fa-solid fa-user-plus text-lg"></i>
+                <form id="registerForm" action="/register" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                            <input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:border-brandGreen dark:focus:border-brandGreen focus:outline-none transition-all" placeholder="John Doe">
                         </div>
-
-                        <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white mb-1">
-                            Create Your Account
-                        </h2>
-
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">
-                            Start your secure digital banking journey today.
-                        </p>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:border-brandGreen dark:focus:border-brandGreen focus:outline-none transition-all" placeholder="98XXXXXXXX">
+                        </div>
                     </div>
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            <div class="mb-6 space-y-3">
-                                {% for category, message in messages %}
-                                    <div class="p-4 rounded-2xl flex items-center gap-3 border text-sm font-medium transition-all shadow-md
-                                        {% if category == 'success' %}
-                                            bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400
-                                        {% else %}
-                                            bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400
-                                        {% endif %}">
-                                        
-                                        {% if category == 'success' %}
-                                            <i class="fa-solid fa-circle-check text-base text-emerald-500"></i>
-                                        {% else %}
-                                            <i class="fa-solid fa-circle-exclamation text-base text-rose-500"></i>
-                                        {% endif %}
-                                        
-                                        <span>{{ message }}</span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                        <input type="email" id="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:border-brandGreen dark:focus:border-brandGreen focus:outline-none transition-all" placeholder="name@example.com">
+                    </div>
 
-                    <form id="registerForm"
-                        action="{{ url_for('register') }}"
-                        method="POST"
-                        class="space-y-5">
-
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="relative">
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
+                            <input type="password" id="password" name="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:border-brandGreen dark:focus:border-brandGreen focus:outline-none transition-all pr-10" placeholder="••••••••">
+                            <button type="button" id="togglePassword" class="absolute right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-eye text-sm"></i></button>
+                        </div>
                         <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Full Name
-                            </label>
-
-                            <div class="relative">
-                                <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
-
-                                <input
-                                    type="text"
-                                    name="fullname"
-                                    id="fullname"
-                                    required
-                                    aria-label="Full Name"
-                                    placeholder="Enter your full name"
-                                    class="input-field pl-12 w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-                            </div>
-
-                            <p class="error-message text-xs text-rose-500 mt-1" id="nameError"></p>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:border-brandGreen dark:focus:border-brandGreen focus:outline-none transition-all" placeholder="••••••••">
                         </div>
+                    </div>
 
-                        <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Email Address
-                            </label>
-
-                            <div class="relative">
-                                <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
-
-                                <input
-                                    type="email"
-                                    name="email"
-                                    id="email"
-                                    required
-                                    placeholder="example@gmail.com"
-                                    class="input-field pl-12 w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-                            </div>
-
-                            <p class="error-message text-xs text-rose-500 mt-1" id="emailError"></p>
+                    <div class="space-y-1.5">
+                        <div class="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="strengthBar" class="h-full w-0 bg-rose-500 transition-all duration-300"></div>
                         </div>
+                        <span id="strengthText" class="text-xs text-slate-400 font-medium">Password Requirements: At least 8 characters.</span>
+                    </div>
 
-                        <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Phone Number
-                            </label>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Profile Avatar Image</label>
+                        <input type="file" name="avatar" accept="image/*" class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brandGreen/10 file:text-brandGreen file:cursor-pointer hover:file:bg-brandGreen/20 transition-all">
+                    </div>
 
-                            <div class="relative">
-                                <i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
+                    <div class="flex items-start gap-2.5 pt-2">
+                        <input type="checkbox" required id="terms" class="mt-1 accent-brandGreen">
+                        <label for="terms" class="text-xs text-slate-400 leading-normal">I accept the <a href="/terms" target="_blank" class="text-brandGreen hover:underline font-medium">Terms & Conditions</a> and data privacy rules.</label>
+                    </div>
 
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    id="phone"
-                                    required
-                                    placeholder="98XXXXXXXX"
-                                    maxlength="10"
-                                    class="input-field pl-12 w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-                            </div>
+                    <button type="submit" class="w-full bg-brandGreen hover:bg-brandGreenHover text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-brandGreen/20 flex items-center justify-center gap-2 mt-4" id="submitBtn">
+                        <span id="btnText">Register Account</span>
+                        <div id="btnLoader" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </form>
 
-                            <p class="text-[11px] font-mono mt-2 text-slate-400 dark:text-slate-500">
-                                नेपाली मोबाइल नम्बर मात्र
-                            </p>
-
-                            <p class="error-message text-xs text-rose-500 mt-1" id="phoneError"></p>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Date of Birth
-                            </label>
-
-                            <input
-                                type="date"
-                                name="dob"
-                                required
-                                class="input-field w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                            />
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Password
-                            </label>
-
-                            <div class="relative">
-                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
-
-                                <input
-                                    type="password"
-                                    name="password"
-                                    id="password"
-                                    required
-                                    placeholder="Create a secure password"
-                                    class="input-field pl-12 pr-12 w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-
-                                <button
-                                    type="button"
-                                    id="togglePassword"
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white">
-                                    <i class="fa-solid fa-eye text-sm"></i>
-                                </button>
-                            </div>
-
-                            <div class="mt-3">
-                                <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-950 overflow-hidden border border-slate-300/30 dark:border-white/5">
-                                    <div id="strengthBar"
-                                        class="h-full w-0 transition-all duration-300 rounded-full">
-                                    </div>
-                                </div>
-
-                                <p id="strengthText"
-                                    class="text-xs font-mono mt-2 text-slate-400 dark:text-slate-500">
-                                    Password strength
-                                </p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                Confirm Password
-                            </label>
-
-                            <input
-                                type="password"
-                                name="confirm_password"
-                                id="confirmPassword"
-                                required
-                                placeholder="Confirm password"
-                                class="input-field w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                            />
-
-                            <p class="error-message text-xs text-rose-500 mt-1" id="confirmError"></p>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-5">
-
-                            <div>
-                                <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                    Citizenship/PAN
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="pan"
-                                    placeholder="Optional"
-                                    class="input-field w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-                            </div>
-
-                            <div>
-                                <label class="block mb-2 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                                    Referral Code
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="referral"
-                                    placeholder="Optional"
-                                    class="input-field w-full p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors duration-200"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <input
-                                type="checkbox"
-                                id="terms"
-                                required
-                                class="mt-1 accent-emerald-500"
-                            >
-
-                            <label
-                                for="terms"
-                                class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"
-                            >
-                                I agree to the
-                                <a
-                                    href="{{ url_for('terms') }}"
-                                    target="_blank"
-                                    class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-medium transition"
-                                >
-                                    Terms & Conditions
-                                </a>
-                                and
-                                <a
-                                    href="{{ url_for('terms') }}"
-                                    target="_blank"
-                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-medium transition"
-                                >
-                                    Privacy Policy
-                                </a>
-                            </label>
-                        </div>
-
-                        <button
-                            type="submit"
-                            id="registerBtn"
-                            class="w-full py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-emerald-500 hover:scale-[1.01] transition-all duration-300 shadow-xl shadow-blue-900/10">
-
-                            <span id="btnText">
-                                Create Secure Account
-                            </span>
-
-                            <span id="btnLoader" class="hidden">
-                                <i class="fa-solid fa-spinner animate-spin"></i>
-                                Processing...
-                            </span>
-                        </button>
-
-                        <div class="text-center pt-2">
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">
-                                Already have an account?
-                                <a href="{{ url_for('login') }}"
-                                    class="text-blue-600 dark:text-blue-400 font-bold hover:underline">
-                                    Login
-                                </a>
-                            </p>
-                        </div>
-
-                    </form>
-                </div>
-            </section>
+                <p class="text-center text-slate-400 text-xs mt-6">
+                    Already registered with E-Paisa? <a href="/login" class="text-brandGreen hover:underline font-semibold">Sign In</a>
+                </p>
+            </div>
         </div>
     </main>
 
-    <div id="toast"
-        class="fixed top-5 right-5 hidden px-6 py-4 rounded-2xl shadow-2xl text-white z-50">
-    </div>
-
-    <footer class="border-t border-slate-200 dark:border-white/10 mt-16 bg-white dark:bg-slate-950 transition-colors duration-200">
-        <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between gap-5">
-
-            <div>
-                <h3 class="font-bold text-slate-900 dark:text-white text-base">E-Paisa</h3>
-                <p class="text-xs text-slate-500 mt-1">
-                    Secure Digital Wallet Platform for Nepal.
-                </p>
-            </div>
-
-            <div class="flex gap-6 text-xs font-mono text-slate-400 dark:text-slate-500">
-                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition">Privacy</a>
-                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition">Terms</a>
-                <a href="#" class="hover:text-slate-900 dark:hover:text-white transition">Support</a>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        const themeToggleBtn = document.getElementById('themeToggle');
-        const htmlElement = document.documentElement;
-
-        // Check for saved preference or fallback to system preference on load
-        if (
-            localStorage.getItem('theme') === 'dark' || 
-            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-        ) {
-            htmlElement.classList.add('dark');
-        } else {
-            htmlElement.classList.remove('dark');
-        }
-
-        // Click event to swap theme classes
-        themeToggleBtn.addEventListener('click', () => {
-            if (htmlElement.classList.contains('dark')) {
-                htmlElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                htmlElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-    </script>
+    <div id="toast" class="hidden fixed top-5 right-5 px-6 py-4 rounded-2xl shadow-2xl text-white z-50 transform transition-all duration-300 font-semibold text-sm"></div>
 
     <script src="{{ url_for('static', filename='js/register.js') }}"></script>
-
 </body>
 </html>

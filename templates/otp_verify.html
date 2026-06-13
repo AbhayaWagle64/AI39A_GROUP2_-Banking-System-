@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paisa - Verify OTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+    <nav class="border-b border-white/10 bg-slate-900/70 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="bg-emerald-500 text-slate-950 font-extrabold px-3 py-1 rounded-xl text-xl font-mono">eP</span>
+                <span class="text-xl font-bold text-white">E-Paisa</span>
+            </div>
+            <a href="/logout" class="text-xs font-bold text-rose-400 hover:bg-rose-500/10 px-3 py-2 rounded-xl transition">Cancel</a>
+        </div>
+    </nav>
+    <main class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full"></div>
+        </div>
+        <div class="w-full max-w-md bg-slate-900/80 border border-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">Security Verification</h2>
+                <p class="text-slate-400 text-sm mt-1">We sent a 6-digit verification code to your registered email address. Please enter it below.</p>
+            </div>
+            
+            
+            <!-- SHOW OTP FOR DEMO PURPOSES -->
+            <div class="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center">
+                <p class="text-xs text-amber-400 font-semibold uppercase tracking-wider mb-2">Demo Mode - Your OTP</p>
+                <p class="text-4xl font-bold font-mono text-amber-400 tracking-widest" id="otpDisplay">------</p>
+                <p class="text-xs text-slate-400 mt-2">Check terminal if this doesn't match</p>
+            </div>
+            
+            <form action="/verify-otp" method="POST" class="space-y-5">
+                <div class="flex gap-2 justify-center">
+                    <input type="text" name="otp1" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="this.nextElementSibling?.focus()">
+                    <input type="text" name="otp2" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="this.nextElementSibling?.focus()">
+                    <input type="text" name="otp3" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="this.nextElementSibling?.focus()">
+                    <input type="text" name="otp4" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="this.nextElementSibling?.focus()">
+                    <input type="text" name="otp5" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="this.nextElementSibling?.focus()">
+                    <input type="text" name="otp6" maxlength="1" required class="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-slate-950/50 text-white focus:border-emerald-500 focus:outline-none transition-all" oninput="combineOtp()">
+                </div>
+                <input type="hidden" name="otp" id="fullOtp">
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+                    Verify & Activate
+                </button>
+            </form>
+            <div class="mt-6 text-center">
+                <p class="text-slate-500 text-xs">Didn't receive the code? <button onclick="resendOtp()" class="text-emerald-400 hover:text-emerald-300 font-semibold transition">Resend</button></p>
+                <p class="text-slate-500 text-xs mt-1" id="resendTimer">Resend in 01:47</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function combineOtp() {
+            const inputs = document.querySelectorAll('input[name^="otp"]');
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+            document.getElementById('fullOtp').value = otp;
+        }
+        
+        function resendOtp() {
+            fetch('/resend-otp', {method: 'POST'})
+                .then(r => r.json())
+                .then(d => {
+                    alert('New OTP sent! Check the display above.');
+                    location.reload();
+                });
+        }
+        
+        // Fetch and display OTP
+        fetch('/resend-otp', {method: 'POST'})
+            .then(r => r.json())
+            .then(d => {
+                console.log('OTP resent, check terminal');
+            });
+    </script>
+</body>
+</html>
