@@ -1,1 +1,4 @@
 venv/\n__pycache__/\n*.pyc\n*.pyo\n*.pyd\n*.db\n*.sqlite3\n*.log\n*.env\n.env.*\ninstance/\n*.egg-info/\npip-wheel-metadata/\nbuild/\ndist/\n*.swp\n*.tmp\n.DS_Store\n.vscode/\n.idea/\n__pycache__/\n*.bak\n*~\n
+profile_management.html\nprofile_management.css\nprofile_management.js\n
+app/services/transaction_service.py app/services/qr_service.py app/services/payment_service.py app/services/otp_service.py app/services/fraud_detection.py app/services/email_service.py
+app/routes/security_routes.py app/routes/transaction_routes.py app/routes/qr_routes.py app/routes/profile_routes.py app/routes/payment_routes.py app/routes/notification_routes.py app/routes/home_routes.py app/routes/dashboard_routes.py app/routes/bills_routes.py app/routes/api_routes.py
