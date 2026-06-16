@@ -23,7 +23,7 @@
     {% else %}
     <p id="otpStatus" class="otp-note" aria-live="polite"></p>
     {% endif %}
-    <form id="otpForm" action="/api/verify-otp" method="post" autocomplete="off">
+    <form id="otpForm" action="{% if recharge_mode %}/api/verify-recharge-otp{% else %}/api/verify-otp{% endif %}" method="post" autocomplete="off">
       <div class="form-group">
         <input type="text" id="otp" name="otp" class="input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       </div>
@@ -41,6 +41,7 @@
 
 {% block js %}
 <script>
+const isRechargeMode = {{ 'true' if recharge_mode else 'false' }};
 document.addEventListener('DOMContentLoaded', () => {
   const otpInput = document.getElementById('otp');
   const resendBtn = document.getElementById('resendBtn');
@@ -50,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function requestOtp() {
     try {
-      const res = await fetch('/api/request-otp', {
+      const url = isRechargeMode ? '/api/request-recharge-otp' : '/api/request-otp';
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         credentials: 'same-origin',
@@ -83,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (cancelBtn) {
     cancelBtn.addEventListener('click', () => {
-      window.location.href = '/wallet';
+      window.location.href = isRechargeMode ? '/recharge' : '/wallet';
     });
   }
 
@@ -96,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
 });
 </script>
 {% endblock %}

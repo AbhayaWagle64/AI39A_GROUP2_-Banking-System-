@@ -494,15 +494,338 @@ def verify_otp():
     db.close()
     _clear_otp_session()
     session.pop("pending_transaction", None)
- 
+
     return redirect(url_for("user.transaction_success"))
- 
- 
+
+
+@main.route("/recharge")
+@login_required
+def recharge_page():
+    user = get_current_user()
+    return render_template("wallet/recharge.html", user=user)
+
+
+@main.route("/merchant-pay")
+@login_required
+def merchant_pay_page():
+    merchant_name = request.args.get("merchant", "Merchant")
+    user = get_current_user()
+    return render_template("wallet/merchant_pay.html", user=user, merchant_name=merchant_name)
+
+
+@main.route("/api/merchant-pay", methods=["POST"])
+@login_required
+def merchant_pay():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    data = request.get_json(silent=True) or {}
+    merchant = data.get("merchant", "").strip()
+    amount = data.get("amount")
+
+    if not merchant:
+        return jsonify({"success": False, "message": "Merchant is required"}), 400
+
+    try:
+        amount_val = float(amount)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Invalid amount"}), 400
+
+    if amount_val < 10:
+        return jsonify({"success": False, "message": "Minimum amount is 10"}), 400
+
+    user = get_current_user()
+    if not user:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    sender_balance = float(user.get("balance", 0) or 0)
+    if sender_balance < amount_val:
+        return jsonify({"success": False, "message": "Insufficient balance"}), 400
+
+    sender_balance = sender_balance - amount_val
+    db = Database()
+    db.execute(
+        "UPDATE register SET balance = %s WHERE username = %s",
+        (sender_balance, user["username"])
+    )
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'merchant_payment')",
+        (sender_email, sender_epaisa_id, '', merchant, amount_val)
+    )
+    db.close()
+
+    session["merchant_payment_success"] = {
+        "merchant": merchant,
+        "amount": amount_val
+    }
+
+    return jsonify({
+        "success": True,
+        "redirect": url_for("user.merchant_pay_success")
+    }), 200
+
+
+@main.route("/merchant-pay-success")
+@login_required
+def merchant_pay_success():
+    user = get_current_user()
+    payment = session.pop("merchant_payment_success", None)
+    return render_template("wallet/merchant_pay_success.html", user=user, payment=payment)
+
+
+@main.route("/recharge-success")
+@login_required
+def recharge_success():
+    user = get_current_user()
+    pending = session.pop("pending_recharge", None)
+    return render_template("wallet/recharge_success.html", user=user, pending=pending)
+
+
+@main.route("/recharge-failed")
+@login_required
+def recharge_failed():
+    user = get_current_user()
+    pending = session.pop("pending_recharge", None)
+    return render_template("wallet/recharge_failed.html", user=user, pending=pending)
+
+
+@main.route("/api/initiate-recharge", methods=["POST"])
+def initiate_recharge():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    raw_data = request.get_data(as_text=True)
+    if not raw_data:
+        return jsonify({"success": False, "message": "Invalid request - no data received"}), 400
+
+    try:
+        data = json.loads(raw_data)
+    except Exception:
+        return jsonify({"success": False, "message": "Invalid JSON data"}), 400
+
+    phone = data.get("phone", "").strip()
+    operator = data.get("operator", "").strip()
+    amount = data.get("amount")
+
+    if not phone or not re.match(r"^[0-9]{10}$", phone):
+        return jsonify({"success": False, "message": "Invalid phone number"}), 400
+
+    if not operator:
+        return jsonify({"success": False, "message": "Operator is required"}), 400
+
+    try:
+        amount_val = float(amount)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Invalid amount"}), 400
+
+    if amount_val < 10:
+        return jsonify({"success": False, "message": "Minimum amount is 10"}), 400
+
+    user = get_current_user()
+    if not user:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    sender_balance = user.get("balance", 0.0)
+    if isinstance(sender_balance, str):
+        try:
+            sender_balance = float(sender_balance)
+        except (ValueError, TypeError):
+            sender_balance = 0.0
+
+    if sender_balance < amount_val:
+        return jsonify({"success": False, "message": "Insufficient balance"}), 400
+
+    session["pending_recharge"] = {
+        "sender_username": user["username"],
+        "sender_balance": sender_balance,
+        "phone": phone,
+        "operator": operator,
+        "amount": amount_val
+    }
+
+    return jsonify({
+        "success": True,
+        "message": "OK",
+        "next": "otp",
+        "redirect": url_for("user.verify_recharge_otp_page")
+    }), 200
+
+
+@main.route("/verify-recharge-otp")
+@login_required
+def verify_recharge_otp_page():
+    sender = get_current_user()
+    pending = session.get("pending_recharge")
+    if not pending or not sender or sender["username"] != pending.get("sender_username"):
+        return redirect(url_for("user.recharge_page"))
+    raw_email = sender.get("email", "") or ""
+    local = raw_email.split("@")[0] if "@" in raw_email else raw_email
+    domain = raw_email.split("@")[1] if "@" in raw_email else ""
+    if len(local) > 2:
+        masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
+    else:
+        masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
+    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=None, recharge_mode=True)
+
+
+@main.route("/api/request-recharge-otp", methods=["POST"])
+def request_recharge_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    pending = session.get("pending_recharge")
+    if not pending:
+        return jsonify({"success": False, "message": "No pending recharge"}), 400
+
+    sender = get_current_user()
+    sender_email = sender.get("email", "").strip() if sender else ""
+    if not sender_email:
+        return jsonify({"success": False, "message": "No email found for user"}), 400
+
+    mailer = _get_mailer()
+    if not mailer or not mailer.is_configured:
+        return jsonify({"success": False, "message": "Email service is not configured"}), 500
+
+    otp = f"{secrets.randbelow(1000000):06d}"
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    session["verified_otp"] = otp
+    session["otp_expires_at"] = expires_at.isoformat()
+    session["otp_attempts"] = 0
+
+    try:
+        sent = mailer.send_otp(sender_email, otp, async_send=False)
+        if not sent:
+            raise RuntimeError("Mailer returned false")
+        logger.info("OTP email sent to %s", sender_email)
+    except Exception as exc:
+        logger.exception("OTP email failed: %s", exc)
+        _clear_otp_session()
+        return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
+
+    return jsonify({
+        "success": True,
+        "message": "OTP sent to your email",
+        "redirect": url_for("user.verify_recharge_otp_page"),
+    }), 200
+
+
+@main.route("/api/verify-recharge-otp", methods=["POST"])
+def verify_recharge_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+    if request.is_json:
+        payload = request.get_json(silent=True) or {}
+        code = (payload.get("otp") or "").strip()
+    else:
+        code = (request.form.get("otp") or "").strip()
+    if not code or len(code) != 6 or not code.isdigit():
+        pending = session.get("pending_recharge")
+        if pending:
+            user = get_current_user()
+            if user:
+                amount = float(pending.get("amount", 0))
+                phone = pending.get("phone", "")
+                operator = pending.get("operator", "")
+                sender_email = user.get("email") or ""
+                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+                db = Database()
+                db.execute(
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
+                )
+                db.close()
+        _clear_otp_session()
+        session.pop("pending_recharge", None)
+        return redirect(url_for("user.recharge_failed"))
+    stored_otp = session.get("verified_otp")
+    expires_at = session.get("otp_expires_at")
+    attempts = int(session.get("otp_attempts", 0) or 0) + 1
+    session["otp_attempts"] = attempts
+    if attempts >= 5:
+        pending = session.get("pending_recharge")
+        if pending:
+            user = get_current_user()
+            if user:
+                amount = float(pending.get("amount", 0))
+                phone = pending.get("phone", "")
+                operator = pending.get("operator", "")
+                sender_email = user.get("email") or ""
+                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+                db = Database()
+                db.execute(
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
+                )
+                db.close()
+        _clear_otp_session()
+        session.pop("pending_recharge", None)
+        return redirect(url_for("user.recharge_failed"))
+    if not stored_otp or stored_otp != code:
+        return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
+    if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
+        pending = session.get("pending_recharge")
+        if pending:
+            user = get_current_user()
+            if user:
+                amount = float(pending.get("amount", 0))
+                phone = pending.get("phone", "")
+                operator = pending.get("operator", "")
+                sender_email = user.get("email") or ""
+                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+                db = Database()
+                db.execute(
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
+                )
+                db.close()
+        _clear_otp_session()
+        session.pop("pending_recharge", None)
+        return redirect(url_for("user.recharge_failed"))
+
+    pending = session.get("pending_recharge")
+    if not pending:
+        return redirect(url_for("user.recharge_failed"))
+
+    sender_username = pending.get("sender_username") or session.get("user_id")
+    phone = pending.get("phone", "")
+    operator = pending.get("operator", "")
+    amount = float(pending.get("amount", 0))
+
+    user = get_current_user()
+    if not user or user["username"] != sender_username:
+        return redirect(url_for("user.recharge_failed"))
+
+    db = Database()
+    sender_balance = float(user.get("balance", 0) or 0)
+    if sender_balance < amount:
+        _clear_otp_session()
+        session.pop("pending_recharge", None)
+        db.close()
+        return redirect(url_for("user.recharge_failed"))
+
+    sender_balance = sender_balance - amount
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
+
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge')
+    )
+    db.close()
+    _clear_otp_session()
+    session.pop("pending_recharge", None)
+
+    return redirect(url_for("user.recharge_success"))
+
+
 def _clear_otp_session():
     session.pop("verified_otp", None)
     session.pop("otp_expires_at", None)
- 
- 
+
+
 def mask_email(email: str) -> str:
     if not email or "@" not in email:
         return email

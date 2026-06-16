@@ -59,14 +59,20 @@
     <div class="result-text">{{ subtitle }}</div>
     {% if pending %}
     <div class="result-meta">
+      {% if pending and pending.get('phone') %}
+      <div><span>Phone</span><span>{{ pending.phone or '—' }}</span></div>
+      <div><span>Operator</span><span>{{ pending.operator or '—' }}</span></div>
+      <div><span>Amount</span><span>₹ {{ "{:,.2f}".format(pending.amount) if pending.amount else '0.00' }}</span></div>
+      {% else %}
       <div><span>To</span><span>{{ pending.recipient_name or pending.recipient_epaisa or '—' }}</span></div>
       <div><span>Amount</span><span>₹ {{ "{:,.2f}".format(pending.amount) if pending.amount else '0.00' }}</span></div>
       <div><span>Recipient</span><span>{{ pending.recipient_epaisa or '—' }}</span></div>
+      {% endif %}
     </div>
     {% endif %}
     <div class="result-footer">
       <a href="{{ url_for('user.transactions') }}" class="btn btn-primary">View Transactions</a>
-      <a href="{{ url_for('user.wallet') }}" class="btn btn-secondary">Back to Wallet</a>
+      <a href="{% if pending and pending.get('phone') %}{{ url_for('user.dashboard') }}{% else %}{{ url_for('user.wallet') }}{% endif %}" class="btn btn-secondary">{% if pending and pending.get('phone') %}Back to Dashboard{% else %}Back to Wallet{% endif %}</a>
     </div>
   </div>
 </div>

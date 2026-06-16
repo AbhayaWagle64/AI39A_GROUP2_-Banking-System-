@@ -28,12 +28,15 @@ Dashboard — ePaisa
  
     <!-- Quick Actions -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; max-width:680px; margin-bottom:24px;">
-        <a href="/wallet" class="btn btn-primary" style="padding:18px;">
-            <span>💳</span> Add Money
-        </a>
-        <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
-            <span>📤</span> Send Money
-        </a>
+<a href="/wallet" class="btn btn-primary" style="padding:18px;">
+             <span>💳</span> Add Money
+         </a>
+         <button id="paymentBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+             <span>💰</span> Payment
+         </button>
+         <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+             <span>📤</span> Send Money
+         </a>
         <a href="/transactions" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
             <span>📊</span> History
         </a>
@@ -102,7 +105,7 @@ Dashboard — ePaisa
         </div>
     </div>
   
-    <div class="modal-overlay" id="qrScannerModal">
+<div class="modal-overlay" id="qrScannerModal">
         <div class="modal-box" style="max-width:440px;">
             <div style="text-align:center; margin-bottom:16px;">
                 <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 4px;">Scan QR Code</h3>
@@ -117,7 +120,133 @@ Dashboard — ePaisa
             </div>
         </div>
     </div>
-  
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-box" style="max-width:400px;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Choose Payment Type</h3>
+                <p style="font-size:13px; color:var(--text-secondary);">Select how you want to make payment</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="rechargeBtn" class="btn btn-primary" style="justify-content:flex-start; gap:12px;">
+                    <span style="font-size:20px;">📱</span>
+                    <span>Recharge</span>
+                </button>
+                <button id="merchantPayBtn" class="btn btn-secondary" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                    <span style="font-size:20px;">🏪</span>
+                    <span>Merchant Pay</span>
+                </button>
+            </div>
+<button class="btn btn-secondary" id="closePaymentModal" style="margin-top:20px; width:100%; background:white; color:var(--text-primary);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Merchant Shopping Modal -->
+        <div class="modal-overlay" id="merchantModal">
+            <div class="modal-box" style="max-width:480px;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Shop Online</h3>
+                    <p style="font-size:13px; color:var(--text-secondary);">Select a merchant to pay</p>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <button class="merchant-option btn btn-secondary" data-merchant="Amazon" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛒</span>
+                        <span>Amazon</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="Flipkart" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛍️</span>
+                        <span>Flipkart</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="Daraz" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">📦</span>
+                        <span>Daraz</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="eBay" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🏪</span>
+                        <span>eBay</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="AliExpress" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛒</span>
+                        <span>AliExpress</span>
+                    </button>
+                </div>
+                <button class="btn btn-secondary" id="closeMerchantModal" style="margin-top:20px; width:100%; background:white; color:var(--text-primary);">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+
 </div>
- 
+
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const paymentBtn = document.getElementById("paymentBtn");
+    const paymentModal = document.getElementById("paymentModal");
+    const closePaymentModal = document.getElementById("closePaymentModal");
+    const rechargeBtn = document.getElementById("rechargeBtn");
+    const merchantPayBtn = document.getElementById("merchantPayBtn");
+    const merchantModal = document.getElementById("merchantModal");
+    const closeMerchantModal = document.getElementById("closeMerchantModal");
+    const merchantOptions = document.querySelectorAll(".merchant-option");
+
+    if (paymentBtn && paymentModal) {
+        paymentBtn.addEventListener("click", () => {
+            paymentModal.classList.add("active");
+        });
+    }
+
+    if (closePaymentModal && paymentModal) {
+        closePaymentModal.addEventListener("click", () => {
+            paymentModal.classList.remove("active");
+        });
+    }
+
+    if (paymentModal) {
+        paymentModal.addEventListener("click", (e) => {
+            if (e.target === paymentModal) {
+                paymentModal.classList.remove("active");
+            }
+        });
+    }
+
+    if (rechargeBtn) {
+        rechargeBtn.addEventListener("click", () => {
+            window.location.href = "/recharge";
+        });
+    }
+
+    if (merchantPayBtn) {
+        merchantPayBtn.addEventListener("click", () => {
+            paymentModal.classList.remove("active");
+            merchantModal.classList.add("active");
+        });
+    }
+
+    if (closeMerchantModal && merchantModal) {
+        closeMerchantModal.addEventListener("click", () => {
+            merchantModal.classList.remove("active");
+        });
+    }
+
+    if (merchantModal) {
+        merchantModal.addEventListener("click", (e) => {
+            if (e.target === merchantModal) {
+                merchantModal.classList.remove("active");
+            }
+        });
+    }
+
+    merchantOptions.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const merchant = btn.dataset.merchant;
+            window.location.href = `/merchant-pay?merchant=${encodeURIComponent(merchant)}`;
+        });
+    });
+});
+</script>
 {% endblock %}
