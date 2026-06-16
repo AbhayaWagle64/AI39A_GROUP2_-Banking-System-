@@ -12,29 +12,29 @@ from app.database import Database
 from app.models.login_model import LoginModel
 from app.models.register_model import RegisterModel
 from app.models.wallet_model import WalletModel
-
+ 
 main = Blueprint("user", __name__)
 login_model = LoginModel()
 register_model = RegisterModel()
 wallet_model = WalletModel()
 logger = logging.getLogger(__name__)
-
+ 
 def _get_mailer():
     from flask import current_app
     return getattr(current_app, "mailer", None)
-
+ 
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "static", "uploads"
 )
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-
-
+ 
+ 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
+ 
+ 
 def get_current_user():
     user_id = session.get("user_id")
     if not user_id:
@@ -68,22 +68,54 @@ def get_current_user():
         "balance": balance,
         "transaction_count": tx_count
     }
-
-
+ 
+ 
+@main.route("/api/lookup-user", methods=["POST"])
+def lookup_user():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+    
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        return jsonify({"success": False, "message": "Invalid request"}), 400
+    
+    epaisa_id = data.get("epaisa_id", "").strip()
+    
+    if not epaisa_id:
+        return jsonify({"success": False, "message": "ePaisa ID required"}), 400
+    
+    db = Database()
+    user = db.fetch_one(
+        "SELECT username, epaisa_id FROM register WHERE epaisa_id = %s OR phone = %s OR username = %s",
+        (epaisa_id, epaisa_id, epaisa_id)
+    )
+    db.close()
+    
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 400
+    
+    return jsonify({
+        "success": True,
+        "epaisa_id": user.get("epaisa_id", ""),
+        "username": user.get("username", "")
+    }), 200
+ 
+ 
 @main.route("/")
 @login_required
 def home():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
-
-
+ 
+ 
 @main.route("/dashboard")
 @login_required
 def dashboard():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
-
-
+ 
+ 
 @main.route("/profile")
 @login_required
 def profile():
@@ -94,40 +126,40 @@ def profile():
         user=user,
         uploaded_image=uploaded_image
     )
-
-
+ 
+ 
 @main.route("/profile-management", methods=["GET", "POST"])
 @login_required
 def profile_management():
     user = get_current_user()
     uploaded_image = session.get("uploaded_image")
-
+ 
     if request.method == "POST":
         full_name = request.form.get("full_name", user["full_name"] if user else "")
         email = request.form.get("email", user["email"] if user else "")
         phone = request.form.get("phone", user["phone"] if user else "")
         address = request.form.get("address", user["address"] if user else "")
-
+ 
         file = request.files.get("profile_image")
-
+ 
         if file and file.filename and allowed_file(file.filename):
             ext = file.filename.rsplit(".", 1)[1].lower()
             filename = f"{uuid.uuid4().hex}.{ext}"
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             file.save(filepath)
-
+ 
             old_image = session.get("uploaded_image")
             if old_image:
                 old_path = os.path.join(UPLOAD_FOLDER, old_image)
                 if os.path.exists(old_path):
                     os.remove(old_path)
-
+ 
             session["uploaded_image"] = filename
-
+ 
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
-
+ 
         if password and password != confirm_password:
             flash("Passwords do not match.", "error")
             return render_template(
@@ -135,7 +167,7 @@ def profile_management():
                 user=user,
                 uploaded_image=uploaded_image
             )
-
+ 
         db = Database()
         db.execute(
             "UPDATE register SET full_name=%s, email=%s, phone=%s, address=%s WHERE username=%s",
@@ -155,7 +187,7 @@ def profile_management():
                 (generate_password_hash(password), session.get("user_id"))
             )
         db.close()
-
+ 
         updated_user = {
             "username": session.get("user_id"),
             "full_name": full_name,
@@ -167,29 +199,29 @@ def profile_management():
             "date_joined": user["date_joined"] if user else "",
             "balance": float(user["balance"]) if user and user.get("balance") else 0.0
         }
-
+ 
         flash("Profile updated successfully!", "success")
         return redirect(url_for("user.profile"))
-
+ 
     return render_template(
         "profile_management.html",
         user=user,
         uploaded_image=uploaded_image
     )
-
-
+ 
+ 
 @main.route("/wallet")
 @login_required
 def wallet():
     user = get_current_user()
     return render_template("wallet/wallet.html", user=user)
-
-
+ 
+ 
 @main.route("/api/send-money", methods=["POST"])
 def send_money():
     if 'user_id' not in session:
         return jsonify({"success": False, "message": "User not authenticated"}), 401
-
+ 
     raw_data = request.get_data(as_text=True)
     if not raw_data:
         return jsonify({"success": False, "message": "Invalid request - no data received"}), 400
@@ -204,29 +236,29 @@ def send_money():
     
     if not data.get("epaisaNumber") or not data.get("amount"):
         return jsonify({"success": False, "message": "Missing required fields", "data": data}), 400
-
+ 
     recipient_epaisa = data.get("epaisaNumber", "") or ""
     recipient_epaisa = recipient_epaisa.strip() if recipient_epaisa else ""
     amount_val = data.get("amount")
     amount_str = str(amount_val).strip() if amount_val is not None else "0"
     recipient_name = data.get("accountHolder", "") or ""
     recipient_name = recipient_name.strip() if recipient_name else ""
-
+ 
     if not recipient_epaisa:
         return jsonify({"success": False, "message": "Recipient ePaisa ID is required"}), 400
-
+ 
     try:
         amount = float(amount_str) if amount_str else 0
     except (ValueError, TypeError):
         return jsonify({"success": False, "message": "Invalid amount"}), 400
-
+ 
     if amount <= 0:
         return jsonify({"success": False, "message": "Amount must be greater than 0"}), 400
-
+ 
     user = get_current_user()
     if not user:
         return jsonify({"success": False, "message": "User not authenticated"}), 401
-
+ 
     db = Database()
     recipient = db.fetch_one(
         "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
@@ -235,11 +267,11 @@ def send_money():
     if not recipient:
         db.close()
         return jsonify({"success": False, "message": "Recipient not found"}), 400
-
+ 
     if recipient["username"] == user["username"]:
         db.close()
         return jsonify({"success": False, "message": "Cannot send to yourself"}), 400
-
+ 
     recipient_balance = float(recipient.get("balance", 0)) if recipient.get("balance") else 0.0
     sender_balance = user.get("balance", 0.0)
     if isinstance(sender_balance, str):
@@ -250,7 +282,7 @@ def send_money():
     if sender_balance < amount:
         db.close()
         return jsonify({"success": False, "message": "Insufficient balance"}), 400
-
+ 
     session["pending_transaction"] = {
         "sender_username": user["username"],
         "sender_balance": sender_balance,
@@ -259,23 +291,45 @@ def send_money():
         "amount": amount,
     }
     db.close()
-
+ 
     return jsonify({
         "success": True,
         "message": "OK",
         "next": "otp",
         "redirect": url_for("user.verify_otp_page")
     }), 200
-
-
+ 
+ 
+@main.route("/qr-code")
+@login_required
+def qr_code():
+    user = get_current_user()
+    epaisa_id = user.get("epaisa_id", user.get("username", ""))
+ 
+    import qrcode
+    import io
+    from flask import send_file
+ 
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(epaisa_id)
+    qr.make(fit=True)
+ 
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+ 
+    return send_file(buf, mimetype="image/png")
+ 
+ 
 @main.route("/transactions")
 @login_required
 def transactions():
     user = get_current_user()
     rows = wallet_model.get_all_transactions(user["username"] if user else "")
     return render_template("transactions.html", user=user, rows=rows)
-
-
+ 
+ 
 @main.route("/admin/users")
 @login_required
 def admin_users():
@@ -284,8 +338,8 @@ def admin_users():
     users = db.fetch_all("SELECT * FROM register ORDER BY email")
     db.close()
     return render_template("user_management.html", user=user, users=users)
-
-
+ 
+ 
 @main.route("/verify-otp")
 @main.route("/verify-otp/<error>")
 @login_required
@@ -302,48 +356,48 @@ def verify_otp_page(error=None):
     else:
         masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
     return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=error)
-
-
+ 
+ 
 @main.route("/transaction-success")
 @login_required
 def transaction_success():
     sender = get_current_user()
     pending = session.pop("pending_transaction", None)
     return render_template("wallet/success.html", user=sender, pending=pending)
-
-
+ 
+ 
 @main.route("/transaction-failed")
 @login_required
 def transaction_failed():
     sender = get_current_user()
     pending = session.pop("pending_transaction", None)
     return render_template("wallet/failed.html", user=sender, pending=pending)
-
-
+ 
+ 
 @main.route("/api/request-otp", methods=["POST"])
 def request_otp():
     if "user_id" not in session:
         return jsonify({"success": False, "message": "User not authenticated"}), 401
-
+ 
     pending = session.get("pending_transaction")
     if not pending:
         return jsonify({"success": False, "message": "No pending transaction"}), 400
-
+ 
     sender = get_current_user()
     sender_email = sender.get("email", "").strip() if sender else ""
     if not sender_email:
         return jsonify({"success": False, "message": "No email found for user"}), 400
-
+ 
     mailer = _get_mailer()
     if not mailer or not mailer.is_configured:
         return jsonify({"success": False, "message": "Email service is not configured"}), 500
-
+ 
     otp = f"{secrets.randbelow(1000000):06d}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
     session["verified_otp"] = otp
     session["otp_expires_at"] = expires_at.isoformat()
     session["otp_attempts"] = 0
-
+ 
     try:
         sent = mailer.send_otp(sender_email, otp, async_send=False)
         if not sent:
@@ -353,14 +407,14 @@ def request_otp():
         logger.exception("OTP email failed: %s", exc)
         _clear_otp_session()
         return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
-
+ 
     return jsonify({
         "success": True,
         "message": "OTP sent to your email",
         "redirect": url_for("user.verify_otp_page"),
     }), 200
-
-
+ 
+ 
 @main.route("/api/verify-otp", methods=["POST"])
 def verify_otp():
     if "user_id" not in session:
@@ -388,20 +442,20 @@ def verify_otp():
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
-
+ 
     pending = session.get("pending_transaction")
     if not pending:
         return redirect(url_for("user.transaction_failed"))
-
+ 
     sender_username = pending.get("sender_username") or session.get("user_id")
     recipient_epaisa = pending.get("recipient_epaisa", "")
     recipient_name = pending.get("recipient_name", "")
     amount = float(pending.get("amount", 0))
-
+ 
     user = get_current_user()
     if not user or user["username"] != sender_username:
         return redirect(url_for("user.transaction_failed"))
-
+ 
     db = Database()
     recipient = db.fetch_one(
         "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
@@ -411,24 +465,24 @@ def verify_otp():
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
-
+ 
     if recipient["username"] == user["username"]:
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
-
+ 
     recipient_balance = float(recipient.get("balance", 0) or 0)
     sender_balance = float(user.get("balance", 0) or 0)
     if sender_balance < amount:
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
-
+ 
     sender_balance = sender_balance - amount
     recipient_balance = recipient_balance + amount
     db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
     db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
-
+ 
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     receiver_email = recipient.get("email") or ""
@@ -440,15 +494,15 @@ def verify_otp():
     db.close()
     _clear_otp_session()
     session.pop("pending_transaction", None)
-
+ 
     return redirect(url_for("user.transaction_success"))
-
-
+ 
+ 
 def _clear_otp_session():
     session.pop("verified_otp", None)
     session.pop("otp_expires_at", None)
-
-
+ 
+ 
 def mask_email(email: str) -> str:
     if not email or "@" not in email:
         return email

@@ -195,6 +195,7 @@ main{
 @media(max-width:768px){
     main{
         padding:16px;
+        padding-bottom:88px;
     }
 }
 
@@ -401,6 +402,7 @@ main{
     .logo-text{font-size:20px;}
     .mobile-nav{display:block;}
     .btn{width:100%; text-align:center;}
+    .send-money-wrapper{margin-top:-8px;}
 }
 
 @media(max-width:400px){

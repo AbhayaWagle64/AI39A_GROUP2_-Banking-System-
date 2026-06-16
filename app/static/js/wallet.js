@@ -9,14 +9,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmYes = document.getElementById("confirmYes");
     const confirmNo = document.getElementById("confirmNo");
     const confirmMessage = document.getElementById("confirmMessage");
-
+ 
+    const urlParams = new URLSearchParams(window.location.search);
+    const toEpaisa = urlParams.get("to");
+    const toName = urlParams.get("name");
+    
+    if (toEpaisa && epaisaNumber) {
+        epaisaNumber.value = toEpaisa;
+    }
+    if (toName && accountHolder) {
+        accountHolder.value = toName;
+    }
+    
     let pendingFormData = null;
-
+    
     function getCsrfToken() {
         const meta = document.querySelector('meta[name=csrf-token]');
         return meta ? meta.getAttribute('content') : '';
     }
-
+ 
     async function startTransaction() {
         const token = getCsrfToken();
         const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -29,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         return res.json();
     }
-
+ 
     async function requestOtp() {
         const token = getCsrfToken();
         const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -37,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch('/api/request-otp', { method: 'POST', headers, credentials: 'same-origin', body: JSON.stringify({}) });
         return res.json();
     }
-
+ 
     async function verifyOtp(code) {
         const token = getCsrfToken();
         const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -45,11 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch('/api/verify-otp', { method: 'POST', headers, credentials: 'same-origin', body: JSON.stringify({ otp: code }) });
         return res.json();
     }
-
+ 
     function navigateTo(path) {
         window.location.href = path;
     }
-
+ 
     sendMoneyForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const epaisaVal = epaisaNumber.value.trim();
@@ -78,19 +89,19 @@ document.addEventListener("DOMContentLoaded", () => {
         confirmMessage.innerHTML = `Are you sure you want to make the transaction?<br><br><small>Send ₹ ${amt.toFixed(2)} to <strong>${accountHolderVal}</strong> (${epaisaVal})?</small>`;
         confirmModal.style.display = "flex";
     });
-
+ 
     confirmNo.addEventListener("click", () => {
         confirmModal.style.display = "none";
         pendingFormData = null;
     });
-
+ 
     confirmModal.addEventListener("click", (e) => {
         if (e.target === confirmModal) {
             confirmModal.style.display = "none";
             pendingFormData = null;
         }
     });
-
+ 
     confirmYes.addEventListener("click", async (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -101,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         confirmYes.disabled = true;
         confirmNo.disabled = true;
         confirmYes.textContent = "Processing...";
-
+ 
         try {
             const txRes = await startTransaction();
             if (!txRes.success) {
