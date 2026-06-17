@@ -1,0 +1,31 @@
+{% extends "wallet/base.html" %}
+
+{% block content %}
+
+<h2>All Transactions</h2>
+
+<table border="1">
+
+<tr>
+    <th>Sender</th>
+    <th>Receiver</th>
+    <th>Amount</th>
+    <th>Status</th>
+    <th>Date</th>
+</tr>
+
+{% for t in transactions %}
+
+<tr>
+    <td>{{ t.sender_wallet }}</td>
+    <td>{{ t.receiver_wallet }}</td>
+    <td>{{ t.amount }}</td>
+    <td>{{ t.status }}</td>
+    <td>{{ t.created_at }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}
