@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+{% block title %}Admin Dashboard - ePaisa{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+
+  <nav class="admin-sidebar">
+    <div class="sidebar-brand">
+      <h2>⚡ ePaisa Admin</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li class="active">
+        <a href="{{ url_for('admin.dashboard') }}">📊 Dashboard</a>
+      </li>
+      <li><a href="#">👥 User Management</a></li>
+      <li><a href="#">💳 Transactions</a></li>
+      <li><a href="#">📄 Reports</a></li>
+      <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+    </ul>
+  </nav>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <h1>Dashboard Overview</h1>
+    </div>
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <h3>{{ total_users }}</h3>
+          <p>Total Users</p>
+          <small>+{{ new_users_today }} today</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💳</div>
+        <div class="stat-info">
+          <h3>{{ total_transactions }}</h3>
+          <p>Total Transactions</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+          <h3>Rs. {{ "{:,.2f}".format(total_volume | float) }}</h3>
+          <p>Total Volume</p>
+        </div>
+      </div>
+
+      <div class="stat-card {{ 'alert-card' if failed_count > 0 else '' }}">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-info">
+          <h3>{{ failed_count }}</h3>
+          <p>Failed Txns (24h)</p>
+          <small>{{ 'Action required!' if failed_count > 0 else 'All clear ✓' }}</small>
+        </div>
+      </div>
+
+    </div>
+
+    {% if failed_count > 0 %}
+    <div class="alert-banner">
+      ⚠️ <strong>{{ failed_count }} failed transaction(s)</strong>
+      detected in the last 24 hours.
+    </div>
+    {% endif %}
+
+    <div class="activity-section">
+      <h2>Recent Activity</h2>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Txn ID</th>
+            <th>Sender</th>
+            <th>Receiver</th>
+            <th>Amount (Rs.)</th>
+            <th>Status</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tx in recent_activity %}
+          <tr>
+            <td>#{{ tx.id }}</td>
+            <td>{{ tx.sender_email }}</td>
+            <td>{{ tx.receiver_email }}</td>
+            <td>{{ "{:,.2f}".format(tx.amount | float) }}</td>
+            <td>
+              <span class="badge badge-{{ tx.status }}">
+                {{ tx.status | upper }}
+              </span>
+            </td>
+            <td>
+              {{ tx.transaction_date.strftime('%Y-%m-%d %H:%M')
+                 if tx.transaction_date else 'N/A' }}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="no-data">No transactions yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+{% endblock %}
