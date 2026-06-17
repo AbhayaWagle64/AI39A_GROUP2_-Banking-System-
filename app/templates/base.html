@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d4a2a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="ePaisa — Your Smart Digital Wallet">
+
+    <title>
+        {% block title %}
+            ePaisa
+        {% endblock %}
+    </title>
+
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.svg') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <span class="logo-text">ePaisa</span>
+
+        <ul class="nav-links">
+
+            <li>
+<a href="{{ url_for('user.home') }}"
+                class="{% if request.path == '/' %}active{% endif %}">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('user.profile') }}"
+                class="{% if request.path == '/profile' %}active{% endif %}">
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="/wallet"
+                data-route="user.wallet"
+                class="{% if request.endpoint == 'user.wallet' %}active{% endif %}">
+                    Wallet
+                </a>
+            </li>
+
+            <li>
+                <a href="/transactions"
+                data-route="user.transactions"
+                class="{% if request.endpoint == 'user.transactions' %}active{% endif %}">
+                    Transactions
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="logout-link">Logout</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <main class="page-enter">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <div class="mobile-nav">
+
+        <div class="mobile-nav-inner">
+
+            <a href="{{ url_for('user.home') }}"
+            class="mobile-nav-item {% if request.path == '/' %}active{% endif %}">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+
+            <a href="{{ url_for('user.profile') }}"
+            class="mobile-nav-item {% if request.path == '/profile' %}active{% endif %}">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+
+            <a href="/wallet"
+            class="mobile-nav-item {% if '/wallet' in request.path %}active{% endif %}">
+                <span class="nav-icon">💳</span>
+                <span>Wallet</span>
+            </a>
+
+            <a href="/transactions"
+            class="mobile-nav-item {% if '/transactions' in request.path %}active{% endif %}">
+                <span class="nav-icon">📊</span>
+                <span>History</span>
+            </a>
+
+            <a href="#" class="mobile-nav-item logout-link">
+                <span class="nav-icon">🚪</span>
+                <span>Exit</span>
+            </a>
+
+        </div>
+
+    </div>
+
+    <script
+    src="{{ url_for('static', filename='js/style.js') }}">
+    </script>
+
+    {% block js %}
+    {% endblock %}
+
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Are you sure you want to logout?</h3>
+            <p class="modal-subtitle">You will be redirected to the login page and your session will be closed.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modalCancel">No, Stay</button>
+                <form id="logoutForm" action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-confirm">Yes, Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+<!-- Session Timeout -->
+<div id="session-warning" style="display:none; position:fixed; top:0; left:0;
+  width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999;
+  justify-content:center; align-items:center;">
+  <div style="background:#fff; border-radius:12px; padding:40px; max-width:400px;
+    width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-size:3rem;">⏱️</div>
+    <h2 style="color:#1a1f36; margin:16px 0 8px;">Session Expiring</h2>
+    <p style="color:#718096; margin-bottom:24px;">
+      You will be logged out in
+      <strong><span id="countdown">60</span> seconds</strong>
+      due to inactivity.
+    </p>
+    <button onclick="resetSessionTimer()"
+      style="background:#2d6a4f; color:#fff; border:none; padding:12px 32px;
+      border-radius:8px; font-size:1rem; cursor:pointer; width:100%;">
+      Keep Me Logged In
+    </button>
+  </div>
+</div>
+
+<script>
+  const isLoggedIn = document.querySelector('.logout-link') !== null;
+
+  if (isLoggedIn) {
+    const TIMEOUT_MS = 10 * 60 * 1000;
+    const WARNING_MS = 9 * 60 * 1000;
+    let warningTimer, logoutTimer, countdownInterval;
+
+    function showWarning() {
+      document.getElementById('session-warning').style.display = 'flex';
+      let seconds = 60;
+      document.getElementById('countdown').textContent = seconds;
+      countdownInterval = setInterval(() => {
+        seconds--;
+        document.getElementById('countdown').textContent = seconds;
+        if (seconds <= 0) clearInterval(countdownInterval);
+      }, 1000);
+    }
+
+    function resetSessionTimer() {
+      document.getElementById('session-warning').style.display = 'none';
+      clearInterval(countdownInterval);
+      clearTimeout(warningTimer);
+      clearTimeout(logoutTimer);
+      fetch('/keep-alive', {
+        method: 'POST',
+        credentials: 'same-origin'
+      });
+      startTimers();
+    }
+
+    function startTimers() {
+      warningTimer = setTimeout(showWarning, WARNING_MS);
+      logoutTimer = setTimeout(() => {
+        window.location.href = '/logout?timeout=1';
+      }, TIMEOUT_MS);
+    }
+
+    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, resetSessionTimer, { passive: true });
+    });
+
+    startTimers();
+  }
+</script>
+
+
+</body>
+</html>
+
