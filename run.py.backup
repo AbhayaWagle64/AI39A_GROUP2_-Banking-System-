@@ -1,24 +1,21 @@
 """
-E-Paisa Digital Wallet - Complete Fixed Application
-Includes Sprint 1-5 + All Essential Fixes
+E-Paisa Digital Wallet - Complete Application
+Includes Sprint 1-4 (existing) + Sprint 5 (admin, disputes, session timeout)
 Run with: python run.py
 Then open: http://127.0.0.1:5000
 """
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from datetime import datetime, timezone, timedelta
 import random
 import os
-import re
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'e-paisa-secret-key-2024')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///epaisa.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file upload
 
 # Import database after app config
 from database_layer import db, UserProfile, Transaction
@@ -26,43 +23,12 @@ from database_layer import db, UserProfile, Transaction
 # Initialize db with app
 db.init_app(app)
 
-# File upload config
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads', 'avatars')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Create tables
+with app.app_context():
+    db.create_all()
 
 # ==========================================
-# OTP STORAGE (in-memory for demo - use Redis in production)
-# ==========================================
-otp_store = {}  # {email: {'otp': '123456', 'expires': datetime, 'verified': False}}
-
-def generate_otp():
-    return str(random.randint(100000, 999999))
-
-def store_otp(email, otp):
-    otp_store[email] = {
-        'otp': otp,
-        'expires': datetime.now(timezone.utc) + timedelta(minutes=10),
-        'verified': False
-    }
-
-def verify_otp_logic(email, otp_input):
-    if email not in otp_store:
-        return False, "OTP not found. Please request a new one."
-    data = otp_store[email]
-    if datetime.now(timezone.utc) > data['expires']:
-        return False, "OTP expired. Please request a new one."
-    if data['otp'] != otp_input:
-        return False, "Invalid OTP."
-    data['verified'] = True
-    return True, "OTP verified successfully."
-
-# ==========================================
-# ALL ROUTES (must be BEFORE if __name__ block)
+# EXISTING ROUTES (Sprint 1-4)
 # ==========================================
 
 @app.route('/')
@@ -78,10 +44,6 @@ def login():
         password = request.form.get('password', '')
         user = UserProfile.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
-            # Check if OTP verification is required for this user
-            if email in otp_store and not otp_store[email].get('verified', False):
-                session['pending_email'] = email
-                return redirect(url_for('verify_otp'))
             session['user_id'] = user.id
             flash("Login successful!", "success")
             return redirect(url_for('dashboard'))
@@ -91,30 +53,13 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # FIXED: Accept both 'name' and 'fullname' fields
-        name = request.form.get('fullname', '').strip() or request.form.get('name', '').strip()
+        name = request.form.get('fullname', '').strip()
         email = request.form.get('email', '').strip()
         phone = request.form.get('phone', '').strip()
         password = request.form.get('password', '')
-
-        # Validation
-        if not name or len(name) < 2:
-            flash("Full name must be at least 2 characters.", "danger")
-            return redirect(url_for('register'))
-        if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-            flash("Please enter a valid email address.", "danger")
-            return redirect(url_for('register'))
-        if not re.match(r'^(98|97)\d{8}$', phone):
-            flash("Phone must be a valid Nepali number (98/97 + 8 digits).", "danger")
-            return redirect(url_for('register'))
-        if len(password) < 8:
-            flash("Password must be at least 8 characters.", "danger")
-            return redirect(url_for('register'))
-
         if UserProfile.query.filter_by(email=email).first():
             flash("Email already registered.", "danger")
             return redirect(url_for('register'))
-
         user = UserProfile(
             name=name,
             fullname=name,
@@ -127,79 +72,15 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-
-        # Generate and store OTP
-        otp = generate_otp()
-        store_otp(email, otp)
-        session['pending_email'] = email
-
-        # Log OTP (in production, send via email/SMS)
-        print("\n" + "="*60)
-        print("REGISTRATION OTP for " + email + ": " + otp)
-        print("="*60 + "\n")
-
-        flash("Registration successful! Please verify your email.", "success")
-        return redirect(url_for('verify_otp'))
-    return render_template('register.html')
-
-@app.route('/verify-otp', methods=['GET', 'POST'])
-def verify_otp():
-    email = session.get('pending_email')
-    if not email:
+        flash("Registration successful! Please login.", "success")
         return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        # Handle both single field and 6-digit inputs
-        otp_input = request.form.get('otp', '').strip()
-        if not otp_input:
-            # Combine 6 individual digit inputs
-            otp_parts = []
-            for i in range(1, 7):
-                part = request.form.get('otp' + str(i), '')
-                otp_parts.append(part)
-            otp_input = ''.join(otp_parts)
-
-        success, message = verify_otp_logic(email, otp_input)
-        if success:
-            # Mark user as verified
-            user = UserProfile.query.filter_by(email=email).first()
-            if user:
-                user.is_verified = True
-                db.session.commit()
-                session.pop('pending_email', None)
-                session['user_id'] = user.id
-                flash("Email verified! Welcome to E-Paisa.", "success")
-                return redirect(url_for('dashboard'))
-        flash(message, "danger")
-
-    # Get current OTP for display (demo mode)
-    current_otp = otp_store.get(email, {}).get('otp', '------')
-    return render_template('otp_verify.html', otp=current_otp)
-
-@app.route('/resend-otp', methods=['POST'])
-def resend_otp():
-    email = session.get('pending_email')
-    if not email:
-        return jsonify({"error": "No pending verification"}), 400
-
-    otp = generate_otp()
-    store_otp(email, otp)
-
-    print("\n" + "="*60)
-    print("RESEND OTP for " + email + ": " + otp)
-    print("="*60 + "\n")
-
-    return jsonify({"success": True, "otp": otp})
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
     session.clear()
     flash("Logged out successfully.", "success")
     return redirect(url_for('login'))
-
-# ==========================================
-# DASHBOARD & API ROUTES
-# ==========================================
 
 @app.route('/dashboard')
 def dashboard():
@@ -213,199 +94,24 @@ def dashboard():
     transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.timestamp.desc()).limit(10).all()
     return render_template('dashboard.html', user=user, transactions=transactions)
 
-@app.route('/api/user-data')
-def api_user_data():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    user = UserProfile.query.get(session['user_id'])
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.timestamp.desc()).limit(50).all()
-    txn_list = []
-    for t in transactions:
-        txn_list.append({
-            "id": t.id,
-            "type": t.txn_type or t.tx_type,
-            "amount": float(t.amount),
-            "running_balance": float(t.running_balance or 0),
-            "reference": t.reference,
-            "date": t.timestamp.strftime('%Y-%m-%d %H:%M') if t.timestamp else '',
-            "ref": t.reference or 'Unknown',
-            "status": t.status or t.txn_status
-        })
-
-    return jsonify({
-        "id": user.id,
-        "name": user.name or user.fullname,
-        "email": user.email,
-        "phone": user.phone,
-        "balance": float(user.balance or user.wallet_balance or 0),
-        "is_verified": user.is_verified,
-        "avatar": user.avatar or '',
-        "transactions": txn_list
-    })
-
-@app.route('/api/send-money', methods=['POST'])
-def api_send_money():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    user = UserProfile.query.get(session['user_id'])
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    amount = float(request.form.get('amount', 0))
-    phone = request.form.get('phone', '').strip()
-    purpose = request.form.get('purpose', 'Transfer')
-
-    if amount <= 0:
-        return jsonify({"error": "Amount must be positive"}), 400
-    if amount > (user.balance or user.wallet_balance or 0):
-        return jsonify({"error": "Insufficient balance"}), 400
-    if not re.match(r'^(98|97)\d{8}$', phone):
-        return jsonify({"error": "Invalid phone number"}), 400
-
-    # Deduct from sender
-    current_balance = user.balance or user.wallet_balance or 0
-    user.balance = current_balance - amount
-    user.wallet_balance = user.balance
-
-    # Create transaction
-    txn = Transaction(
-        id="TXN-" + str(random.randint(100000, 999999)) + "-SND",
-        user_id=user.id,
-        tx_type='debit',
-        txn_type='debit',
-        amount=amount,
-        running_balance=user.balance,
-        status='success',
-        txn_status='success',
-        reference="Sent to " + phone + " - " + purpose,
-        recipient=phone
-    )
-    db.session.add(txn)
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "transaction_id": txn.id,
-        "new_balance": float(user.balance),
-        "amount": amount,
-        "recipient": phone
-    })
-
-@app.route('/api/load-funds', methods=['POST'])
-def api_load_funds():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    user = UserProfile.query.get(session['user_id'])
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    amount = float(request.form.get('amount', 0))
-    purpose = request.form.get('purpose', 'Wallet Load')
-
-    if amount <= 0:
-        return jsonify({"error": "Amount must be positive"}), 400
-    if amount > 50000:
-        return jsonify({"error": "Maximum load amount is Rs. 50,000"}), 400
-
-    # Add to balance
-    current_balance = user.balance or user.wallet_balance or 0
-    user.balance = current_balance + amount
-    user.wallet_balance = user.balance
-
-    # Create transaction
-    txn = Transaction(
-        id="TXN-" + str(random.randint(100000, 999999)) + "-LOD",
-        user_id=user.id,
-        tx_type='credit',
-        txn_type='credit',
-        amount=amount,
-        running_balance=user.balance,
-        status='success',
-        txn_status='success',
-        reference="Loaded - " + purpose
-    )
-    db.session.add(txn)
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "transaction_id": txn.id,
-        "new_balance": float(user.balance),
-        "amount": amount
-    })
-
-# ==========================================
-# PROFILE & PASSWORD ROUTES
-# ==========================================
-
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route('/profile')
 def profile():
     if 'user_id' not in session:
         flash("Please login first.", "danger")
         return redirect(url_for('login'))
     user = UserProfile.query.get(session['user_id'])
-    if not user:
-        return redirect(url_for('logout'))
-    if request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'update_profile':
-            user.name = request.form.get('name', user.name).strip()
-            user.fullname = user.name
-            user.phone = request.form.get('phone', user.phone).strip()
-            if 'avatar' in request.files:
-                file = request.files['avatar']
-                if file and file.filename != '' and allowed_file(file.filename):
-                    # Check file size
-                    file.seek(0, os.SEEK_END)
-                    file_size = file.tell()
-                    file.seek(0)
-                    if file_size > 5 * 1024 * 1024:
-                        flash("File too large. Max 5MB.", "danger")
-                        return redirect(url_for('profile'))
-                    avatar = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S_') + secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar))
-                    user.avatar = avatar
-                    user.profile_pic_path = avatar
-            db.session.commit()
-            flash("Profile updated.", "success")
-        elif action == 'change_password':
-            current = request.form.get('current_password', '')
-            new_pass = request.form.get('new_password', '')
-            confirm_pass = request.form.get('confirm_password', '')
-
-            if not check_password_hash(user.password, current):
-                flash("Current password incorrect.", "danger")
-            elif len(new_pass) < 8:
-                flash("New password must be 8+ characters.", "danger")
-            elif new_pass != confirm_pass:
-                flash("New password and confirmation do not match.", "danger")
-            else:
-                user.password = generate_password_hash(new_pass)
-                db.session.commit()
-                flash("Password changed.", "success")
-    txn_count = Transaction.query.filter_by(user_id=user.id).count()
-    return render_template('profile.html', user=user, transaction_count=txn_count)
+    return render_template('profile.html', user=user)
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         user = UserProfile.query.filter_by(email=email).first()
         if user:
-            token = generate_otp()
+            token = str(random.randint(100000, 999999))
             session['reset_token'] = token
             session['reset_email'] = email
-            print("="*60)
-            print("RESET CODE FOR " + email + ": " + token)
-            print("="*60)
-            flash("Reset code sent! Check terminal.", "success")
+            flash(f"Reset code: {token}", "success")
         else:
             flash("Email not found.", "danger")
     return render_template('forgot_password.html')
@@ -414,46 +120,17 @@ def forgot_password():
 def reset_password():
     if request.method == 'POST':
         token = request.form.get('token', '').strip()
-        # FIXED: Accept both 'password' and 'new_password' field names
-        password = request.form.get('password', '') or request.form.get('new_password', '')
+        password = request.form.get('password', '')
         if token == session.get('reset_token'):
             user = UserProfile.query.filter_by(email=session.get('reset_email')).first()
             if user:
-                if len(password) < 8:
-                    flash("Password must be at least 8 characters.", "danger")
-                    return render_template('reset_password.html')
                 user.password = generate_password_hash(password)
                 db.session.commit()
                 session.pop('reset_token', None)
-                session.pop('reset_email', None)
-                flash("Password reset successful! Login now.", "success")
+                flash("Password reset successful!", "success")
                 return redirect(url_for('login'))
         flash("Invalid token.", "danger")
     return render_template('reset_password.html')
-
-@app.route('/transaction/<txn_id>')
-def transaction_confirmation(txn_id):
-    if 'user_id' not in session:
-        flash("Login required.", "danger")
-        return redirect(url_for('login'))
-    txn = Transaction.query.filter_by(id=txn_id, user_id=session['user_id']).first()
-    if not txn:
-        flash("Transaction not found.", "danger")
-        return redirect(url_for('dashboard'))
-    # FIXED: Pass individual variables that confirmation.html expects
-    return render_template('confirmation.html', 
-        txn_id=txn.id,
-        txn_type=txn.txn_type or txn.tx_type,
-        amount=txn.amount,
-        recipient=txn.recipient or 'Unknown',
-        date=txn.timestamp.strftime('%Y-%m-%d %H:%M') if txn.timestamp else 'N/A',
-        status=txn.status or txn.txn_status,
-        balance=txn.running_balance or 0
-    )
-
-# ==========================================
-# PAYMENT FEATURE ROUTES
-# ==========================================
 
 @app.route('/mobile-recharge')
 def mobile_recharge():
@@ -494,49 +171,10 @@ def confirmation():
     return render_template('confirmation.html')
 
 # ==========================================
-# REPORT TRANSACTION ROUTE
+# SPRINT 5 ROUTES - ADMIN & DISPUTES
 # ==========================================
 
-@app.route('/report-transaction', methods=['GET', 'POST'])
-def report_transaction():
-    if 'user_id' not in session:
-        flash("Login required.", "danger")
-        return redirect(url_for('login'))
-    user = UserProfile.query.get(session['user_id'])
-    if not user:
-        flash("User not found.", "danger")
-        return redirect(url_for('logout'))
-    if request.method == 'POST':
-        txn_id = request.form.get('txn_id', '').strip()
-        issue_type = request.form.get('issue_type', '').strip()
-        description = request.form.get('description', '').strip()
-        resolution = request.form.get('resolution', 'investigation').strip()
-        if not txn_id or not issue_type or not description:
-            flash("All fields are required.", "danger")
-            return redirect(url_for('report_transaction'))
-        txn = Transaction.query.filter_by(id=txn_id, user_id=user.id).first()
-        if not txn:
-            flash("Transaction not found or does not belong to you.", "danger")
-            return redirect(url_for('report_transaction'))
-        from database_layer import Dispute
-        dispute = Dispute(
-            user_id=user.id,
-            txn_id=txn_id,
-            issue_type=issue_type,
-            description=description,
-            resolution=resolution
-        )
-        db.session.add(dispute)
-        db.session.commit()
-        flash("Report submitted successfully. We will investigate within 24 hours.", "success")
-        return redirect(url_for('report_transaction'))
-    from database_layer import Dispute
-    disputes = Dispute.query.filter_by(user_id=user.id).order_by(Dispute.created_at.desc()).all()
-    return render_template('report_transaction.html', disputes=disputes)
-
-# ==========================================
-# ADMIN ROUTES
-# ==========================================
+# ---------- #26 ADMIN DASHBOARD ----------
 
 @app.route('/admin')
 def admin_dashboard():
@@ -592,6 +230,8 @@ def admin_dashboard():
         chart_users=chart_users,
         now=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
     )
+
+# ---------- #27 USER MANAGEMENT ----------
 
 @app.route('/admin/users')
 def admin_users():
@@ -679,6 +319,8 @@ def admin_delete_user(user_id):
     db.session.commit()
     return jsonify({"success": True})
 
+# ---------- #28 TRANSACTION MONITORING ----------
+
 @app.route('/admin/transactions')
 def admin_transactions():
     if 'user_id' not in session:
@@ -729,6 +371,8 @@ def admin_flag_transaction(txn_id):
     db.session.commit()
     return jsonify({"success": True})
 
+# ---------- #29 REPORT GENERATION ----------
+
 @app.route('/admin/reports')
 def admin_reports():
     if 'user_id' not in session:
@@ -740,15 +384,6 @@ def admin_reports():
         return redirect(url_for('dashboard'))
     return render_template('admin_reports.html')
 
-# FIXED: Added backward-compatible export routes
-@app.route('/admin/export-users')
-def admin_export_users_legacy():
-    return redirect(url_for('admin_export_report', report_type='users'))
-
-@app.route('/admin/export-transactions')
-def admin_export_transactions_legacy():
-    return redirect(url_for('admin_export_report', report_type='transactions'))
-
 @app.route('/admin/export/<report_type>')
 def admin_export_report(report_type):
     if 'user_id' not in session:
@@ -757,73 +392,78 @@ def admin_export_report(report_type):
     to_date = request.args.get('to')
     if report_type == 'users':
         users = UserProfile.query.all()
-        csv_lines = ["ID,Name,Email,Phone,Balance,Verified,Banned,Created"]
+        csv = "ID,Name,Email,Phone,Balance,Verified,Banned,Created\n"
         for u in users:
-            csv_lines.append(",".join([
-                str(u.id),
-                str(u.name or u.fullname or ''),
-                str(u.email or ''),
-                str(u.phone or ''),
-                str(u.balance or u.wallet_balance or 0),
-                str(u.is_verified),
-                str(getattr(u, 'is_banned', False)),
-                str(u.created_at or '')
-            ]))
-        csv = "\n".join(csv_lines)
+            csv += f"{u.id},{u.name or u.fullname},{u.email},{u.phone},{u.balance or u.wallet_balance},{u.is_verified},{getattr(u, 'is_banned', False)},{u.created_at}\n"
         return Response(csv, mimetype='text/csv',
-            headers={"Content-Disposition": "attachment;filename=users_report_" + datetime.now().strftime('%Y%m%d') + ".csv"})
+            headers={"Content-Disposition": f"attachment;filename=users_report_{datetime.now().strftime('%Y%m%d')}.csv"})
     elif report_type == 'transactions':
         txns = Transaction.query.all()
-        csv_lines = ["ID,User,Type,Amount,Status,Reference,Date"]
+        csv = "ID,User,Type,Amount,Status,Reference,Date\n"
         for t in txns:
-            csv_lines.append(",".join([
-                str(t.id or ''),
-                str(t.user_id),
-                str(t.txn_type or t.tx_type or ''),
-                str(t.amount),
-                str(t.status or t.txn_status or ''),
-                str(t.reference or ''),
-                str(t.timestamp or '')
-            ]))
-        csv = "\n".join(csv_lines)
+            csv += f"{t.id},{t.user_id},{t.txn_type or t.tx_type},{t.amount},{t.status or t.txn_status},{t.reference},{t.timestamp}\n"
         return Response(csv, mimetype='text/csv',
-            headers={"Content-Disposition": "attachment;filename=transactions_report_" + datetime.now().strftime('%Y%m%d') + ".csv"})
+            headers={"Content-Disposition": f"attachment;filename=transactions_report_{datetime.now().strftime('%Y%m%d')}.csv"})
     elif report_type == 'revenue':
         txns = Transaction.query.filter(Transaction.txn_type == 'credit').all()
         total = sum(t.amount for t in txns)
-        csv = "Total Revenue,Rs. " + str(round(total, 2)) + "\nTransaction Count," + str(len(txns)) + "\n"
+        csv = f"Total Revenue,Rs. {total:.2f}\nTransaction Count,{len(txns)}\n"
         return Response(csv, mimetype='text/csv',
-            headers={"Content-Disposition": "attachment;filename=revenue_report_" + datetime.now().strftime('%Y%m%d') + ".csv"})
+            headers={"Content-Disposition": f"attachment;filename=revenue_report_{datetime.now().strftime('%Y%m%d')}.csv"})
     elif report_type == 'disputes':
         from database_layer import Dispute
         disputes = Dispute.query.all()
-        csv_lines = ["ID,User,TXN ID,Type,Status,Resolution,Created"]
+        csv = "ID,User,TXN ID,Type,Status,Resolution,Created\n"
         for d in disputes:
-            csv_lines.append(",".join([
-                str(d.id),
-                str(d.user_id),
-                str(d.txn_id or ''),
-                str(d.issue_type or ''),
-                str(d.status or ''),
-                str(d.resolution or ''),
-                str(d.created_at or '')
-            ]))
-        csv = "\n".join(csv_lines)
+            csv += f"{d.id},{d.user_id},{d.txn_id},{d.issue_type},{d.status},{d.resolution},{d.created_at}\n"
         return Response(csv, mimetype='text/csv',
-            headers={"Content-Disposition": "attachment;filename=disputes_report_" + datetime.now().strftime('%Y%m%d') + ".csv"})
+            headers={"Content-Disposition": f"attachment;filename=disputes_report_{datetime.now().strftime('%Y%m%d')}.csv"})
     return jsonify({"error": "Unknown report type"}), 400
 
-# ==========================================
-# SESSION TIMEOUT
-# ==========================================
+# ---------- #30 SESSION TIMEOUT ----------
 
 @app.route('/api/ping', methods=['POST'])
 def ping():
     return jsonify({"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()})
 
-# ==========================================
-# ADMIN DISPUTES
-# ==========================================
+# ---------- #31 REPORT WRONG TRANSACTION ----------
+
+@app.route('/report-transaction', methods=['GET', 'POST'])
+def report_transaction():
+    if 'user_id' not in session:
+        flash("Login required.", "danger")
+        return redirect(url_for('login'))
+    user = UserProfile.query.get(session['user_id'])
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for('logout'))
+    if request.method == 'POST':
+        txn_id = request.form.get('txn_id', '').strip()
+        issue_type = request.form.get('issue_type', '').strip()
+        description = request.form.get('description', '').strip()
+        resolution = request.form.get('resolution', 'investigation').strip()
+        if not txn_id or not issue_type or not description:
+            flash("All fields are required.", "danger")
+            return redirect(url_for('report_transaction'))
+        txn = Transaction.query.filter_by(id=txn_id, user_id=user.id).first()
+        if not txn:
+            flash("Transaction not found or does not belong to you.", "danger")
+            return redirect(url_for('report_transaction'))
+        from database_layer import Dispute
+        dispute = Dispute(
+            user_id=user.id,
+            txn_id=txn_id,
+            issue_type=issue_type,
+            description=description,
+            resolution=resolution
+        )
+        db.session.add(dispute)
+        db.session.commit()
+        flash("Report submitted successfully. We will investigate within 24 hours.", "success")
+        return redirect(url_for('report_transaction'))
+    from database_layer import Dispute
+    disputes = Dispute.query.filter_by(user_id=user.id).order_by(Dispute.created_at.desc()).all()
+    return render_template('report_transaction.html', disputes=disputes)
 
 @app.route('/admin/disputes')
 def admin_disputes():
@@ -877,7 +517,7 @@ def admin_refund_dispute(dispute_id):
             user.balance = (user.balance or user.wallet_balance or 0) + txn.amount
             user.wallet_balance = user.balance
             refund_txn = Transaction(
-                id="TXN-" + str(random.randint(100000, 999999)) + "-REF",
+                id=f"TXN-{random.randint(100000, 999999)}-REF",
                 user_id=user.id,
                 tx_type='credit',
                 txn_type='credit',
@@ -885,7 +525,7 @@ def admin_refund_dispute(dispute_id):
                 running_balance=user.balance,
                 status='success',
                 txn_status='success',
-                reference="Refund: " + str(dispute.txn_id)
+                reference=f"Refund: {dispute.txn_id}"
             )
             db.session.add(refund_txn)
     dispute.status = 'resolved'
@@ -893,8 +533,13 @@ def admin_refund_dispute(dispute_id):
     db.session.commit()
     return jsonify({"success": True})
 
+
+
+
+
+
 # ==========================================
-# MAIN BLOCK (MUST BE LAST)
+# MAIN
 # ==========================================
 
 if __name__ == '__main__':
@@ -917,3 +562,157 @@ if __name__ == '__main__':
             db.session.commit()
             print("Admin user created: admin@epaisa.com / admin123")
     app.run(debug=True, port=5000)
+
+
+
+# ==========================================
+# PASSWORD RESET ROUTES
+# ==========================================
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        user = UserProfile.query.filter_by(email=email).first()
+        if not user:
+            flash("Email not found.", "danger")
+            return render_template('forgot_password.html')
+        reset_code = str(random.randint(100000, 999999))
+        session['reset_email'] = email
+        session['reset_code'] = reset_code
+        print(f"========================================")
+        print(f"RESET CODE FOR {email}: {reset_code}")
+        print(f"========================================")
+        flash("Reset code sent! Check terminal.", "success")
+        return redirect(url_for('reset_password'))
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if 'reset_email' not in session or 'reset_code' not in session:
+        flash("Session expired.", "danger")
+        return redirect(url_for('forgot_password'))
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip()
+        new_password = request.form.get('new_password', '')
+        if code != session.get('reset_code'):
+            flash("Invalid reset code.", "danger")
+            return render_template('reset_password.html')
+        if len(new_password) < 8:
+            flash("Password must be 8+ characters.", "danger")
+            return render_template('reset_password.html')
+        user = UserProfile.query.filter_by(email=session['reset_email']).first()
+        if user:
+            user.set_password(new_password)
+            db.session.commit()
+            session.pop('reset_email', None)
+            session.pop('reset_code', None)
+            flash("Password reset! Login now.", "success")
+            return redirect(url_for('login'))
+    return render_template('reset_password.html', email=session.get('reset_email', ''))
+
+
+# ==========================================
+# PROFILE ROUTE
+# ==========================================
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        flash("Login required.", "danger")
+        return redirect(url_for('login'))
+    user = UserProfile.query.get(session['user_id'])
+    if not user:
+        return redirect(url_for('logout'))
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'update_profile':
+            user.name = request.form.get('name', user.name).strip()
+            user.fullname = user.name
+            user.phone = request.form.get('phone', user.phone).strip()
+            if 'avatar' in request.files:
+                file = request.files['avatar']
+                if file and file.filename != '' and allowed_file(file.filename):
+                    avatar = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S_')}{secure_filename(file.filename)}"
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar))
+                    user.avatar = avatar
+                    user.profile_pic_path = avatar
+            db.session.commit()
+            flash("Profile updated.", "success")
+        elif action == 'change_password':
+            current = request.form.get('current_password', '')
+            new_pass = request.form.get('new_password', '')
+            if not user.check_password(current):
+                flash("Current password incorrect.", "danger")
+            elif len(new_pass) < 8:
+                flash("New password must be 8+ characters.", "danger")
+            else:
+                user.set_password(new_pass)
+                db.session.commit()
+                flash("Password changed.", "success")
+    txn_count = Transaction.query.filter_by(user_id=user.id).count()
+    return render_template('profile.html', user=user, transaction_count=txn_count)
+
+
+# ==========================================
+# TRANSACTION CONFIRMATION ROUTE
+# ==========================================
+
+@app.route('/transaction/<txn_id>')
+def transaction_confirmation(txn_id):
+    if 'user_id' not in session:
+        flash("Login required.", "danger")
+        return redirect(url_for('login'))
+    txn = Transaction.query.filter_by(id=txn_id, user_id=session['user_id']).first()
+    if not txn:
+        flash("Transaction not found.", "danger")
+        return redirect(url_for('dashboard'))
+    return render_template('confirmation.html', txn=txn)
+
+
+# ==========================================
+# ADMIN DASHBOARD ROUTE
+# ==========================================
+
+@app.route('/admin')
+def admin_dashboard():
+    if 'user_id' not in session:
+        flash("Login required.", "danger")
+        return redirect(url_for('login'))
+    user = UserProfile.query.get(session['user_id'])
+    total_users = UserProfile.query.count()
+    total_txns = Transaction.query.count()
+    total_volume = db.session.query(db.func.sum(Transaction.amount)).scalar() or 0
+    verified = UserProfile.query.filter_by(is_verified=True).count()
+    users = UserProfile.query.all()
+    transactions = Transaction.query.order_by(Transaction.timestamp.desc()).limit(50).all()
+    return render_template('admin.html', 
+                         stats={'total_users': total_users, 'total_transactions': total_txns,
+                                'total_volume': total_volume, 'verified_users': verified},
+                         users=users, transactions=transactions, current_user=user)
+
+
+@app.route('/admin/export-users')
+def export_users():
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    users = UserProfile.query.all()
+    csv = "ID,Name,Email,Phone,Balance,Verified,Created\n"
+    for u in users:
+        csv += f"{u.id},{u.name or u.fullname},{u.email},{u.phone},{u.balance or u.wallet_balance},{u.is_verified},{u.created_at}\n"
+    return Response(csv, mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=users.csv'})
+
+
+@app.route('/admin/export-transactions')
+def export_transactions():
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    txns = Transaction.query.order_by(Transaction.timestamp.desc()).all()
+    csv = "ID,User,Type,Amount,Balance,Reference,Date\n"
+    for t in txns:
+        user = UserProfile.query.get(t.user_id)
+        csv += f"{t.id},{user.name if user else 'Unknown'},{t.txn_type or t.tx_type},{t.amount},{t.running_balance},{t.reference},{t.timestamp}\n"
+    return Response(csv, mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=transactions.csv'})
