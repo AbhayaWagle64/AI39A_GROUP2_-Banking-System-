@@ -1,11 +1,23 @@
 from flask import Flask
-import os
+from app.session_manager import configure_session
+
 
 def create_app():
-    app = Flask(__name__)
-    app.secret_key = os.urandom(24)  # Generate a secure secret key for sessions
 
-    from app.routes import main
-    app.register_blueprint(main)
+    app = Flask(
+        __name__,
+        template_folder="templets",
+        static_folder="templets/static"
+    )
+
+    # SECRET KEY (sessions)
+    app.secret_key = "epaisa_secret_key_123"
+
+    # Session timeout setup
+    configure_session(app)
+
+    # Import routes
+    from app.routes import init_routes
+    init_routes(app)
 
     return app
