@@ -8,7 +8,7 @@ def create_database():
     conn = mysql.connector.connect(
         host='localhost',
         user='root',
-        password=''
+        password='admin#abhaya64$'
     )
     cursor = conn.cursor()
 
@@ -70,6 +70,23 @@ def create_database():
         )
     """)
 
+
+    # Story #12 - OTP Verification (Kalyan backend)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS otp_verifications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            otp VARCHAR(6) NOT NULL,
+            amount FLOAT NOT NULL,
+            receiver_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            is_used TINYINT(1) DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (receiver_id) REFERENCES users(id)
+        )
+    """)
+
     conn.commit()
     cursor.close()
     conn.close()
@@ -77,3 +94,5 @@ def create_database():
 
 if __name__ == '__main__':
     create_database()
+
+    
