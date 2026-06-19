@@ -47,7 +47,7 @@ def get_customer_id(username=None):
     customer_id = "EP-10001"
     db = Database()
     if username:
-        result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = %s", (username,))
+        result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = ?", (username,))
         if result:
             db.close()
             if result.get("epaisa_id"):
@@ -71,7 +71,7 @@ def _generate_epaisa_id(phone=None, db=None):
     base = 1001
     if db:
         result = db.fetch_one(
-            "SELECT CAST(SUBSTRING_INDEX(epaisa_id, '-', -1) AS UNSIGNED) AS num FROM register WHERE epaisa_id REGEXP %s ORDER BY num DESC LIMIT 1",
+            "SELECT CAST(SUBSTRING_INDEX(epaisa_id, '-', -1) AS UNSIGNED) AS num FROM register WHERE epaisa_id REGEXP ? ORDER BY num DESC LIMIT 1",
             ("^eP-[0-9]+$",)
         )
         if result and result.get("num"):
@@ -149,7 +149,7 @@ def login():
         reg_data = register_model.find_by_username(username)
         if not reg_data:
             db = Database()
-            results = db.fetch_all("SELECT * FROM register WHERE email = %s", (username,))
+            results = db.fetch_all("SELECT * FROM register WHERE email = ?", (username,))
             db.close()
             if results:
                 reg_data = results[0]
@@ -226,11 +226,11 @@ def register():
         epaisa_id = _generate_epaisa_id(phone=phone, db=db)
         customer_id = f"SB-{phone}" if phone.startswith("98") else f"SB-{10001}"
         db.execute(
-            "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 1000.0, '', 'Savings', '2026-01-01')
         )
         db.execute(
-            "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (?, ?, ?, ?)",
             (username, password_hash, full_name, epaisa_id)
         )
         db.close()

@@ -9,7 +9,7 @@ class AdminModel:
     def find_by_email(self, admin_email):
         db = Database()
         result = db.fetch_one(
-            f"SELECT * FROM {self.table} WHERE admin_email = %s", (admin_email,)
+            f"SELECT * FROM {self.table} WHERE admin_email = ?", (admin_email,)
         )
         db.close()
         return result

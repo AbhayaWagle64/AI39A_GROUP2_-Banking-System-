@@ -43,7 +43,7 @@ def insert_failed_transaction(user, amount, receiver_epaisa_id="", receiver_emai
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db = Database()
     db.execute(
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
         (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status)
     )
     db.close()
@@ -101,7 +101,7 @@ def lookup_user():
     
     db = Database()
     user = db.fetch_one(
-        "SELECT username, epaisa_id FROM register WHERE epaisa_id = %s OR phone = %s OR username = %s",
+        "SELECT username, epaisa_id FROM register WHERE epaisa_id = ? OR phone = ? OR username = ?",
         (epaisa_id, epaisa_id, epaisa_id)
     )
     db.close()
@@ -184,20 +184,20 @@ def profile_management():
  
         db = Database()
         db.execute(
-            "UPDATE register SET full_name=%s, email=%s, phone=%s, address=%s WHERE username=%s",
+            "UPDATE register SET full_name=?, email=?, phone=?, address=? WHERE username=?",
             (full_name, email, phone, address, session.get("user_id"))
         )
         db.execute(
-            "UPDATE login SET full_name=%s WHERE username=%s",
+            "UPDATE login SET full_name=? WHERE username=?",
             (full_name, session.get("user_id"))
         )
         if password:
             db.execute(
-                "UPDATE login SET password=%s WHERE username=%s",
+                "UPDATE login SET password=? WHERE username=?",
                 (generate_password_hash(password), session.get("user_id"))
             )
             db.execute(
-                "UPDATE register SET password=%s WHERE username=%s",
+                "UPDATE register SET password=? WHERE username=?",
                 (generate_password_hash(password), session.get("user_id"))
             )
         db.close()
@@ -275,7 +275,7 @@ def send_money():
  
     db = Database()
     recipient = db.fetch_one(
-        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
+        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = ? OR phone = ?",
         (recipient_epaisa, recipient_epaisa)
     )
     if not recipient:
@@ -406,9 +406,9 @@ def request_otp():
         sent = mailer.send_otp(sender_email, otp, async_send=False)
         if not sent:
             raise RuntimeError("Mailer returned false")
-        logger.info("OTP email sent to %s", sender_email)
+        logger.info("OTP email sent to ?", sender_email)
     except Exception as exc:
-        logger.exception("OTP email failed: %s", exc)
+        logger.exception("OTP email failed: ?", exc)
         _clear_otp_session()
         return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
  
@@ -506,7 +506,7 @@ def verify_otp():
  
     db = Database()
     recipient = db.fetch_one(
-        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
+        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = ? OR phone = ?",
         (recipient_epaisa, recipient_epaisa)
     )
     if not recipient:
@@ -551,15 +551,15 @@ def verify_otp():
  
     sender_balance = sender_balance - amount
     recipient_balance = recipient_balance + amount
-    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
-    db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
+    db.execute("UPDATE register SET balance = ? WHERE username = ?", (sender_balance, user["username"]))
+    db.execute("UPDATE register SET balance = ? WHERE username = ?", (recipient_balance, recipient["username"]))
  
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     receiver_email = recipient.get("email") or ""
     receiver_epaisa_id = recipient.get("epaisa_id") or recipient.get("customer_id") or recipient.get("username") or ""
     db.execute(
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'completed')",
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, 'completed')",
         (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount)
     )
     db.close()
@@ -616,13 +616,13 @@ def merchant_pay():
     sender_balance = sender_balance - amount_val
     db = Database()
     db.execute(
-        "UPDATE register SET balance = %s WHERE username = %s",
+        "UPDATE register SET balance = ? WHERE username = ?",
         (sender_balance, user["username"])
     )
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db.execute(
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'merchant_payment')",
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, 'merchant_payment')",
         (sender_email, sender_epaisa_id, '', merchant, amount_val)
     )
     db.close()
@@ -769,9 +769,9 @@ def request_recharge_otp():
         sent = mailer.send_otp(sender_email, otp, async_send=False)
         if not sent:
             raise RuntimeError("Mailer returned false")
-        logger.info("OTP email sent to %s", sender_email)
+        logger.info("OTP email sent to ?", sender_email)
     except Exception as exc:
-        logger.exception("OTP email failed: %s", exc)
+        logger.exception("OTP email failed: ?", exc)
         _clear_otp_session()
         return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
 
@@ -803,7 +803,7 @@ def verify_recharge_otp():
                 sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
                 db = Database()
                 db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
                     (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
                 )
                 db.close()
@@ -826,7 +826,7 @@ def verify_recharge_otp():
                 sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
                 db = Database()
                 db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
                     (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
                 )
                 db.close()
@@ -858,7 +858,7 @@ def verify_recharge_otp():
                 sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
                 db = Database()
                 db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
                     (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
                 )
                 db.close()
@@ -888,12 +888,12 @@ def verify_recharge_otp():
         return redirect(url_for("user.recharge_failed"))
 
     sender_balance = sender_balance - amount
-    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
+    db.execute("UPDATE register SET balance = ? WHERE username = ?", (sender_balance, user["username"]))
 
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db.execute(
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
         (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge')
     )
     db.close()

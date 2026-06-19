@@ -78,11 +78,11 @@ class UserController:
 
             db = Database()
             db.execute(
-                "UPDATE register SET full_name=%s, email=%s, phone=%s, address=%s WHERE username=%s",
+                "UPDATE register SET full_name=?, email=?, phone=?, address=? WHERE username=?",
                 (full_name, email, phone, address, session.get("user_id"))
             )
             db.execute(
-                "UPDATE login SET full_name=%s WHERE username=%s",
+                "UPDATE login SET full_name=? WHERE username=?",
                 (full_name, session.get("user_id"))
             )
             db.close()
@@ -91,11 +91,11 @@ class UserController:
                 from werkzeug.security import generate_password_hash
                 db = Database()
                 db.execute(
-                    "UPDATE register SET password=%s WHERE username=%s",
+                    "UPDATE register SET password=? WHERE username=?",
                     (generate_password_hash(password), session.get("user_id"))
                 )
                 db.execute(
-                    "UPDATE login SET password=%s WHERE username=%s",
+                    "UPDATE login SET password=? WHERE username=?",
                     (generate_password_hash(password), session.get("user_id"))
                 )
                 db.close()
@@ -104,8 +104,8 @@ class UserController:
             login_data = None
             reg_data = None
             db = Database()
-            login_data = db.fetch_one("SELECT * FROM login WHERE username = %s", (user_id,))
-            reg_data = db.fetch_one("SELECT * FROM register WHERE username = %s", (user_id,))
+            login_data = db.fetch_one("SELECT * FROM login WHERE username = ?", (user_id,))
+            reg_data = db.fetch_one("SELECT * FROM register WHERE username = ?", (user_id,))
             db.close()
 
             updated_user = {

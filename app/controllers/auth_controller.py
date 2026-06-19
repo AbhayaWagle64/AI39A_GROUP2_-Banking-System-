@@ -85,7 +85,7 @@ class AuthController(BaseController):
             reg_data = self.register_model.find_by_username(username)
             if not reg_data:
                 db = Database()
-                results = db.fetch_all("SELECT * FROM register WHERE email = %s", (username,))
+                results = db.fetch_all("SELECT * FROM register WHERE email = ?", (username,))
                 db.close()
                 if results:
                     reg_data = results[0]

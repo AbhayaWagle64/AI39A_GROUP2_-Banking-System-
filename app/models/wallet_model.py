@@ -8,7 +8,7 @@ class WalletModel:
     def create_transaction(self, sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status='completed'):
         db = Database()
         db.execute(
-            "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
             (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status)
         )
         db.close()
@@ -16,7 +16,7 @@ class WalletModel:
     def get_user_balance(self, username):
         db = Database()
         result = db.fetch_one(
-            "SELECT balance FROM register WHERE username = %s", (username,)
+            "SELECT balance FROM register WHERE username = ?", (username,)
         )
         db.close()
         if result:
@@ -26,7 +26,7 @@ class WalletModel:
     def update_user_balance(self, username, new_balance):
         db = Database()
         db.execute(
-            "UPDATE register SET balance = %s WHERE username = %s",
+            "UPDATE register SET balance = ? WHERE username = ?",
             (str(new_balance), username)
         )
         db.close()
@@ -34,7 +34,7 @@ class WalletModel:
     def get_user_by_customer_id(self, customer_id):
         db = Database()
         result = db.fetch_one(
-            "SELECT username, email FROM register WHERE epaisa_id = %s OR phone = %s OR username = %s OR email = %s",
+            "SELECT username, email FROM register WHERE epaisa_id = ? OR phone = ? OR username = ? OR email = ?",
             (customer_id, customer_id, customer_id, customer_id)
         )
         db.close()
@@ -43,7 +43,7 @@ class WalletModel:
     def get_user_by_username(self, username):
         db = Database()
         result = db.fetch_one(
-            "SELECT * FROM register WHERE username = %s", (username,)
+            "SELECT * FROM register WHERE username = ?", (username,)
         )
         db.close()
         return result
@@ -51,7 +51,7 @@ class WalletModel:
     def get_all_transactions(self, username):
         db = Database()
         results = db.fetch_all(
-            "SELECT * FROM transactions WHERE sender_email = (SELECT email FROM register WHERE username = %s) OR receiver_email = (SELECT email FROM register WHERE username = %s) ORDER BY transaction_date DESC",
+            "SELECT * FROM transactions WHERE sender_email = (SELECT email FROM register WHERE username = ?) OR receiver_email = (SELECT email FROM register WHERE username = ?) ORDER BY transaction_date DESC",
             (username, username)
         )
         db.close()
@@ -60,7 +60,7 @@ class WalletModel:
     def get_transaction_count(self, username):
         db = Database()
         result = db.fetch_one(
-            "SELECT COUNT(*) AS total FROM transactions WHERE sender_email = (SELECT email FROM register WHERE username = %s) OR receiver_email = (SELECT email FROM register WHERE username = %s)",
+            "SELECT COUNT(*) AS total FROM transactions WHERE sender_email = (SELECT email FROM register WHERE username = ?) OR receiver_email = (SELECT email FROM register WHERE username = ?)",
             (username, username)
         )
         db.close()
