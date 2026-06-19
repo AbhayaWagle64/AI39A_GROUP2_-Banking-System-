@@ -1,0 +1,9 @@
+{% extends "wallet/result.html" %}
+
+{% set status = "failed" %}
+{% set title = "Transaction Failed" %}
+{% set subtitle = "The transaction could not be completed. Please try again." %}
+
+{% block content %}
+{{ super() }}
+{% endblock %}

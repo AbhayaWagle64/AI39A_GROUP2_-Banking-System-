@@ -1,52 +1,27 @@
-from app.database import get_connection
+from app.models.base_model import BaseModel
 
 
-class User:
+class User(BaseModel):
+    def __init__(self, db, username=None, password=None, full_name=None, 
+                 email=None, phone=None, address=None, account_type='Savings', date_joined=None):
+        super().__init__(db)
+        self.username = username
+        self.password = password
+        self.full_name = full_name
+        self.email = email
+        self.phone = phone
+        self.address = address
+        self.account_type = account_type
+        self.date_joined = date_joined
 
-    @staticmethod
-    def create(
-        wallet_id,
-        name,
-        phone,
-        email,
-        password
-    ):
-
-        conn = get_connection()
-
-        cursor = conn.cursor()
-
-        cursor.execute("""
-        INSERT INTO users(
-        wallet_id,
-        name,
-        phone,
-        email,
-        password
-        )
-        VALUES(?,?,?,?,?)
-        """,
-        (
-            wallet_id,
-            name,
-            phone,
-            email,
-            password
-        ))
-
-        conn.commit()
-        conn.close()
-
-    @staticmethod
-    def get_by_phone(phone):
-
-        conn = get_connection()
-
-        user = conn.execute(
-            "SELECT * FROM users WHERE phone=?",
-            (phone,)
-        ).fetchone()
-
-        conn.close()
-
-        return user
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'password': self.password,
+            'full_name': self.full_name,
+            'email': self.email,
+            'phone': self.phone,
+            'address': self.address,
+            'account_type': self.account_type,
+            'date_joined': self.date_joined
+        }

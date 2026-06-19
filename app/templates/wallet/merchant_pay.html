@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Merchant Pay — ePaisa{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+<style>
+    .merchant-pay-wrap { padding:24px 0; }
+    .merchant-header { margin-bottom:24px; }
+    .merchant-header h1 { font-size:28px; font-weight:700; color:var(--text-primary); margin:0 0 6px; }
+    .merchant-badge { display:inline-flex; align-items:center; gap:8px; background:var(--green-100); color:var(--green-700); padding:6px 14px; border-radius:var(--radius-full); font-size:14px; font-weight:600; }
+    .merchant-pay-card { max-width:480px; margin:0 auto; }
+    .merchant-logo { width:60px; height:60px; border-radius:12px; background:var(--green-50); display:flex; align-items:center; justify-content:center; font-size:32px; margin-right:16px; }
+    .merchant-info { display:flex; align-items:center; padding:20px 0; border-bottom:1px solid var(--border-subtle); }
+    .merchant-details h3 { margin:0; font-size:18px; font-weight:600; color:var(--text-primary); }
+    .merchant-details p { margin:4px 0 0; font-size:13px; color:var(--text-secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-wrap merchant-pay-wrap">
+    <div class="wallet-header merchant-header">
+        <h1>Merchant Payment</h1>
+        <span class="merchant-badge">{{ merchant_name }}</span>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="card balance-card" style="margin-bottom:24px;">
+        <div class="balance-row">
+            <div>
+                <span class="balance-label">Available Balance</span>
+                <div class="balance-pill">₹ {{ "{:,.2f}".format(user.balance) }}</div>
+            </div>
+            <div class="balance-icon">💳</div>
+        </div>
+    </div>
+
+    <!-- Merchant Info -->
+    <div class="card merchant-pay-card">
+        <div class="merchant-info">
+            <div class="merchant-logo" id="merchantLogo">🛒</div>
+            <div class="merchant-details">
+                <h3 id="merchantTitle">{{ merchant_name }}</h3>
+                <p>Online Shopping Platform</p>
+            </div>
+        </div>
+        <form id="merchantPayForm" style="margin-top:24px;">
+            <div class="form-group">
+                <label for="merchantAmount">Amount (₹)</label>
+                <input type="number" id="merchantAmount" class="input" placeholder="0.00" min="10" step="1" required>
+            </div>
+            <div class="form-group">
+                <label for="merchantRef">Order Reference (Optional)</label>
+                <input type="text" id="merchantRef" class="input" placeholder="Enter order ID or reference">
+            </div>
+            <div class="form-actions" style="margin-top:24px;">
+                <button type="submit" class="btn btn-primary">Pay Now</button>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary" style="margin-left:12px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:420px;">
+        <div style="text-align:center; margin-bottom:16px;">
+            <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Confirm Payment</h3>
+            <p id="confirmMessage" style="font-size:14px; color:var(--text-secondary); margin:0;">Are you sure you want to pay ₹ <span id="confirmAmount"></span> to {{ merchant_name }}?</p>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <button id="confirmYes" class="btn btn-primary" style="background:var(--green-600);">Yes, Pay</button>
+            <button id="confirmNo" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const merchantLogos = {
+        'Amazon': '🛒',
+        'Flipkart': '🛍️',
+        'Daraz': '📦',
+        'eBay': '🏪',
+        'AliExpress': '🛒'
+    };
+    const merchant = "{{ merchant_name }}";
+    document.getElementById("merchantLogo").textContent = merchantLogos[merchant] || '🏪';
+
+    const form = document.getElementById("merchantPayForm");
+    const amountInput = document.getElementById("merchantAmount");
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmAmount = document.getElementById("confirmAmount");
+    const confirmYes = document.getElementById("confirmYes");
+    const confirmNo = document.getElementById("confirmNo");
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const amount = amountInput.value;
+        if (!amount || amount < 10) return;
+        confirmAmount.textContent = amount;
+        confirmModal.classList.add("active");
+    });
+
+    confirmNo.addEventListener("click", () => {
+        confirmModal.classList.remove("active");
+    });
+
+    confirmModal.addEventListener("click", (e) => {
+        if (e.target === confirmModal) {
+            confirmModal.classList.remove("active");
+        }
+    });
+
+    confirmYes.addEventListener("click", () => {
+        const amount = amountInput.value;
+        fetch("/api/merchant-pay", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ merchant: merchant, amount: parseFloat(amount) })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                alert(data.message || "Payment failed");
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

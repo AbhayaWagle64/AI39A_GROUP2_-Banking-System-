@@ -1,23 +1,38 @@
 from flask import Flask
-from app.session_manager import configure_session
+from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
 
 
 def create_app():
+    app = Flask(__name__)
 
-    app = Flask(
-        __name__,
-        template_folder="templets",
-        static_folder="templets/static"
-    )
+    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+    app.config["ALLOWED_EXTENSIONS"] = ALLOWED_EXTENSIONS
+    app.config["MYSQL_HOST"] = MYSQL_HOST
+    app.config["MYSQL_USER"] = MYSQL_USER
+    app.config["MYSQL_PASSWORD"] = MYSQL_PASSWORD
+    app.config["MYSQL_DATABASE"] = MYSQL_DATABASE
+    app.config["MAIL_SERVER"] = MAIL_SERVER
+    app.config["MAIL_PORT"] = MAIL_PORT
+    app.config["MAIL_USE_TLS"] = MAIL_USE_TLS
+    app.config["MAIL_USERNAME"] = MAIL_USERNAME
+    app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
+    app.config["MAIL_DEFAULT_SENDER"] = MAIL_DEFAULT_SENDER
 
-    # SECRET KEY (sessions)
-    app.secret_key = "epaisa_secret_key_123"
+    from app.database import Database
+    from app.routes.auth_routes import main as auth_bp
+    from app.routes.user_routes import main as user_bp
+    from app.routes.admin_routes import main as admin_bp
+    from app.utils.mailer import Mailer
 
-    # Session timeout setup
-    configure_session(app)
+    with app.app_context():
+        Database.create_tables()
 
-    # Import routes
-    from app.routes import init_routes
-    init_routes(app)
+    mailer = Mailer(app)
+    app.mailer = mailer
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(admin_bp)
 
     return app
