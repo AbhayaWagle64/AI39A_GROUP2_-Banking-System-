@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.register_model import RegisterModel
 from app.models.login_model import LoginModel
 from app.models.wallet_model import WalletModel
+from app.models.admin_model import AdminModel
 from app.database import Database
 
 main = Blueprint("auth", __name__)
@@ -13,6 +14,7 @@ main = Blueprint("auth", __name__)
 register_model = RegisterModel()
 login_model = LoginModel()
 wallet_model = WalletModel()
+admin_model = AdminModel()
 
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -123,6 +125,14 @@ def login():
         if not username or not password:
             flash('Username/email and password are required.', 'danger')
             return render_template("login.html")
+
+        admin = admin_model.find_by_email(username)
+        if admin and check_password_hash(admin['password'], password):
+            session['user_id'] = username
+            session['is_admin'] = True
+            session['admin_email'] = username
+            flash('Admin login successful!', 'success')
+            return redirect(url_for('admin.admin_dashboard'))
 
         login_data = login_model.find_by_username(username)
         if login_data:

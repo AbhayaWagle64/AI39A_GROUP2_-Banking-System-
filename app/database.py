@@ -39,6 +39,13 @@ class Database:
     def create_tables():
         db = Database()
         db.execute("""
+            CREATE TABLE IF NOT EXISTS administration (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                admin_email VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL
+            )
+        """)
+        db.execute("""
             CREATE TABLE IF NOT EXISTS register (
                 username VARCHAR(100) PRIMARY KEY,
                 password VARCHAR(255) NOT NULL,
@@ -73,6 +80,16 @@ class Database:
                 status VARCHAR(20) DEFAULT 'completed'
             )
         """)
+
+        # Insert default admin users
+        from werkzeug.security import generate_password_hash
+        for admin_email, admin_password in [('admin@admin.com', 'Admin#AW64'), ('admin1@admin.com', 'Admin1#AW64')]:
+            existing = db.fetch_one("SELECT * FROM administration WHERE admin_email = %s", (admin_email,))
+            if not existing:
+                db.execute(
+                    "INSERT INTO administration (admin_email, password) VALUES (%s, %s)",
+                    (admin_email, generate_password_hash(admin_password))
+                )
 
         def add_column_if_missing(table, col, col_def):
             cols = db.fetch_all(f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name='{table}' AND table_schema=DATABASE()")

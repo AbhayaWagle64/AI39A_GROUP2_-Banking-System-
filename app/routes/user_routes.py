@@ -33,6 +33,20 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
  
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def insert_failed_transaction(user, amount, receiver_epaisa_id="", receiver_email="", status="failed"):
+    if not user:
+        return
+
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    db = Database()
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status)
+    )
+    db.close()
  
  
 def get_current_user():
@@ -328,18 +342,8 @@ def transactions():
     user = get_current_user()
     rows = wallet_model.get_all_transactions(user["username"] if user else "")
     return render_template("transactions.html", user=user, rows=rows)
- 
- 
-@main.route("/admin/users")
-@login_required
-def admin_users():
-    user = get_current_user()
-    db = Database()
-    users = db.fetch_all("SELECT * FROM register ORDER BY email")
-    db.close()
-    return render_template("user_management.html", user=user, users=users)
- 
- 
+
+
 @main.route("/verify-otp")
 @main.route("/verify-otp/<error>")
 @login_required
@@ -425,6 +429,17 @@ def verify_otp():
     else:
         code = (request.form.get("otp") or "").strip()
     if not code or len(code) != 6 or not code.isdigit():
+        pending = session.get("pending_transaction")
+        if pending:
+            user = get_current_user()
+            if user:
+                insert_failed_transaction(
+                    user,
+                    float(pending.get("amount", 0)),
+                    pending.get("recipient_epaisa", ""),
+                    "",
+                    "failed_otp"
+                )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
@@ -433,12 +448,45 @@ def verify_otp():
     attempts = int(session.get("otp_attempts", 0) or 0) + 1
     session["otp_attempts"] = attempts
     if attempts >= 5:
+        pending = session.get("pending_transaction")
+        if pending:
+            user = get_current_user()
+            if user:
+                insert_failed_transaction(
+                    user,
+                    float(pending.get("amount", 0)),
+                    pending.get("recipient_epaisa", ""),
+                    "",
+                    "failed_otp"
+                )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
     if not stored_otp or stored_otp != code:
+        pending = session.get("pending_transaction")
+        if pending:
+            user = get_current_user()
+            if user:
+                insert_failed_transaction(
+                    user,
+                    float(pending.get("amount", 0)),
+                    pending.get("recipient_epaisa", ""),
+                    "",
+                    "failed_otp"
+                )
         return redirect(url_for("user.verify_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
+        pending = session.get("pending_transaction")
+        if pending:
+            user = get_current_user()
+            if user:
+                insert_failed_transaction(
+                    user,
+                    float(pending.get("amount", 0)),
+                    pending.get("recipient_epaisa", ""),
+                    "",
+                    "failed_otp"
+                )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
@@ -462,11 +510,27 @@ def verify_otp():
         (recipient_epaisa, recipient_epaisa)
     )
     if not recipient:
+        user = get_current_user()
+        if user:
+            insert_failed_transaction(
+                user,
+                amount,
+                recipient_epaisa,
+                "",
+                "failed"
+            )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
  
     if recipient["username"] == user["username"]:
+        insert_failed_transaction(
+            user,
+            amount,
+            recipient_epaisa,
+            recipient.get("email") or "",
+            "failed"
+        )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
@@ -474,6 +538,13 @@ def verify_otp():
     recipient_balance = float(recipient.get("balance", 0) or 0)
     sender_balance = float(user.get("balance", 0) or 0)
     if sender_balance < amount:
+        insert_failed_transaction(
+            user,
+            amount,
+            recipient_epaisa,
+            recipient.get("email") or "",
+            "failed"
+        )
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
@@ -763,6 +834,17 @@ def verify_recharge_otp():
         session.pop("pending_recharge", None)
         return redirect(url_for("user.recharge_failed"))
     if not stored_otp or stored_otp != code:
+        pending = session.get("pending_recharge")
+        if pending:
+            user = get_current_user()
+            if user:
+                insert_failed_transaction(
+                    user,
+                    float(pending.get("amount", 0)),
+                    '',
+                    f"{pending.get('operator', '')} - {pending.get('phone', '')}",
+                    "failed_otp"
+                )
         return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
         pending = session.get("pending_recharge")
