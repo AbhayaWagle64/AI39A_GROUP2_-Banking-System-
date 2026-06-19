@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Wallet — ePaisa{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+<style>
+  .card-result {
+    text-align: center;
+    padding: 32px 24px;
+    max-width: 480px;
+    margin: 40px auto;
+  }
+  .result-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  .result-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0d4a2a;
+    margin-bottom: 10px;
+  }
+  .result-text {
+    color: #4b5563;
+    font-size: 15px;
+    margin-bottom: 22px;
+  }
+  .result-meta {
+    background: #f3f6f4;
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    margin-bottom: 22px;
+    font-size: 14px;
+    color: #374151;
+  }
+  .result-meta div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .result-meta div + div {
+    margin-top: 8px;
+  }
+  .result-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-wrap">
+  <div class="card-result">
+    <div class="result-icon">{{ '✅' if status == 'success' else '❌' }}</div>
+    <div class="result-title">{{ title }}</div>
+    <div class="result-text">{{ subtitle }}</div>
+    {% if pending %}
+    <div class="result-meta">
+      {% if pending and pending.get('phone') %}
+      <div><span>Phone</span><span>{{ pending.phone or '—' }}</span></div>
+      <div><span>Operator</span><span>{{ pending.operator or '—' }}</span></div>
+      <div><span>Amount</span><span>₹ {{ "{:,.2f}".format(pending.amount) if pending.amount else '0.00' }}</span></div>
+      {% else %}
+      <div><span>To</span><span>{{ pending.recipient_name or pending.recipient_epaisa or '—' }}</span></div>
+      <div><span>Amount</span><span>₹ {{ "{:,.2f}".format(pending.amount) if pending.amount else '0.00' }}</span></div>
+      <div><span>Recipient</span><span>{{ pending.recipient_epaisa or '—' }}</span></div>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div class="result-footer">
+      <a href="{{ url_for('user.transactions') }}" class="btn btn-primary">View Transactions</a>
+      <a href="{% if pending and pending.get('phone') %}{{ url_for('user.dashboard') }}{% else %}{{ url_for('user.wallet') }}{% endif %}" class="btn btn-secondary">{% if pending and pending.get('phone') %}Back to Dashboard{% else %}Back to Wallet{% endif %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

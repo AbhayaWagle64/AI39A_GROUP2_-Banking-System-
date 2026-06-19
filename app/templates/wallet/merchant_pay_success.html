@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful — ePaisa{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+<style>
+    .success-wrap { text-align:center; padding:60px 20px; max-width:480px; margin:0 auto; }
+    .success-icon { font-size:64px; margin-bottom:20px; }
+    .success-title { font-size:24px; font-weight:700; color:var(--text-primary); margin:0 0 12px; }
+    .success-message { font-size:15px; color:var(--text-secondary); margin:0 0 24px; line-height:1.6; }
+    .success-details { background:var(--surface-card); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px; text-align:left; }
+    .success-details .detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-subtle); font-size:14px; }
+    .success-details .detail-row:last-child { border-bottom:none; }
+    .success-details .label { color:var(--text-secondary); }
+    .success-details .value { font-weight:600; color:var(--text-primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-wrap">
+    <div class="success-icon">✅</div>
+    <h2 class="success-title">Payment Successful!</h2>
+    <p class="success-message">Your payment to {{ payment.merchant if payment else 'Merchant' }} has been processed successfully.</p>
+    
+    {% if payment %}
+    <div class="success-details">
+        <div class="detail-row">
+            <span class="label">Merchant</span>
+            <span class="value">{{ payment.merchant }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Amount Paid</span>
+            <span class="value">₹ {{ "{:,.2f}".format(payment.amount) }}</span>
+        </div>
+    </div>
+    {% endif %}
+    
+    <a href="{{ url_for('user.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+{% endblock %}

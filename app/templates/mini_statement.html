@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Statement - ePaisa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+
+    .container { max-width: 700px; margin: 0 auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header h2 { font-size: 20px; color: #333; }
+    .back-link {
+      font-size: 13px;
+      color: #4CAF50;
+      text-decoration: none;
+    }
+
+    /* FLASH MESSAGES */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .alert-danger  { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .alert button  { background: none; border: none; font-size: 18px; cursor: pointer; color: inherit; }
+
+    /* BALANCE CARD */
+    .balance-card {
+      background: #4CAF50;
+      color: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .balance-card p { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+    .balance-card h2 { font-size: 28px; font-weight: bold; }
+
+    /* STATEMENT CARD */
+    .statement-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #eee;
+      overflow: hidden;
+    }
+
+    .statement-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .statement-header h3 { font-size: 15px; color: #333; font-weight: 600; }
+    .statement-header span { font-size: 12px; color: #999; }
+
+    /* TRANSACTION ITEM */
+    .tx-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-item:hover { background: #f9f9f9; }
+
+    .tx-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .tx-icon.credit { background: #d4edda; color: #155724; }
+    .tx-icon.debit  { background: #f8d7da; color: #721c24; }
+
+    .tx-info { flex: 1; }
+    .tx-title { font-size: 14px; color: #333; font-weight: 500; margin-bottom: 3px; }
+    .tx-date  { font-size: 12px; color: #999; }
+
+    .tx-amount { font-size: 15px; font-weight: 600; }
+    .tx-amount.credit { color: #4CAF50; }
+    .tx-amount.debit  { color: #f44336; }
+
+    /* NO TRANSACTIONS */
+    .no-tx {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-size: 14px;
+    }
+    .no-tx .icon { font-size: 40px; margin-bottom: 10px; }
+
+    /* DOWNLOAD BUTTON */
+    .btn-download {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      padding: 12px;
+      background: white;
+      border: 1px solid #4CAF50;
+      color: #4CAF50;
+      border-radius: 8px;
+      font-size: 14px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .btn-download:hover { background: #f0fff0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h2>📋 Mini Statement</h2>
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- BALANCE -->
+    <div class="balance-card">
+      <p>Current Balance</p>
+      <h2>Rs. {{ balance if balance else '1,000.00' }}</h2>
+    </div>
+
+    <!-- TRANSACTIONS LIST -->
+    <div class="statement-card">
+      <div class="statement-header">
+        <h3>Last 10 Transactions</h3>
+        <span>Most recent first</span>
+      </div>
+
+      {% if transactions %}
+        {% for tx in transactions %}
+        <a href="/transaction/{{ tx.id }}" class="tx-item">
+          <div class="tx-icon {{ tx.type }}">
+            {% if tx.type == 'credit' %}➕{% else %}➖{% endif %}
+          </div>
+          <div class="tx-info">
+            <div class="tx-title">{{ tx.title }}</div>
+            <div class="tx-date">{{ tx.date }}</div>
+          </div>
+          <div class="tx-amount {{ tx.type }}">
+            {% if tx.type == 'credit' %}+{% else %}-{% endif %}
+            Rs. {{ tx.amount }}
+          </div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="no-tx">
+          <div class="icon">📭</div>
+          No recent transactions found.
+        </div>
+      {% endif %}
+    </div>
+
+    <a href="/dashboard" class="btn-download">⬇ Download Full Statement</a>
+
+  </div>
+</body>
+</html>

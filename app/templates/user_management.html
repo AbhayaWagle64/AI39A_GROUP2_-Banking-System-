@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+User Management — ePaisa
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-wrap" style="padding:24px;">
+
+    <h1 class="dashboard-title" style="margin:0 0 16px;">User Management</h1>
+    <p style="color:var(--text-secondary); margin-bottom:24px;">View all registered users</p>
+
+    <div class="card" style="max-width:1000px;">
+        <h3 style="margin:0 0 16px; font-size:18px;">All Users</h3>
+        <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <thead>
+                <tr style="background:#f8fafc; text-align:left; border-bottom:2px solid #e2e8f0;">
+                    <th style="padding:10px 12px;">#</th>
+                    <th style="padding:10px 12px;">Username</th>
+                    <th style="padding:10px 12px;">Full Name</th>
+                    <th style="padding:10px 12px;">Email</th>
+                    <th style="padding:10px 12px;">Phone</th>
+                    <th style="padding:10px 12px;">ePaisa ID</th>
+                    <th style="padding:10px 12px;">Balance (₹)</th>
+                    <th style="padding:10px 12px;">Account Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                    {% for u in users %}
+                        <tr style="border-bottom:1px solid #e2e8f0;">
+                            <td style="padding:10px 12px;">{{ loop.index }}</td>
+                            <td style="padding:10px 12px;">{{ u.username or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ u.full_name or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ u.email or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ u.phone or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ u.epaisa_id or '-' }}</td>
+                            <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(u.balance) if u.balance else '0.00' }}</td>
+                            <td style="padding:10px 12px;">{{ u.account_type or 'Savings' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="padding:20px 12px; text-align:center; color:#64748b;">No users found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
