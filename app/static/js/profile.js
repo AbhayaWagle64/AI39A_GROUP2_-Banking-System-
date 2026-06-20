@@ -9,5 +9,4 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/profile-management";
         });
     }
-
 });
