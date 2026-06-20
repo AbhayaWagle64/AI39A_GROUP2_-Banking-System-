@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d4a2a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="ePaisa — Your Smart Digital Wallet">
+
+    <title>
+        {% block title %}
+            ePaisa
+        {% endblock %}
+    </title>
+
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.svg') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <span class="logo-text">ePaisa</span>
+
+        <ul class="nav-links">
+
+            <li>
+<a href="{{ url_for('user.home') }}"
+                class="{% if request.path == '/' %}active{% endif %}">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('user.profile') }}"
+                class="{% if request.path == '/profile' %}active{% endif %}">
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="/wallet"
+                data-route="user.wallet"
+                class="{% if request.endpoint == 'user.wallet' %}active{% endif %}">
+                    Wallet
+                </a>
+            </li>
+
+            <li>
+                <a href="/transactions"
+                data-route="user.transactions"
+                class="{% if request.endpoint == 'user.transactions' %}active{% endif %}">
+                    Transactions
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('bill_payment.bill_payment') }}"
+                class="{% if request.endpoint == 'bill_payment.bill_payment' %}active{% endif %}">
+                    Pay Bills
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('report.reports') }}"
+                class="{% if request.endpoint == 'report.reports' %}active{% endif %}">
+                    Reports
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('notification.notifications') }}"
+                class="{% if request.endpoint == 'notification.notifications' %}active{% endif %}">
+                    Notifications
+                    <span id="notificationBadge" class="notification-badge" style="display:none;"></span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="logout-link">Logout</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <main class="page-enter">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <div class="mobile-nav">
+
+        <div class="mobile-nav-inner">
+
+            <a href="{{ url_for('user.home') }}"
+            class="mobile-nav-item {% if request.path == '/' %}active{% endif %}">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+
+            <a href="{{ url_for('user.profile') }}"
+            class="mobile-nav-item {% if request.path == '/profile' %}active{% endif %}">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+
+            <a href="/wallet"
+            class="mobile-nav-item {% if '/wallet' in request.path %}active{% endif %}">
+                <span class="nav-icon">💳</span>
+                <span>Wallet</span>
+            </a>
+
+            <a href="/transactions"
+            class="mobile-nav-item {% if '/transactions' in request.path %}active{% endif %}">
+                <span class="nav-icon">📊</span>
+                <span>History</span>
+            </a>
+
+            <a href="#" class="mobile-nav-item logout-link">
+                <span class="nav-icon">🚪</span>
+                <span>Exit</span>
+            </a>
+
+        </div>
+
+    </div>
+
+    <script
+    src="{{ url_for('static', filename='js/style.js') }}">
+    </script>
+
+    {% if session.get('user_id') %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
+
+    {% block js %}
+    {% endblock %}
+
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Are you sure you want to logout?</h3>
+            <p class="modal-subtitle">You will be redirected to the login page and your session will be closed.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modalCancel">No, Stay</button>
+                <form id="logoutForm" action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-confirm">Yes, Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
