@@ -23,13 +23,13 @@
     background:#60a5fa;
 }
 
-/* ── DELETE MODAL ICON ──────────────────── */
+/* ── DELETE MODEL ──────────────────── */
 #deleteModal .modal-icon{
     background:#fee;
     color:#dc2626;
 }
 
-/* ── FORM STYLES ──────────────────── */
+/* ──  STYLES ──────────────────── */
 .form-group{
     margin-bottom:16px;
 }
@@ -47,17 +47,19 @@
     gap:12px;
 }
 
-/* ── BUTTONS ──────────────────── */
+/* ── BUTTOME ──────────────────── */
 .btn-danger{
     background:#dc2626;
     color:white;
 }
 
+
 .btn-danger:hover{
     background:#b91c1c;
 }
 
-/* ── RESPONSIVE ──────────────────── */
+
+/* ── RESPONSIVE ────────────── */
 @media(max-width:768px){
     .admin-navbar{
         background:#1e40af;
