@@ -23,7 +23,7 @@
       border: 1px solid #eee;
       text-align: center;
     }
-
+/* icon */
     .icon {
       font-size: 50px;
       margin-bottom: 16px;
@@ -52,7 +52,7 @@
     .amount-box p { font-size: 13px; color: #555; margin-bottom: 4px; }
     .amount-box h3 { font-size: 24px; color: #4CAF50; font-weight: bold; }
 
-    /* FLASH MESSAGES */
+    /*flash masage */
     .alert {
       padding: 10px 14px;
       border-radius: 8px;
@@ -67,7 +67,7 @@
     .alert-danger  { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
     .alert button  { background: none; border: none; font-size: 18px; cursor: pointer; color: inherit; }
 
-    /* OTP INPUT */
+    /* otp input */
     .otp-inputs {
       display: flex;
       gap: 10px;
@@ -105,6 +105,8 @@
     }
     .btn-verify:hover { background: #45a049; }
 
+
+/* resend */
     .resend-row {
       font-size: 13px;
       color: #888;
@@ -114,7 +116,7 @@
       text-decoration: none;
       font-weight: 500;
     }
-
+/* time */
     .timer {
       font-size: 13px;
       color: #f44336;
@@ -141,7 +143,7 @@
       mobile number or email. Please enter it below.
     </p>
 
-    <!-- TRANSACTION AMOUNT -->
+    <!-- transaction amount -->
     <div class="amount-box">
       <p>Transaction Amount</p>
       <h3>Rs. {{ amount if amount else '0.00' }}</h3>
@@ -159,7 +161,7 @@
       {% endif %}
     {% endwith %}
 
-    <!-- OTP FORM -->
+    <!-- otp form -->
     <form method="POST" action="/verify-transaction-otp" id="otpForm">
       <div class="otp-inputs">
         <input type="text" maxlength="1" class="otp-box" id="otp1" autofocus>
