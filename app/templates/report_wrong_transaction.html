@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}
+Report Wrong Transaction
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+      filename='css/report_transaction.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="report-container">
+
+    <div class="report-card">
+
+        <h2>
+            Report Wrong Transaction
+        </h2>
+
+        {% with messages =
+        get_flashed_messages(with_categories=true) %}
+        {% for cat,msg in messages %}
+
+        <div class="alert alert-{{ cat }}">
+            {{ msg }}
+        </div>
+
+        {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label>
+                    Transaction ID
+                </label>
+
+                <input
+                    type="number"
+                    name="transaction_id"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Reason
+                </label>
+
+                <select
+                    name="reason"
+                    required>
+
+                    <option value="">
+                        Select Reason
+                    </option>
+
+                    <option value="Wrong Amount">
+                        Wrong Amount
+                    </option>
+
+                    <option value="Wrong Receiver">
+                        Wrong Receiver
+                    </option>
+
+                    <option value="Duplicate Transaction">
+                        Duplicate Transaction
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Description
+                </label>
+
+                <textarea
+                    name="description"
+                    rows="5"></textarea>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-submit">
+
+                Submit Report
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static',
+filename='js/report_transaction.js') }}"></script>
+{% endblock %}
