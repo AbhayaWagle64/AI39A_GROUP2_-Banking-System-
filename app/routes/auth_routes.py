@@ -66,7 +66,6 @@ def get_customer_id(username=None):
         customer_id = f"EP-{10001 + result['total']}"
     return customer_id
 
-
 def _generate_epaisa_id(phone=None, db=None):
     if phone and phone.startswith("98") and len(phone) >= 10:
         return f"eP-{phone}"
