@@ -1,7 +1,7 @@
 import re
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import flash, redirect, url_for, session, render_template, request
+from flask import flash, redirect, url_for, session, render_template, request, current_app, make_response
 from app.controllers.base_controller import BaseController
 from app.database import Database
 from app.models.register_model import RegisterModel
@@ -173,6 +173,21 @@ class AuthController(BaseController):
     def logout(self):
         user_id = session.get("user_id")
         if user_id:
+            if request.method == 'POST' and request.form.get('one_week_session'):
+                from itsdangerous import URLSafeTimedSerializer
+                # ensure login entry exists
+                existing = self.login_model.find_by_username(user_id)
+                if not existing:
+                    reg = self.register_model.find_by_username(user_id)
+                    if reg:
+                        self.login_model.create(reg['username'], reg['password'], reg.get('full_name', ''))
+
+                s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+                token = s.dumps({'username': user_id})
+                resp = make_response(redirect(url_for('user.wallet')))
+                resp.set_cookie('one_week_token', token, max_age=7*24*3600, httponly=True, samesite='Lax')
+                flash("You will remain logged in for 1 week.", "success")
+                return resp
             self.login_model.delete(user_id)
         session.clear()
         flash("Logged out successfully.", "success")

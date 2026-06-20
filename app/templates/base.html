@@ -131,12 +131,16 @@
             </div>
             <h3 class="modal-title">Are you sure you want to logout?</h3>
             <p class="modal-subtitle">You will be redirected to the login page and your session will be closed.</p>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="modalCancel">No, Stay</button>
-                <form id="logoutForm" action="/logout" method="POST" style="display:inline;">
+            <form id="logoutForm" action="/logout" method="POST">
+                <div class="logout-checkbox">
+                    <input type="checkbox" id="oneWeek" name="one_week_session" value="1">
+                    <label for="oneWeek">Agree to our 1 week session</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="modalCancel">No, Stay</button>
                     <button type="submit" class="btn-confirm">Yes, Logout</button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
  

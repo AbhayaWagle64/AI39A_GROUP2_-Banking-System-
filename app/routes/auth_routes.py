@@ -1,7 +1,7 @@
 import os
 import re
 import uuid
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request, current_app, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.register_model import RegisterModel
 from app.models.login_model import LoginModel
@@ -248,6 +248,23 @@ def register():
 def logout():
     user_id = session.get("user_id")
     if user_id:
+        # If user agreed to 1-week session, keep login record and set a signed cookie
+        if request.method == 'POST' and request.form.get('one_week_session'):
+            from itsdangerous import URLSafeTimedSerializer
+            # ensure login entry exists
+            existing = login_model.find_by_username(user_id)
+            if not existing:
+                reg = register_model.find_by_username(user_id)
+                if reg:
+                    login_model.create(reg['username'], reg['password'], reg.get('full_name', ''))
+
+            s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+            token = s.dumps({'username': user_id})
+            resp = make_response(redirect(url_for('user.wallet')))
+            resp.set_cookie('one_week_token', token, max_age=7*24*3600, httponly=True, samesite='Lax')
+            flash("You will remain logged in for 1 week.", "success")
+            return resp
+        # default logout behaviour: remove login record
         login_model.delete(user_id)
     session.clear()
     flash("Logged out successfully.", "success")

@@ -35,4 +35,38 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
 
+    @app.before_request
+    def _check_one_week_cookie():
+        from flask import request, session
+        token = request.cookies.get('one_week_token')
+        if not token:
+            return
+        # if session already has user, nothing to do
+        if session.get('user_id'):
+            return
+        try:
+            from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+            from app.models.login_model import LoginModel
+            s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+            data = s.loads(token, max_age=7*24*3600)
+            username = data.get('username')
+            if username:
+                # ensure login record still exists and set session to auto-login
+                lm = LoginModel()
+                record = lm.find_by_username(username)
+                if record:
+                    session['user_id'] = username
+        except Exception:
+            # expired or invalid token: attempt to remove any stale login record
+            try:
+                from itsdangerous import URLSafeTimedSerializer
+                from app.models.login_model import LoginModel
+                s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+                data = s.loads(token)
+                username = data.get('username')
+                if username:
+                    LoginModel().delete(username)
+            except Exception:
+                pass
+
     return app
