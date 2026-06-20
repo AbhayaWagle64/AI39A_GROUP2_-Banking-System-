@@ -1,0 +1,37 @@
+.card {
+    border-radius: 1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+#my-qr {
+    min-height: 180px;
+}
+
+#scanner-container {
+    display: none;
+}
+
+#preview {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.btn-primary {
+    font-weight: 600;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+    font-weight: 500;
+}
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    font-weight: 600;
+}
