@@ -12,7 +12,7 @@
     border:1px solid var(--border-subtle);
 }
 
-/* ── LEFT PANEL ──────────────────── */
+/* ── LEFT PANEL ──────────── */
 .pm-sidebar{
     flex:1.2;
     background:linear-gradient(150deg, var(--green-50) 0%, var(--surface-white) 100%);
