@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Recharge — ePaisa{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+<style>
+  .recharge-card { max-width:480px; margin:40px auto; }
+  .field-hint.error { color:#dc2626; font-size:12px; margin-top:4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-wrap">
+    <div class="wallet-header">
+        <h1>Mobile Recharge</h1>
+        <p class="wallet-subtitle">Recharge your phone instantly</p>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="card balance-card" style="margin-bottom:24px;">
+        <div class="balance-row">
+            <div>
+                <span class="balance-label">Available Balance</span>
+                <div class="balance-pill">₹ {{ "{:,.2f}".format(user.balance) }}</div>
+            </div>
+            <div class="balance-icon">📱</div>
+        </div>
+    </div>
+
+    <!-- Recharge Form -->
+    <div class="card recharge-card">
+        <h2 style="margin:0 0 20px; font-size:20px;">Recharge Mobile</h2>
+        <form id="rechargeForm">
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" class="input" placeholder="Enter 10-digit mobile number" maxlength="10" pattern="[0-9]{10}" required autocomplete="off">
+                <p class="field-hint" id="phoneError"></p>
+            </div>
+            <div class="form-group">
+                <label for="operator">Operator</label>
+                <select id="operator" class="input" required>
+                    <option value="">Select Operator</option>
+                    <option value="NTC">NTC</option>
+                    <option value="NCELL">NCELL</option>
+                    <option value="SMART">Smart Cell</option>
+                    <option value="UTL">UTL</option>
+                </select>
+                <p class="field-hint" id="operatorError"></p>
+            </div>
+            <div class="form-group">
+                <label for="rechargeAmount">Amount (₹)</label>
+                <input type="number" id="rechargeAmount" class="input" placeholder="0.00" min="10" step="1" required>
+                <p class="field-hint" id="amountError"></p>
+            </div>
+            <div class="form-actions" style="margin-top:24px;">
+                <button type="submit" class="btn btn-primary">Recharge Now</button>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary" style="margin-left:12px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#fff; border-radius:12px; padding:28px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.15); text-align:center;">
+        <div style="font-size:48px; margin-bottom:12px;">⚠️</div>
+        <h3 style="margin:0 0 10px; font-size:18px; color:#1a1a2e;">Confirm Recharge</h3>
+        <p id="confirmMessage" style="margin:0 0 20px; color:#555; font-size:15px; line-height:1.6;">Are you sure you want to recharge?</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <button id="confirmYes" class="btn btn-primary" style="background:#1e8449;">Yes, Recharge</button>
+            <button id="confirmNo" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/recharge.js') }}"></script>
+{% endblock %}

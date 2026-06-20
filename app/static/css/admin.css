@@ -1,0 +1,67 @@
+/* Admin Theme - Blue Navbar */
+
+/* ── ADMIN NAVBAR ──────────────────── */
+.admin-navbar{
+    background:#1e40af;
+    box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+
+.admin-navbar .nav-links a{
+    color:#bfdbfe;
+}
+
+.admin-navbar .nav-links a.active{
+    color:#ffffff;
+    box-shadow:inset 0 -2px 0 #60a5fa;
+}
+
+.admin-navbar .nav-links a:hover{
+    color:#ffffff;
+}
+
+.admin-navbar .nav-links a::after{
+    background:#60a5fa;
+}
+
+/* ── DELETE MODEL ──────────────────── */
+#deleteModal .modal-icon{
+    background:#fee;
+    color:#dc2626;
+}
+
+/* ──  STYLES ──────────────────── */
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    color:#374151;
+    margin-bottom:6px;
+}
+
+.form-actions{
+    display:flex;
+    gap:12px;
+}
+
+/* ── BUTTOME ──────────────────── */
+.btn-danger{
+    background:#dc2626;
+    color:white;
+}
+
+
+.btn-danger:hover{
+    background:#b91c1c;
+}
+
+
+/* ── RESPONSIVE ────────────── */
+@media(max-width:768px){
+    .admin-navbar{
+        background:#1e40af;
+    }
+}

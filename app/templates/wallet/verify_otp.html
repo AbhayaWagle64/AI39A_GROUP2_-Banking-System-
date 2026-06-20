@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP — ePaisa{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+<style>
+  .otp-card { max-width:400px; margin:40px auto; }
+  .otp-note { color:#555; font-size:14px; margin:0 0 18px; }
+  .otp-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .btn-cancel { background:#dc2626; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; }
+  .btn-cancel:hover { background:#b91c1c; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-wrap">
+  <div class="card otp-card">
+    <h2 style="margin:0 0 8px; font-size:20px;">Verify OTP</h2>
+    <p class="otp-note">OTP has been sent to <strong>{{ masked_email or user.email }}</strong></p>
+    {% if error == 'invalid' %}
+    <p id="otpStatus" class="otp-note error" aria-live="polite" style="color:#dc2626;">Invalid OTP. Please try again.</p>
+    {% else %}
+    <p id="otpStatus" class="otp-note" aria-live="polite"></p>
+    {% endif %}
+    <form id="otpForm" action="{% if recharge_mode %}/api/verify-recharge-otp{% else %}/api/verify-otp{% endif %}" method="post" autocomplete="off">
+      <div class="form-group">
+        <input type="text" id="otp" name="otp" class="input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+      </div>
+      <div class="otp-actions">
+        <button type="submit" class="btn btn-primary" id="verifyBtn">Verify &amp; Pay</button>
+        <button type="button" class="btn btn-secondary" id="resendBtn">Resend OTP</button>
+      </div>
+      <div style="text-align:center; margin-top:18px;">
+        <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+const isRechargeMode = {{ 'true' if recharge_mode else 'false' }};
+document.addEventListener('DOMContentLoaded', () => {
+  const otpInput = document.getElementById('otp');
+  const resendBtn = document.getElementById('resendBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const otpForm = document.getElementById('otpForm');
+  const otpStatus = document.getElementById('otpStatus');
+
+  async function requestOtp() {
+    try {
+      const url = isRechargeMode ? '/api/request-recharge-otp' : '/api/request-otp';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (otpStatus) {
+        otpStatus.textContent = data.message || '';
+      }
+      if (data && !data.success && otpInput) {
+        otpInput.value = '';
+      }
+    } catch (err) {
+      if (otpStatus) {
+        otpStatus.textContent = 'Could not send OTP email. Please try again.';
+      }
+    }
+  }
+
+  if (resendBtn) {
+    resendBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Resending...';
+      await requestOtp();
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend OTP';
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+      window.location.href = isRechargeMode ? '/recharge' : '/wallet';
+    });
+  }
+
+  if (otpForm) {
+    otpForm.addEventListener('submit', () => {
+      const btn = document.getElementById('verifyBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
