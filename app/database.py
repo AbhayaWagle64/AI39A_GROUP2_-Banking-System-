@@ -126,6 +126,20 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS profile_management (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) NOT NULL,
+                full_name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                phone VARCHAR(20),
+                address VARCHAR(255),
+                account_type VARCHAR(20) DEFAULT 'Savings',
+                profile_picture VARCHAR(255),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+           )
+        """)
 
         def add_column_if_missing(table, col, col_def):
             cols = db.fetch_all(f"SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name='{table}' AND table_schema=DATABASE()")
@@ -172,6 +186,14 @@ class Database:
         add_column_if_missing("wrong_transaction_reports","description","description TEXT")
         add_column_if_missing("wrong_transaction_reports","status","status VARCHAR(20) DEFAULT 'pending'")
         add_column_if_missing("wrong_transaction_reports","created_at","created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        add_column_if_missing("profile_management","username","username VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","full_name","full_name VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","email","email VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","phone","phone VARCHAR(20)")
+        add_column_if_missing("profile_management","address","address VARCHAR(255)")
+        add_column_if_missing("profile_management","account_type","account_type VARCHAR(20) DEFAULT 'Savings'")
+        add_column_if_missing("profile_management","profile_picture","profile_picture VARCHAR(255)")
+        add_column_if_missing("profile_management","updated_at","updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 
         cols_check = db.fetch_all("SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name='register' AND table_schema=DATABASE()")
         col_names = {r.get('COLUMN_NAME','') for r in cols_check}
