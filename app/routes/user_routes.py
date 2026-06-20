@@ -18,10 +18,43 @@ login_model = LoginModel()
 register_model = RegisterModel()
 wallet_model = WalletModel()
 logger = logging.getLogger(__name__)
- 
+
+MAX_OTP_VERIFY_ATTEMPTS = 3
+
+
 def _get_mailer():
     from flask import current_app
     return getattr(current_app, "mailer", None)
+
+
+def _record_failed_otp_transaction(pending, recharge=False):
+    if not pending:
+        return
+    user = get_current_user()
+    if not user:
+        return
+
+    if recharge:
+        amount = float(pending.get("amount", 0))
+        phone = pending.get("phone", "")
+        operator = pending.get("operator", "")
+        sender_email = user.get("email") or ""
+        sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+        db = Database()
+        db.execute(
+            "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+            (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
+        )
+        db.close()
+        return
+
+    insert_failed_transaction(
+        user,
+        float(pending.get("amount", 0)),
+        pending.get("recipient_epaisa", ""),
+        "",
+        "failed_otp"
+    )
  
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -359,7 +392,14 @@ def verify_otp_page(error=None):
         masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
     else:
         masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
-    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=error)
+    attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
+    return render_template(
+        "wallet/verify_otp.html",
+        user=sender,
+        masked_email=masked,
+        error=error,
+        attempts_left=attempts_left
+    )
  
  
 @main.route("/transaction-success")
@@ -428,52 +468,19 @@ def verify_otp():
         code = (payload.get("otp") or "").strip()
     else:
         code = (request.form.get("otp") or "").strip()
-    if not code or len(code) != 6 or not code.isdigit():
-        pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
-        _clear_otp_session()
-        session.pop("pending_transaction", None)
-        return redirect(url_for("user.transaction_failed"))
     stored_otp = session.get("verified_otp")
     expires_at = session.get("otp_expires_at")
     attempts = int(session.get("otp_attempts", 0) or 0) + 1
     session["otp_attempts"] = attempts
-    if attempts >= 5:
+    if attempts > MAX_OTP_VERIFY_ATTEMPTS:
         pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
+        _record_failed_otp_transaction(pending)
         _clear_otp_session()
         session.pop("pending_transaction", None)
         return redirect(url_for("user.transaction_failed"))
+    if not code or len(code) != 6 or not code.isdigit():
+        return redirect(url_for("user.verify_otp_page", error="invalid"))
     if not stored_otp or stored_otp != code:
-        pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
         return redirect(url_for("user.verify_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
         pending = session.get("pending_transaction")
@@ -738,7 +745,15 @@ def verify_recharge_otp_page():
         masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
     else:
         masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
-    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=None, recharge_mode=True)
+    attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
+    return render_template(
+        "wallet/verify_otp.html",
+        user=sender,
+        masked_email=masked,
+        error=None,
+        recharge_mode=True,
+        attempts_left=attempts_left
+    )
 
 
 @main.route("/api/request-recharge-otp", methods=["POST"])
@@ -791,60 +806,19 @@ def verify_recharge_otp():
         code = (payload.get("otp") or "").strip()
     else:
         code = (request.form.get("otp") or "").strip()
-    if not code or len(code) != 6 or not code.isdigit():
-        pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                amount = float(pending.get("amount", 0))
-                phone = pending.get("phone", "")
-                operator = pending.get("operator", "")
-                sender_email = user.get("email") or ""
-                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
-                db = Database()
-                db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
-                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
-                )
-                db.close()
-        _clear_otp_session()
-        session.pop("pending_recharge", None)
-        return redirect(url_for("user.recharge_failed"))
     stored_otp = session.get("verified_otp")
     expires_at = session.get("otp_expires_at")
     attempts = int(session.get("otp_attempts", 0) or 0) + 1
     session["otp_attempts"] = attempts
-    if attempts >= 5:
+    if attempts > MAX_OTP_VERIFY_ATTEMPTS:
         pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                amount = float(pending.get("amount", 0))
-                phone = pending.get("phone", "")
-                operator = pending.get("operator", "")
-                sender_email = user.get("email") or ""
-                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
-                db = Database()
-                db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
-                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
-                )
-                db.close()
+        _record_failed_otp_transaction(pending, recharge=True)
         _clear_otp_session()
         session.pop("pending_recharge", None)
         return redirect(url_for("user.recharge_failed"))
+    if not code or len(code) != 6 or not code.isdigit():
+        return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
     if not stored_otp or stored_otp != code:
-        pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    '',
-                    f"{pending.get('operator', '')} - {pending.get('phone', '')}",
-                    "failed_otp"
-                )
         return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
         pending = session.get("pending_recharge")
