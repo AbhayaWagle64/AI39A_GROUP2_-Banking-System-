@@ -122,14 +122,14 @@ def home():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
  
- 
+# DASHBOARD
 @main.route("/dashboard")
 @login_required
 def dashboard():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
  
- 
+#  PROFILE
 @main.route("/profile")
 @login_required
 def profile():
@@ -568,14 +568,14 @@ def verify_otp():
 
     return redirect(url_for("user.transaction_success"))
 
-
+# RECHARGE
 @main.route("/recharge")
 @login_required
 def recharge_page():
     user = get_current_user()
     return render_template("wallet/recharge.html", user=user)
 
-
+# MERCHANT-PAY
 @main.route("/merchant-pay")
 @login_required
 def merchant_pay_page():
