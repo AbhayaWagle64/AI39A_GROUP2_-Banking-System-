@@ -266,16 +266,18 @@ main{
 
 /* ── CARDS ──────────────────── */
 .card{
-    background:var(--surface-card);
+    background:rgba(255,255,255,0.88);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
     border-radius:var(--radius-lg);
     padding:24px;
-    box-shadow:var(--shadow-md);
-    border:1px solid var(--border-subtle);
+    box-shadow:0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+    border:1px solid rgba(255,255,255,0.7);
     transition:box-shadow var(--transition-base), transform var(--transition-base);
 }
 
 .card:hover{
-    box-shadow:var(--shadow-lg);
+    box-shadow:0 12px 40px rgba(0,0,0,0.14);
     transform:translateY(-2px);
 }
 

@@ -38,7 +38,7 @@ class RegisterModel:
         db.close()
         return result
 
-    def create(self, username, password, full_name, email, phone, address, account_type='Savings', date_joined='2026-01-01', epaisa_id=None):
+    def create(self, username, password, full_name, email, phone, address, account_type='Savings', date_joined='2026-01-01', epaisa_id=None, balance=0.0):
         db = Database()
         if not epaisa_id:
             # SQLite compatible approach - get all epaisa_ids and find max
@@ -55,8 +55,8 @@ class RegisterModel:
             epaisa_id = f"eP-{num}"
         customer_id = f"SB-{phone}" if phone and phone.startswith("98") else f"SB-{10001}"
         db.execute(
-            f"INSERT INTO {self.table} (username, password, full_name, email, phone, customer_id, epaisa_id, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (username, generate_password_hash(password), full_name, email, phone, customer_id, epaisa_id, address, account_type, date_joined)
+            f"INSERT INTO {self.table} (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (username, generate_password_hash(password), full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined)
         )
         db.close()
         return epaisa_id

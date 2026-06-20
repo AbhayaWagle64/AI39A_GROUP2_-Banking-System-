@@ -9,6 +9,10 @@ from app.models.wallet_model import WalletModel
 from app.models.admin_model import AdminModel
 from app.database import Database
 
+def _row_to_dict(row):
+    """Convert sqlite3.Row object to dictionary"""
+    return dict(row) if row else {}
+
 main = Blueprint("auth", __name__)
 
 register_model = RegisterModel()
@@ -52,6 +56,7 @@ def get_customer_id(username=None):
         result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = ?", (username,))
         if result:
             db.close()
+            result = _row_to_dict(result)
             if result.get("epaisa_id"):
                 return result["epaisa_id"]
             if result.get("customer_id"):
@@ -63,6 +68,7 @@ def get_customer_id(username=None):
     result = db.fetch_one("SELECT COUNT(*) AS total FROM register")
     db.close()
     if result:
+        result = _row_to_dict(result)
         customer_id = f"EP-{10001 + result['total']}"
     return customer_id
 
@@ -73,11 +79,13 @@ def _generate_epaisa_id(phone=None, db=None):
     base = 1001
     if db:
         result = db.fetch_one(
-            "SELECT CAST(SUBSTRING_INDEX(epaisa_id, '-', -1) AS UNSIGNED) AS num FROM register WHERE epaisa_id REGEXP ? ORDER BY num DESC LIMIT 1",
-            ("^eP-[0-9]+$",)
+            "SELECT epaisa_id FROM register WHERE epaisa_id LIKE 'eP-%' ORDER BY epaisa_id DESC LIMIT 1"
         )
-        if result and result.get("num"):
-            base = int(result["num"]) + 1
+        if result and result.get("epaisa_id"):
+            try:
+                base = int(result["epaisa_id"].split("-")[1]) + 1
+            except (ValueError, IndexError):
+                base = 1001
     return f"eP-{base}"
 
 
@@ -89,7 +97,9 @@ def get_current_user():
     if not login_data:
         session.clear()
         return None
+    login_data = _row_to_dict(login_data)
     reg_data = register_model.find_by_username(user_id)
+    reg_data = _row_to_dict(reg_data) if reg_data else {}
     balance = 0.0
     try:
         if reg_data and reg_data.get("balance"):
@@ -126,6 +136,7 @@ def login():
             flash('Username/email and password are required.', 'danger')
             return render_template("login.html")
 
+        # Check admin first
         admin = admin_model.find_by_email(username)
         if admin and check_password_hash(admin['password'], password):
             session['user_id'] = username
@@ -134,34 +145,16 @@ def login():
             flash('Admin login successful!', 'success')
             return redirect(url_for('admin.admin_dashboard'))
 
-        login_data = login_model.find_by_username(username)
-        if login_data:
-            reg_data = register_model.find_by_username(username)
-            if not reg_data:
-                flash('Account not found.', 'danger')
-                return render_template("login.html")
-            if check_password_hash(login_data['password'], password):
-                epaisa_id = login_data.get("epaisa_id") or ""
-                if reg_data:
-                    epaisa_id = reg_data.get("epaisa_id") or epaisa_id
-                if epaisa_id:
-                    login_model.create(username, login_data['password'], login_data['full_name'], epaisa_id=epaisa_id)
-                session['user_id'] = username
-                flash('Login successful!', 'success')
-                return redirect(url_for('user.wallet'))
-            else:
-                flash('Wrong username or password.', 'danger')
-                return render_template("login.html")
-        
-        reg_data = register_model.find_by_username(username)
-        if not reg_data:
-            db = Database()
-            results = db.fetch_all("SELECT * FROM register WHERE email = ?", (username,))
-            db.close()
-            if results:
-                reg_data = results[0]
-        
+        # Find in register table by username (email), email, phone, or epaisa_id
+        db = Database()
+        reg_data = db.fetch_one(
+            "SELECT * FROM register WHERE username = ? OR email = ? OR phone = ? OR epaisa_id = ?",
+            (username, username, username, username)
+        )
+        db.close()
+
         if reg_data:
+            reg_data = _row_to_dict(reg_data)
             if check_password_hash(reg_data['password'], password):
                 epaisa_id = reg_data.get("epaisa_id") or f"eP-{reg_data['phone']}"
                 login_model.create(reg_data['username'], reg_data['password'], reg_data['full_name'], epaisa_id=epaisa_id)
@@ -231,7 +224,7 @@ def register():
         customer_id = f"SB-{phone}" if phone.startswith("98") else f"SB-{10001}"
         db.execute(
             "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 1000.0, '', 'Savings', '2026-01-01')
+            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 0.0, '', 'Savings', '2026-01-01')
         )
         db.execute(
             "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (?, ?, ?, ?)",

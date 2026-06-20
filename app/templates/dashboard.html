@@ -16,13 +16,13 @@ Dashboard — ePaisa
     <p style="color:var(--text-secondary); margin-bottom:24px;">Manage your finances securely</p>
  
     <!-- Balance Card -->
-    <div class="card card-elevated" style="max-width:480px; margin-bottom:24px; background:linear-gradient(135deg, var(--green-600) 0%, var(--green-800) 100%); border:none; color:white;">
+    <div style="border-radius:var(--radius-lg); padding:24px; max-width:480px; margin-bottom:24px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <p style="font-size:13px; opacity:.85; margin-bottom:4px;">Current Balance</p>
-                <h2 style="font-size:32px; font-weight:700; margin:0;">₹ {{ user.balance|default('12,450.00') }}</h2>
+                <p style="font-size:14px; opacity:0.9; margin-bottom:4px; font-weight:500;">Current Balance</p>
+                <h2 style="font-size:36px; font-weight:700; margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">₹ {{ user.balance|default('0.00') }}</h2>
             </div>
-            <div style="font-size:48px; opacity:.15;">💵</div>
+            <div style="font-size:48px; opacity:0.9;">💵</div>
         </div>
     </div>
  

@@ -162,7 +162,7 @@ class AuthController(BaseController):
                 address='',
                 account_type='Savings',
                 date_joined='2026-01-01',
-                balance=1000.0
+                balance=0.0
             )
 
             flash('Registration successful! Please login.', 'success')

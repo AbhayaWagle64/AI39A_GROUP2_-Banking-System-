@@ -227,7 +227,7 @@ def register():
         customer_id = f"SB-{phone}" if phone.startswith("98") else f"SB-{10001}"
         db.execute(
             "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 1000.0, '', 'Savings', '2026-01-01')
+            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 0.0, '', 'Savings', '2026-01-01')
         )
         db.execute(
             "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (?, ?, ?, ?)",
