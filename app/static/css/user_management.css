@@ -17,7 +17,7 @@
     margin-bottom: 24px;
 }
 
-/* Card */
+/* CARD */
 .card {
     background: #ffffff;
     border-radius: 16px;
@@ -34,7 +34,7 @@
     margin: 0 0 16px;
 }
 
-/* Table */
+/* TABLE */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -82,7 +82,7 @@ table tbody tr:last-child td {
     }
 }
 
-/* Buttons (if any) */
+/* Buttons  */
 .btn-green {
     background: #00a859;
     color: white;
