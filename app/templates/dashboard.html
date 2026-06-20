@@ -93,7 +93,7 @@ Dashboard — ePaisa
                 <p style="font-size:14px; font-weight:600; color:var(--green-700); margin-top:8px;">{{ user.epaisa_id or user.username }}</p>
             </div>
             <div style="display:flex; justify-content:center; align-items:center; background:white; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
-                <img id="qrImage" src="" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
+                <img id="qrImage" src="{{ url_for('user.qr_code') }}" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
             </div>
             <div style="display:flex; gap:12px; flex-direction:column;">
                 <button class="btn btn-secondary" id="closeQrModal" style="flex:1; color:var(--text-primary);">Close</button>

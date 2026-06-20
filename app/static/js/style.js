@@ -49,9 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
  
     if (qrCodeBtn) {
         qrCodeBtn.addEventListener("click", () => {
-            qrImage.src = "/qr-code?" + new Date().getTime();
+            if (qrImage) {
+                qrImage.alt = "Loading QR Code...";
+                qrImage.src = "/qr-code?" + new Date().getTime();
+            }
             qrCodeModal.classList.add("active");
         });
+    }
+ 
+    if (qrImage) {
+        qrImage.onerror = () => {
+            qrImage.alt = "Failed to load QR Code";
+        };
     }
  
     if (closeQrModal) {

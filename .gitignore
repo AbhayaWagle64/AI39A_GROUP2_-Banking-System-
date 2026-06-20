@@ -4,5 +4,5 @@ __pycache__/
 *.pyo
 .env
 static/images/
-static/uploads
+static/uploads/
 app/query
