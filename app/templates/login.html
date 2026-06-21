@@ -3,225 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - E-Paisa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .login-container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
-            padding: 48px;
-            width: 100%;
-            max-width: 420px;
-            margin: 20px;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-        
-        .login-logo {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            color: white;
-            font-size: 32px;
-            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
-        }
-        
-        .login-header h1 {
-            color: #1a1a2e;
-            margin: 0 0 12px;
-            font-size: 32px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .login-header p {
-            color: #666;
-            margin: 0;
-            font-size: 15px;
-            font-weight: 400;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: #1a1a2e;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-            letter-spacing: 0.3px;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e8e8e8;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s;
-            box-sizing: border-box;
-            background: #fafafa;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #11998e;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
-        }
-        
-        .form-group input::placeholder {
-            color: #aaa;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
-            letter-spacing: 0.5px;
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(17, 153, 142, 0.4);
-        }
-        
-        .login-btn:active {
-            transform: translateY(-1px);
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 24px;
-            border-top: 2px solid #f0f0f0;
-        }
-        
-        .login-footer p {
-            color: #666;
-            margin: 0;
-            font-size: 15px;
-        }
-        
-        .login-footer a {
-            color: #11998e;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        
-        .login-footer a:hover {
-            color: #38ef7d;
-            text-decoration: underline;
-        }
-        
-        .alert {
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #fee 0%, #fcc 100%);
-            color: #c33;
-            border: 2px solid #f99;
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #efe 0%, #cfc 100%);
-            color: #2d8a2d;
-            border: 2px solid #9f9;
-        }
-    </style>
+    <title>E-Paisa Login</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="login-logo">
-                <i class="fas fa-wallet"></i>
+
+    <div class="landing-wrapper">
+
+        <!-- Left Hero -->
+        <div class="landing-hero">
+
+            <div class="hero-chip">
+                <span>★</span>
+                <span>Trusted Nepali Digital Wallet</span>
             </div>
-            <h1>Welcome Back</h1>
-            <p>Sign in to your E-Paisa account</p>
+
+            <img
+                src="{{ url_for('static', filename='images/logo.svg') }}"
+                alt="ePaisa"
+                class="hero-logo-lg"
+                width="100"
+                height="100">
+
+            <h1 class="hero-title">Smart Banking <span>For Nepal</span></h1>
+
+            <p class="hero-subtitle">
+                Send money, pay bills, manage your wallet and experience secure digital
+                finance with E-Paisa.
+            </p>
+
+            <ul class="hero-features">
+                <li>Instant Payments</li>
+                <li>Bank-Level Security</li>
+                <li>नेपालमै विश्वास</li>
+            </ul>
+
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <div class="metric-value">50K+</div>
+                    <div class="metric-label">Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">₹10M+</div>
+                    <div class="metric-label">Transactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.9★</div>
+                    <div class="metric-label">Rating</div>
+                </div>
+            </div>
+
+            <p class="hero-footer">
+                Secure • Reliable • Fast
+            </p>
         </div>
-        
-                    <div class="alert alert-{{ category }}">Your mobile number will be your USER ID</div>
-              
-        <form method="POST" action="{{ url_for('main.login') }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+        <!-- Right Auth Panel -->
+        <div class="landing-auth">
+
+            <div class="auth-box">
+
+                <div class="auth-box-header">
+                    <img
+                        src="{{ url_for('static', filename='images/logo.svg') }}"
+                        alt="ePaisa"
+                        class="auth-box-logo"
+                        width="52"
+                        height="52">
+
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue to your wallet</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flashes" style="margin-bottom:16px;">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}" style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;{% if category == 'success' %}background:var(--green-50);color:var(--green-700);{% elif category == 'danger' %}background:#fee;border:1px solid #fcc;color:#c00;{% elif category == 'error' %}background:#fff3cd;border:1px solid #ffc107;color:#856404;{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+
+                    <div class="form-group">
+                        <label for="username">
+                            <span>👤</span>
+                            <span>Username / Email / Phone Number</span>
+                        </label>
+                        <input
+                             type="text"
+                             id="username"
+                             name="username"
+                             class="input"
+                             placeholder="Enter your username, email or phone"
+                             required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <span>🔒</span>
+                            <span>Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="input"
+                            placeholder="Enter your password"
+                            required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary auth-btn">
+                        Login
+                    </button>
+
+                    <div class="divider">OR</div>
+
+                    <p class="auth-footer">
+                        Don't have an account?
+                        <a href="/register">Register</a>
+                    </p>
+                </form>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            </div>
-            
-            <button type="submit" class="login-btn">
-                <i class="fas fa-sign-in-alt"></i> Sign In
-            </button>
-        </form>
-        
-        <div class="login-footer">
-            <p>Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/style.js') }}"></script>
+
 </body>
 </html>

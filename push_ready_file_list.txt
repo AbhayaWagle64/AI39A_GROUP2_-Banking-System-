@@ -1,0 +1,110 @@
+================================================================================
+SECTION 1 — BACKEND
+================================================================================
+
+--- Security Login ---
+auth_controller.py
+security.py
+auth.py
+session_manager.py
+config.py
+
+--- Error Handling ---
+error_handler.py
+auth_controller.py
+transaction_controller.py
+routes.py
+
+--- Payment Confirmation Screen ---
+transaction_controller.py
+otp_controller.py
+notification_controller.py
+
+================================================================================
+SECTION 2 — FRONTEND
+================================================================================
+
+--- Receive Money ---
+wallet.html
+verify_otp.html
+result.html
+success.html
+failed.html
+wallet.css
+style.css
+theme.css
+wallet.js
+style.js
+
+--- Digital Wallet ---
+wallet.html
+result.html
+success.html
+failed.html
+recharge.html
+recharge_success.html
+recharge_failed.html
+dashboard.html
+base.html
+wallet.css
+style.css
+theme.css
+wallet.js
+style.js
+
+--- OTP Flow ---
+transaction_otp.html
+verify_otp.html
+verify_otp.html
+wallet.css
+style.css
+theme.css
+wallet.js
+style.js
+
+--- Real-Time Notification ---
+dashboard.html
+base.html
+style.css
+theme.css
+style.js
+
+--- Report Generation ---
+report.html
+transactions.html
+mini_statement.html
+admin.css
+style.css
+theme.css
+style.js
+
+================================================================================
+SECTION 3 — DATABASE
+================================================================================
+
+--- Password Reset ---
+database.py
+password_controller.py
+
+--- Basic Transaction Logging ---
+database.py
+transaction_controller.py
+admin_controller.py
+
+--- Transaction Confirmation Screen ---
+database.py
+transaction_controller.py
+otp_controller.py
+
+--- Bill Payment ---
+database.py
+bill_controller.py
+
+--- Transaction Monitoring ---
+database.py
+admin_controller.py
+
+--- Session Timeout ---
+session_manager.py
+database.py
+routes.py

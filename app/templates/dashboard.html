@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+ 
+{% block title %}
+Dashboard — ePaisa
+{% endblock %}
+ 
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+ 
+{% block content %}
+ 
+<div class="dashboard-wrap" style="padding:24px;">
+ 
+    <h1 class="dashboard-title" style="margin:0 0 8px;">Welcome back, {{ user.full_name or 'User' }}!</h1>
+    <p style="color:var(--text-secondary); margin-bottom:24px;">Manage your finances securely</p>
+ 
+    <!-- Balance Card -->
+    <div style="border-radius:var(--radius-lg); padding:24px; max-width:480px; margin-bottom:24px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <p style="font-size:14px; opacity:0.9; margin-bottom:4px; font-weight:500;">Current Balance</p>
+                <h2 style="font-size:36px; font-weight:700; margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">₹ {{ user.balance|default('0.00') }}</h2>
+            </div>
+            <div style="font-size:48px; opacity:0.9;">💵</div>
+        </div>
+    </div>
+ 
+    <!-- Quick Actions -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; max-width:680px; margin-bottom:24px;">
+<a href="/wallet" class="btn btn-primary" style="padding:18px;">
+             <span>💳</span> Add Money
+         </a>
+         <button id="paymentBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+             <span>💰</span> Payment
+         </button>
+         <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+             <span>📤</span> Send Money
+         </a>
+        <a href="/transactions" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>📊</span> History
+        </a>
+        <a href="/profile" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>👤</span> Profile
+        </a>
+        <button id="qrCodeBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
+            <span>🔲</span> My QR Code
+        </button>
+    </div>
+ 
+    <!-- Recent Transactions -->
+    <div class="card" style="max-width:680px;">
+        <h3 style="margin:0 0 16px; font-size:18px;">Recent Transactions</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-subtle);">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">📱</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Recharge - NTC</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Today, 10:30 AM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:var(--green-700); font-weight:600;">-₹ 150.00</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-subtle);">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">🏪</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Merchant Payment</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Yesterday, 2:15 PM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:var(--green-700); font-weight:600;">-₹ 2,500.00</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <span style="font-size:24px;">💰</span>
+                    <div>
+                        <p style="margin:0; font-weight:500;">Money Received</p>
+                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">Jan 15, 11:45 AM</p>
+                    </div>
+                </div>
+                <p style="margin:0; color:#155724; font-weight:600;">+₹ 5,000.00</p>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="modal-overlay" id="qrCodeModal">
+        <div class="modal-box">
+            <div style="text-align:center; margin-bottom:16px;">
+                <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 4px;">Your ePaisa QR Code</h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin:0;">Share this QR to receive payments</p>
+                <p style="font-size:14px; font-weight:600; color:var(--green-700); margin-top:8px;">{{ user.epaisa_id or user.username }}</p>
+            </div>
+            <div style="display:flex; justify-content:center; align-items:center; background:white; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
+                <img id="qrImage" src="" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
+            </div>
+            <div style="display:flex; gap:12px; flex-direction:column;">
+                <button class="btn btn-secondary" id="closeQrModal" style="flex:1; color:var(--text-primary);">Close</button>
+                <button class="btn btn-primary" id="downloadQr" style="flex:1;">Download</button>
+                <button class="btn btn-secondary" id="scanQrBtn" style="flex:1; background:var(--green-600); color:white; display:none;">
+                    <span>📷</span> Scan QR
+                </button>
+            </div>
+        </div>
+    </div>
+  
+<div class="modal-overlay" id="qrScannerModal">
+        <div class="modal-box" style="max-width:440px;">
+            <div style="text-align:center; margin-bottom:16px;">
+                <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 4px;">Scan QR Code</h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin:0;">Point camera at recipient's QR code</p>
+            </div>
+            <div id="scannerContainer" style="width:100%; height:260px; background:#000; border-radius:var(--radius-md); margin-bottom:16px; overflow:hidden; position:relative;">
+                <video id="scannerVideo" style="width:100%; height:100%; object-fit:cover; display:none;"></video>
+                <div id="scannerPlaceholder" style="display:flex; align-items:center; justify-content:center; height:100%; color:#666; font-size:14px;">Initializing scanner...</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="closeScannerModal" style="flex:1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-box" style="max-width:400px;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Choose Payment Type</h3>
+                <p style="font-size:13px; color:var(--text-secondary);">Select how you want to make payment</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="rechargeBtn" class="btn btn-primary" style="justify-content:flex-start; gap:12px;">
+                    <span style="font-size:20px;">📱</span>
+                    <span>Recharge</span>
+                </button>
+                <button id="merchantPayBtn" class="btn btn-secondary" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                    <span style="font-size:20px;">🏪</span>
+                    <span>Merchant Pay</span>
+                </button>
+            </div>
+<button class="btn btn-secondary" id="closePaymentModal" style="margin-top:20px; width:100%; background:white; color:var(--text-primary);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Merchant Shopping Modal -->
+        <div class="modal-overlay" id="merchantModal">
+            <div class="modal-box" style="max-width:480px;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Shop Online</h3>
+                    <p style="font-size:13px; color:var(--text-secondary);">Select a merchant to pay</p>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <button class="merchant-option btn btn-secondary" data-merchant="Amazon" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛒</span>
+                        <span>Amazon</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="Flipkart" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛍️</span>
+                        <span>Flipkart</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="Daraz" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">📦</span>
+                        <span>Daraz</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="eBay" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🏪</span>
+                        <span>eBay</span>
+                    </button>
+                    <button class="merchant-option btn btn-secondary" data-merchant="AliExpress" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                        <span style="font-size:24px;">🛒</span>
+                        <span>AliExpress</span>
+                    </button>
+                </div>
+                <button class="btn btn-secondary" id="closeMerchantModal" style="margin-top:20px; width:100%; background:white; color:var(--text-primary);">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const paymentBtn = document.getElementById("paymentBtn");
+    const paymentModal = document.getElementById("paymentModal");
+    const closePaymentModal = document.getElementById("closePaymentModal");
+    const rechargeBtn = document.getElementById("rechargeBtn");
+    const merchantPayBtn = document.getElementById("merchantPayBtn");
+    const merchantModal = document.getElementById("merchantModal");
+    const closeMerchantModal = document.getElementById("closeMerchantModal");
+    const merchantOptions = document.querySelectorAll(".merchant-option");
+
+    if (paymentBtn && paymentModal) {
+        paymentBtn.addEventListener("click", () => {
+            paymentModal.classList.add("active");
+        });
+    }
+
+    if (closePaymentModal && paymentModal) {
+        closePaymentModal.addEventListener("click", () => {
+            paymentModal.classList.remove("active");
+        });
+    }
+
+    if (paymentModal) {
+        paymentModal.addEventListener("click", (e) => {
+            if (e.target === paymentModal) {
+                paymentModal.classList.remove("active");
+            }
+        });
+    }
+
+    if (rechargeBtn) {
+        rechargeBtn.addEventListener("click", () => {
+            window.location.href = "/recharge";
+        });
+    }
+
+    if (merchantPayBtn) {
+        merchantPayBtn.addEventListener("click", () => {
+            paymentModal.classList.remove("active");
+            merchantModal.classList.add("active");
+        });
+    }
+
+    if (closeMerchantModal && merchantModal) {
+        closeMerchantModal.addEventListener("click", () => {
+            merchantModal.classList.remove("active");
+        });
+    }
+
+    if (merchantModal) {
+        merchantModal.addEventListener("click", (e) => {
+            if (e.target === merchantModal) {
+                merchantModal.classList.remove("active");
+            }
+        });
+    }
+
+    merchantOptions.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const merchant = btn.dataset.merchant;
+            window.location.href = `/merchant-pay?merchant=${encodeURIComponent(merchant)}`;
+        });
+    });
+});
+</script>
+{% endblock %}

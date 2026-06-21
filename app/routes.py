@@ -1,164 +1,201 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
+from flask import render_template, request, redirect, session
 
-main = Blueprint("main", __name__)
+from app.controllers.auth_controller import AuthController
+from app.controllers.wallet_controller import WalletController
+from app.controllers.transaction_controller import TransactionController
+from app.controllers.otp_controller import OTPController
+from app.controllers.admin_controller import AdminController
+from app.controllers.bill_controller import BillController
+from app.controllers.report_controller import ReportController
+from app.database import get_connection
 
-# Simple in-memory user database (in production, use a real database)
-users_db = {
-    'test': {
-        'password': generate_password_hash('test123')
-    }
-}
 
-# Sample data
-transactions = [
-    {
-        'title': 'Salary Credit',
-        'date': 'Today, 9:00 AM',
-        'amount': 50000,
-        'type': 'credit',
-        'icon': 'wallet'
-    },
-    {
-        'title': 'Shopping - Amazon',
-        'date': 'Yesterday, 2:30 PM',
-        'amount': -2500,
-        'type': 'debit',
-        'icon': 'shopping-cart'
-    },
-    {
-        'title': 'Transfer to Savings',
-        'date': 'May 15, 11:15 AM',
-        'amount': -10000,
-        'type': 'transfer',
-        'icon': 'exchange-alt'
-    },
-    {
-        'title': 'Electricity Bill',
-        'date': 'May 14, 4:20 PM',
-        'amount': -1500,
-        'type': 'debit',
-        'icon': 'bolt'
-    },
-    {
-        'title': 'Freelance Payment',
-        'date': 'May 13, 3:00 PM',
-        'amount': 8000,
-        'type': 'credit',
-        'icon': 'laptop'
-    }
-]
+def init_routes(app):
 
-linked_accounts = [
-    {
-        'name': 'Nepal Investment Bank',
-        'number': '**** 4521',
-        'status': 'verified',
-        'icon': 'university'
-    },
-    {
-        'name': 'Global IME Bank',
-        'number': '**** 7832',
-        'status': 'verified',
-        'icon': 'landmark'
-    },
-    {
-        'name': 'Khalti Wallet',
-        'number': '**** 9876',
-        'status': 'unverified',
-        'icon': 'mobile-alt'
-    }
-]
+    # ---------------- HOME ----------------
+    @app.route("/")
+    def home():
+        return redirect("/login")
 
-# Login required decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Please login to access this page.', 'danger')
-            return redirect(url_for('main.login'))
-        return f(*args, **kwargs)
-    return decorated_function
+    # ---------------- REGISTER ----------------
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
 
-@main.route("/")
-def home():
-    return render_template("index.html")
+        if request.method == "POST":
 
-@main.route("/login", methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if username in users_db:
-            if check_password_hash(users_db[username]['password'], password):
-                session['user_id'] = username
-                flash('Login successful!', 'success')
-                return redirect(url_for('main.wallet'))
-            else:
-                flash('Invalid password.', 'danger')
-        else:
-            flash('Username not found.', 'danger')
-    
-    return render_template("login.html")
+            data = request.form
 
-@main.route("/register", methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        
-        # Validation
-        if not username or not password:
-            flash('Username and password are required.', 'danger')
-            return render_template("register.html")
-        
-        if password != confirm_password:
-            flash('Passwords do not match.', 'danger')
-            return render_template("register.html")
-        
-        if len(password) < 6:
-            flash('Password must be at least 6 characters.', 'danger')
-            return render_template("register.html")
-        
-        if username in users_db:
-            flash('Username already exists.', 'danger')
-            return render_template("register.html")
-        
-        # Create new user with hashed password
-        users_db[username] = {
-            'password': generate_password_hash(password)
-        }
-        
-        flash('Account created successfully! Please login.', 'success')
-        return redirect(url_for('main.login'))
-    
-    return render_template("register.html")
+            result = AuthController.register(
+                data["name"],
+                data["phone"],
+                data["email"],
+                data["password"]
+            )
 
-@main.route("/logout")
-def logout():
-    session.pop('user_id', None)
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('main.login'))
+            if not result.get("success"):
+                return render_template(
+                    "register.html",
+                    error=result.get("message")
+                )
 
-@main.route("/wallet")
-@login_required
-def wallet():
-    return render_template("wallet.html", transactions=transactions, linked_accounts=linked_accounts)
+            # Auto-login after registration
+            session["user"] = result.get("wallet_id")
 
-@main.route("/add-money")
-@login_required
-def add_money():
-    return render_template("add_money.html", linked_accounts=linked_accounts)
+            return redirect("/dashboard")
 
-@main.route("/withdraw-money")
-@login_required
-def withdraw_money():
-    return render_template("withdraw_money.html", linked_accounts=linked_accounts)
+        return render_template("register.html")
 
-@main.route("/linked-accounts")
-@login_required
-def linked_accounts_page():
-    return render_template("linked_accounts.html", linked_accounts=linked_accounts)
+    # ---------------- FORGOT / RESET / OTP PAGES ----------------
+    @app.route("/forgot-password")
+    def forgot_password():
+        return render_template("forgot_password.html")
+
+    @app.route("/reset-password")
+    def reset_password():
+        return render_template("reset_password.html")
+
+    @app.route("/otp-verification")
+    def otp_verification():
+        return render_template("otp_verification.html")
+
+    # ---------------- OTHER PAGES ----------------
+    @app.route("/recieve-money")
+    def recieve_money():
+        return render_template("recieve_money.html")
+
+    @app.route("/notifications")
+    def notifications():
+        return render_template("notifications.html")
+
+    @app.route('/transaction-confirmation')
+    def transaction_confirmation():
+        return render_template('transaction_confirmation.html')
+
+    @app.route('/reports')
+    def reports_page():
+        return render_template('reports.html')
+
+    # ---------------- LOGIN ----------------
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+
+        if request.method == "POST":
+
+            data = request.form
+
+            result = AuthController.login(
+                data["phone"],
+                data["password"]
+            )
+
+            if not result.get("success"):
+                # show message on the login page
+                return render_template("login.html", error=result.get("message"))
+
+            # Successful login: set session and redirect to dashboard
+            session["user"] = result.get("wallet_id")
+            return redirect("/dashboard")
+
+        return render_template("login.html")
+
+    @app.route('/logout')
+    def logout():
+        session.pop('user', None)
+        return redirect('/login')
+
+    # ---------------- DASHBOARD ----------------
+    @app.route("/dashboard")
+    def dashboard():
+
+        if "user" not in session:
+            return redirect("/login")
+
+        wallet_id = session["user"]
+
+        wallet = WalletController.get_dashboard(wallet_id)
+
+        return render_template(
+            "dashboard.html",
+            wallet=wallet
+        )
+
+    # ---------------- CREATE TRANSACTION ----------------
+    @app.route("/create-transaction", methods=["POST"])
+    def create_transaction():
+
+        data = request.form
+
+        result = TransactionController.create(
+            data["sender_wallet"],
+            data["receiver_wallet"],
+            float(data["amount"])
+        )
+
+        if not result["success"]:
+            return result["message"]
+
+        otp = OTPController.generate(
+            result["transaction_id"]
+        )
+
+        return f"OTP Generated: {otp}"
+
+    # ---------------- VERIFY OTP ----------------
+    @app.route("/verify-otp", methods=["POST"])
+    def verify_otp():
+
+        data = request.form
+
+        valid = OTPController.verify(
+            data["transaction_id"],
+            data["otp"]
+        )
+
+        if not valid:
+            return "Invalid or Expired OTP"
+
+        TransactionController.complete(
+            data["transaction_id"]
+        )
+
+        return render_template(
+            "transaction_success.html"
+        )
+
+    # ---------------- ADMIN ----------------
+    @app.route("/admin/transactions")
+    def admin_transactions():
+
+        data = AdminController.get_all_transactions()
+
+        return render_template(
+            "admin/transactions.html",
+            transactions=data
+        )
+
+    # ---------------- BILL PAYMENT ----------------
+    @app.route("/pay-bill", methods=["GET", "POST"])
+    def pay_bill():
+
+        if request.method == "POST":
+
+            data = request.form
+
+            BillController.pay_bill(
+                session.get("user_id"),
+                data["bill_type"],
+                data["customer_id"],
+                float(data["amount"])
+            )
+
+            return "Bill Paid Successfully"
+
+        return render_template("bill_payment.html")
+
+    # ---------------- REPORT ----------------
+    @app.route("/report")
+    def report():
+
+        file = ReportController.generate_csv()
+
+        return f"Report generated: {file}"
