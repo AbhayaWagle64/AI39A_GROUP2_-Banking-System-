@@ -1,5 +1,9 @@
 import config
-import pymysql
+
+try:
+    import pymysql
+except ImportError:
+    pymysql = None
 
 
 class Database:

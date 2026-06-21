@@ -166,11 +166,12 @@ function showToast(message, type) {
 }
 
 /* ------------------------------
-DARK MODE
------------------------------- */
+ DARK MODE
+ ------------------------------ */
 
 const themeToggle = document.getElementById("themeToggle");
-
-themeToggle.addEventListener("click", () => {
-    document.documentElement.classList.toggle("dark");
-});
+if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+    });
+}

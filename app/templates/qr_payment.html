@@ -35,7 +35,7 @@ QR Payment — ePaisa
 
                     <p class="small text-muted">
                         User ID:
-                        <strong>{{ session['user_id'] }}</strong>
+                        <strong>{{ session.get('user_id', '') }}</strong>
                     </p>
 
                     <button
@@ -165,7 +165,7 @@ QR Payment — ePaisa
 
 <script>
 
-    const userId = "{{ session['user_id'] }}";
+    const userId = "{{ session.get('user_id', '') }}";
 
     const qrData = JSON.stringify({
         user_id: userId,

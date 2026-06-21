@@ -1,118 +1,180 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
 
-body{
-    height: 100vh;
+body {
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background: linear-gradient(to right, #0f172a, #1e293b);
 }
 
-/* container */
-.login-container{
+.login-container,
+.register-page {
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 2rem;
 }
 
-/* login box (glass-like modern look) */
-.login-box{
-    background: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    width: 360px;
-    border-radius: 16px;
-    box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
-    backdrop-filter: blur(10px);
+.login-box,
+.register-box {
+    background: rgba(255, 255, 255, 0.96);
+    padding: 2rem;
+    width: min(420px, 100%);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
-.login-box h1{
+.register-box {
+    width: min(620px, 100%);
+}
+
+h1 {
     text-align: center;
     color: #0f172a;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
-.subtitle{
+.subtitle {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 1.5rem;
     color: #64748b;
-    font-size: 0.9rem;
 }
 
-/* INPUT GROUP */
-.input-group{
-    margin-bottom: 18px;
+.input-group {
+    margin-bottom: 1rem;
 }
 
-.input-group label{
+.input-group label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 0.4rem;
     color: #1e293b;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 700;
 }
 
-/* MODERN INPUT FIELD STYLE */
-.input-group input{
+.input-group input,
+.input-group select,
+.input-group textarea {
     width: 100%;
     border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    background: rgba(255,255,255,0.8);
-    padding: 0.95rem 1rem;
-    transition: all 0.3s ease;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.9rem 1rem;
     outline: none;
     color: #0f172a;
 }
 
-/* focus effect */
-.input-group input:focus{
+.input-group input:focus {
     border-color: #2563eb;
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-    background: #ffffff;
 }
 
-/* BUTTON */
-button{
+.password-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toggle-password {
+    width: auto;
+    min-width: 76px;
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+button {
     width: 100%;
-    padding: 12px;
+    padding: 0.85rem 1rem;
     background: #2563eb;
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 16px;
+    border-radius: 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: 0.2s ease;
 }
 
-button:hover{
+button:hover {
     background: #1d4ed8;
     transform: translateY(-1px);
 }
 
-/* REGISTER TEXT */
-.register-text{
+.register-text {
     text-align: center;
-    margin-top: 15px;
-    font-size: 0.9rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
 }
 
-.register-text a{
+.register-text a {
     color: #2563eb;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 700;
 }
 
-.register-text a:hover{
+.register-text a:hover {
     text-decoration: underline;
 }
 
-.error-message{
+.error-message {
     color: #ef4444;
-    font-size: 0.85rem;
-    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+}
+
+.small-text {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+}
+
+.password-strength {
+    height: 0.35rem;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    background: var(--green-500, #16a34a);
+    border-radius: 999px;
+    transition: width 0.2s ease;
+}
+
+.flash {
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.flash-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.flash-danger,
+.flash-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+#toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 50;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: white;
+    background: #16a34a;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }

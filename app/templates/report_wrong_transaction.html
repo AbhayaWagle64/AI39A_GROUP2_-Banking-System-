@@ -1,114 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}
-Report Wrong Transaction
-{% endblock %}
+{% block title %}Report Wrong Transaction - ePaisa{% endblock %}
 
 {% block css %}
-<link rel="stylesheet"
-      href="{{ url_for('static',
-      filename='css/report_transaction.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report_wrong_transaction.css') }}">
 {% endblock %}
 
 {% block content %}
-
 <div class="report-container">
-
     <div class="report-card">
+        <h2>Report Wrong Transaction</h2>
 
-        <h2>
-            Report Wrong Transaction
-        </h2>
-
-        {% with messages =
-        get_flashed_messages(with_categories=true) %}
-        {% for cat,msg in messages %}
-
-        <div class="alert alert-{{ cat }}">
-            {{ msg }}
-        </div>
-
-        {% endfor %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
         {% endwith %}
 
-        <form method="POST">
-
+        <form method="POST" action="{{ url_for('report.report_wrong_transaction') }}">
             <div class="form-group">
-
-                <label>
-                    Transaction ID
-                </label>
-
-                <input
-                    type="number"
-                    name="transaction_id"
-                    required>
-
+                <label>Transaction ID</label>
+                <input type="number" name="transaction_id" required>
             </div>
 
             <div class="form-group">
-
-                <label>
-                    Reason
-                </label>
-
-                <select
-                    name="reason"
-                    required>
-
-                    <option value="">
-                        Select Reason
-                    </option>
-
-                    <option value="Wrong Amount">
-                        Wrong Amount
-                    </option>
-
-                    <option value="Wrong Receiver">
-                        Wrong Receiver
-                    </option>
-
-                    <option value="Duplicate Transaction">
-                        Duplicate Transaction
-                    </option>
-
-                    <option value="Other">
-                        Other
-                    </option>
-
+                <label>Reason</label>
+                <select name="reason" required>
+                    <option value="">Select Reason</option>
+                    <option value="Wrong Amount">Wrong Amount</option>
+                    <option value="Wrong Receiver">Wrong Receiver</option>
+                    <option value="Duplicate Transaction">Duplicate Transaction</option>
+                    <option value="Other">Other</option>
                 </select>
-
             </div>
 
             <div class="form-group">
-
-                <label>
-                    Description
-                </label>
-
-                <textarea
-                    name="description"
-                    rows="5"></textarea>
-
+                <label>Description</label>
+                <textarea name="description" rows="5"></textarea>
             </div>
 
-            <button
-                type="submit"
-                class="btn-submit">
-
-                Submit Report
-
-            </button>
-
+            <button type="submit" class="btn primary">Submit Report</button>
         </form>
-
     </div>
-
 </div>
-
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static',
-filename='js/report_transaction.js') }}"></script>
+{% block js %}
+<script src="{{ url_for('static', filename='js/report_wrong_transaction.js') }}"></script>
 {% endblock %}

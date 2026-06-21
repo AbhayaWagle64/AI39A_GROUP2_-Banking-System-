@@ -18,7 +18,7 @@ class TransactionController:
                 FROM register
                 WHERE username = %s
                 """,
-                (session["username"],)
+                (session.get("user_id"),)
             )
 
             if not user:
@@ -121,7 +121,7 @@ class TransactionController:
                 FROM register
                 WHERE username = %s
                 """,
-                (session["username"],)
+                (session.get("user_id"),)
             )
 
             transactions = db.fetch_all(

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Wallet - ePaisa{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Wallet</h1>
+    <div class="wallet-balance">
+        <span>Available Balance</span>
+        <strong>Rs. 0.00</strong>
+    </div>
+    <div class="action-grid">
+        <a class="btn primary" href="{{ url_for('wallet.send_money') }}">Send Money</a>
+        <a class="btn secondary" href="{{ url_for('wallet.receive_money') }}">Receive Money</a>
+        <a class="btn secondary" href="{{ url_for('qr.qr_payment') }}">QR Payment</a>
+        <a class="btn secondary" href="{{ url_for('wallet.show_add_money') }}">Add Money</a>
+        <a class="btn secondary" href="{{ url_for('wallet.show_withdraw_money') }}">Withdraw</a>
+        <a class="btn secondary" href="{{ url_for('wallet.show_linked_accounts') }}">Linked Accounts</a>
+    </div>
+</section>
+{% endblock %}
