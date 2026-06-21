@@ -12,58 +12,70 @@
 
 <div class="dashboard-wrap" style="padding:24px;">
 
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:24px;">
+    <div
+        style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:24px;">
         <div>
             <h1 class="dashboard-title" style="margin:0 0 8px;">Generate Report</h1>
-            <p style="color:var(--text-secondary); margin:0;">All transactions, unsuccessful transactions, and user growth data</p>
+            <p style="color:var(--text-secondary); margin:0;">All transactions, unsuccessful transactions, and user
+                growth data</p>
         </div>
-        <a href="{{ url_for('admin.download_admin_report_zip') }}" class="btn btn-primary" style="padding:12px 18px;">Download Report Pack</a>
+        <a href="{{ url_for('admin.download_admin_report_zip') }}" class="btn btn-primary"
+            style="padding:12px 18px;">Download Report Pack</a>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+    <div
+        style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
         <div class="card" style="padding:18px;">
             <div style="color:var(--text-secondary); font-size:13px;">Total Transactions</div>
             <div style="font-size:28px; font-weight:700; margin-top:8px;">{{ transactions|length }}</div>
         </div>
         <div class="card" style="padding:18px;">
             <div style="color:var(--text-secondary); font-size:13px;">Wrong Transactions</div>
-            <div style="font-size:28px; font-weight:700; margin-top:8px; color:#c00;">{{ wrong_transactions|length }}</div>
+            <div style="font-size:28px; font-weight:700; margin-top:8px; color:#c00;">{{ wrong_transactions|length }}
+            </div>
         </div>
         <div class="card" style="padding:18px;">
             <div style="color:var(--text-secondary); font-size:13px;">Total Users</div>
-            <div style="font-size:28px; font-weight:700; margin-top:8px;">{{ total_users.total if total_users and total_users.total else 0 }}</div>
+            <div style="font-size:28px; font-weight:700; margin-top:8px;">{{ total_users.total if total_users and
+                total_users.total else 0 }}</div>
         </div>
     </div>
 
     <div class="card" style="max-width:900px; margin-bottom:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
             <div>
                 <h3 style="margin:0 0 6px; font-size:18px;">User Growth Over Time</h3>
                 <p style="color:var(--text-secondary); margin:0;">New and cumulative users by joined date</p>
             </div>
-            <a href="{{ url_for('admin.export_user_growth_csv') }}" class="btn btn-secondary" style="padding:10px 14px; font-size:13px;">Download CSV</a>
+            <a href="{{ url_for('admin.export_user_growth_csv') }}" class="btn btn-secondary"
+                style="padding:10px 14px; font-size:13px;">Download CSV</a>
         </div>
         <canvas id="userGrowthChart" height="110"></canvas>
     </div>
 
     <div class="card" style="max-width:900px; margin-bottom:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
             <div>
                 <h3 style="margin:0 0 6px; font-size:18px;">Cumulative User Growth</h3>
                 <p style="color:var(--text-secondary); margin:0;">Same cumulative graph used in Wallet Analytics</p>
             </div>
-            <a href="{{ url_for('admin.export_user_growth_csv') }}" class="btn btn-secondary" style="padding:10px 14px; font-size:13px;">Download CSV</a>
+            <a href="{{ url_for('admin.export_user_growth_csv') }}" class="btn btn-secondary"
+                style="padding:10px 14px; font-size:13px;">Download CSV</a>
         </div>
         <canvas id="walletUserGrowthChart" height="110"></canvas>
     </div>
 
     <div class="card" style="max-width:1200px; margin-bottom:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
             <div>
                 <h3 style="margin:0 0 6px; font-size:18px;">All Transactions</h3>
                 <p style="color:var(--text-secondary); margin:0;">Complete transaction history of all users</p>
             </div>
-            <a href="{{ url_for('admin.export_transactions_csv') }}" class="btn btn-secondary" style="padding:10px 14px; font-size:13px;">Download CSV</a>
+            <a href="{{ url_for('admin.export_transactions_csv') }}" class="btn btn-secondary"
+                style="padding:10px 14px; font-size:13px;">Download CSV</a>
         </div>
         <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
@@ -80,41 +92,57 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     {% if transactions %}
-                        {% for row in transactions %}
-                            <tr style="border-bottom:1px solid #e2e8f0;">
-                                <td style="padding:10px 12px;">{{ loop.index }}</td>
-                                <td style="padding:10px 12px;">{{ row.transaction_date.strftime('%Y-%m-%d %H:%M') if row.transaction_date else '' }}</td>
-                                <td style="padding:10px 12px;">{{ row.sender_email or '-' }}</td>
-                                <td style="padding:10px 12px;">{{ row.sender_epaisa_id or '-' }}</td>
-                                <td style="padding:10px 12px;">{{ row.receiver_email or '-' }}</td>
-                                <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or '-' }}</td>
-                                <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount else '0.00' }}</td>
-                                <td style="padding:10px 12px;">
-                                    {% if row.status == 'recharge' %}
-                                        <span style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge</span>
-                                    {% elif row.status == 'recharge_failed' %}
-                                        <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge Failed</span>
-                                    {% elif row.status == 'merchant_payment' %}
-                                        <span style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Merchant Payment</span>
-                                    {% elif row.status == 'failed_otp' %}
-                                        <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed OTP</span>
-                                    {% elif row.status == 'failed_internet' %}
-                                        <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Internet Failed</span>
-                                    {% elif row.status == 'failed_processed' %}
-                                        <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Processed Failed</span>
-                                    {% elif row.status == 'failed' %}
-                                        <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed</span>
-                                    {% else %}
-                                        <span style="text-transform:capitalize;">{{ row.status or 'completed' }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    {% for row in transactions %}
+                    <tr style="border-bottom:1px solid #e2e8f0;">
+                        <td style="padding:10px 12px;">{{ loop.index }}</td>
+                        <td style="padding:10px 12px;">{{ row.transaction_date.strftime('%Y-%m-%d %H:%M') if
+                            row.transaction_date else '' }}</td>
+                        <td style="padding:10px 12px;">{{ row.sender_email or '-' }}</td>
+                        <td style="padding:10px 12px;">{{ row.sender_epaisa_id or '-' }}</td>
+                        <td style="padding:10px 12px;">{{ row.receiver_email or '-' }}</td>
+                        <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or '-' }}</td>
+                        <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount
+                            else '0.00' }}</td>
+                        <td style="padding:10px 12px;">
+                            {% if row.status == 'recharge' %}
+                            <span
+                                style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge</span>
+                            {% elif row.status == 'recharge_failed' %}
+                            <span
+                                style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge
+                                Failed</span>
+                            {% elif row.status == 'merchant_payment' %}
+                            <span
+                                style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Merchant
+                                Payment</span>
+                            {% elif row.status == 'failed_otp' %}
+                            <span
+                                style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed
+                                OTP</span>
+                            {% elif row.status == 'failed_internet' %}
+                            <span
+                                style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Internet
+                                Failed</span>
+                            {% elif row.status == 'failed_processed' %}
+                            <span
+                                style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Processed
+                                Failed</span>
+                            {% elif row.status == 'failed' %}
+                            <span
+                                style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed</span>
+                            {% else %}
+                            <span style="text-transform:capitalize;">{{ row.status or 'completed' }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
                     {% else %}
-                        <tr>
-                            <td colspan="8" style="padding:20px 12px; text-align:center; color:#64748b;">No transactions found.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="8" style="padding:20px 12px; text-align:center; color:#64748b;">No transactions
+                            found.</td>
+                    </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -122,12 +150,15 @@
     </div>
 
     <div class="card" style="max-width:1200px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
             <div>
                 <h3 style="margin:0 0 6px; font-size:18px;">Wrong Transactions</h3>
-                <p style="color:var(--text-secondary); margin:0;">Unsuccessful transactions from wrong OTP, timeout, internet failure, or incomplete processing</p>
+                <p style="color:var(--text-secondary); margin:0;">Unsuccessful transactions from wrong OTP, timeout,
+                    internet failure, or incomplete processing</p>
             </div>
-            <a href="{{ url_for('admin.export_wrong_transactions_csv') }}" class="btn btn-secondary" style="padding:10px 14px; font-size:13px;">Download CSV</a>
+            <a href="{{ url_for('admin.export_wrong_transactions_csv') }}" class="btn btn-secondary"
+                style="padding:10px 14px; font-size:13px;">Download CSV</a>
         </div>
         <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
@@ -145,24 +176,29 @@
                 </thead>
                 <tbody>
                     {% if wrong_transactions %}
-                        {% for row in wrong_transactions %}
-                            <tr style="border-bottom:1px solid #ffe4e6;">
-                                <td style="padding:10px 12px;">{{ loop.index }}</td>
-                                <td style="padding:10px 12px;">{{ row.transaction_date.strftime('%Y-%m-%d %H:%M') if row.transaction_date else '' }}</td>
-                                <td style="padding:10px 12px;">{{ row.sender_email or '-' }}</td>
-                                <td style="padding:10px 12px;">{{ row.sender_epaisa_id or '-' }}</td>
-                                <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or row.receiver_email or '-' }}</td>
-                                <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount else '0.00' }}</td>
-                                <td style="padding:10px 12px;">
-                                    <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">{{ row.status or 'failed' }}</span>
-                                </td>
-                                <td style="padding:10px 12px;">{{ row.failure_reason or 'Unsuccessful transaction' }}</td>
-                            </tr>
-                        {% endfor %}
+                    {% for row in wrong_transactions %}
+                    <tr style="border-bottom:1px solid #ffe4e6;">
+                        <td style="padding:10px 12px;">{{ loop.index }}</td>
+                        <td style="padding:10px 12px;">{{ row.transaction_date.strftime('%Y-%m-%d %H:%M') if
+                            row.transaction_date else '' }}</td>
+                        <td style="padding:10px 12px;">{{ row.sender_email or '-' }}</td>
+                        <td style="padding:10px 12px;">{{ row.sender_epaisa_id or '-' }}</td>
+                        <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or row.receiver_email or '-' }}</td>
+                        <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount
+                            else '0.00' }}</td>
+                        <td style="padding:10px 12px;">
+                            <span
+                                style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">{{
+                                row.status or 'failed' }}</span>
+                        </td>
+                        <td style="padding:10px 12px;">{{ row.failure_reason or 'Unsuccessful transaction' }}</td>
+                    </tr>
+                    {% endfor %}
                     {% else %}
-                        <tr>
-                            <td colspan="8" style="padding:20px 12px; text-align:center; color:#64748b;">No wrong transactions found.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="8" style="padding:20px 12px; text-align:center; color:#64748b;">No wrong
+                            transactions found.</td>
+                    </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -170,38 +206,38 @@
     </div>
 
 </div>
-
 {% endblock %}
 
 {% block js %}
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const logoutLinks = document.querySelectorAll('.logout-link');
-    const logoutModal = document.getElementById('logoutModal');
-    const modalCancel = document.getElementById('modalCancel');
+    document.addEventListener("DOMContentLoaded", () => {
+        const logoutLinks = document.querySelectorAll('.logout-link');
+        const logoutModal = document.getElementById('logoutModal');
+        const modalCancel = document.getElementById('modalCancel');
 
-    logoutLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            logoutModal.classList.add('active');
+        logoutLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                logoutModal.classList.add('active');
+            });
         });
-    });
 
-    if (modalCancel) {
-        modalCancel.addEventListener('click', () => {
-            logoutModal.classList.remove('active');
-        });
-    }
-
-    if (logoutModal) {
-        logoutModal.addEventListener('click', (e) => {
-            if (e.target === logoutModal) {
+        if (modalCancel) {
+            modalCancel.addEventListener('click', () => {
                 logoutModal.classList.remove('active');
-            }
-        });
-    }
+            });
+        }
 
-    const userGrowthRows = {{ user_growth_json|safe }};
+        if (logoutModal) {
+            logoutModal.addEventListener('click', (e) => {
+                if (e.target === logoutModal) {
+                    logoutModal.classList.remove('active');
+                }
+            });
+        }
+
+        const userGrowthRows = {{ user_growth_json | safe
+    }};
     const userLabels = userGrowthRows.length ? userGrowthRows.map(row => row.date_joined) : ['No Data'];
     const newUsers = userGrowthRows.length ? userGrowthRows.map(row => Number(row.new_users || 0)) : [0];
     const cumulativeUsers = userGrowthRows.length ? userGrowthRows.map(row => Number(row.cumulative_users || 0)) : [0];
@@ -248,14 +284,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const totalUsers = {{ total_users.total if total_users and total_users.total else 0 }};
-    const walletLabels = [];
-    const walletData = [];
+    const userGrowthRows = {{ user_growth_json | safe }};
+    const hasData = userGrowthRows && userGrowthRows.length > 0;
 
-    for (let i = 0; i <= totalUsers; i++) {
-        walletLabels.push(i.toString());
-        walletData.push(i);
-    }
+    const walletLabels = hasData ? userGrowthRows.map(row => row.date_joined) : ['No Data'];
+    const walletData = hasData ? userGrowthRows.map(row => Number(row.cumulative_users || 0)) : [0];
 
     const walletUserGrowthCtx = document.getElementById('walletUserGrowthChart').getContext('2d');
     new Chart(walletUserGrowthCtx, {
@@ -263,11 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
         data: {
             labels: walletLabels,
             datasets: [{
-                label: 'User Count',
+                label: 'Cumulative Users',
                 data: walletData,
                 borderColor: '#1e40af',
                 backgroundColor: 'rgba(30, 64, 175, 0.1)',
-                tension: 0,
+                tension: 0.35,
                 fill: true,
                 pointRadius: 4,
                 pointBackgroundColor: '#1e40af'
@@ -286,12 +319,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 x: {
                     title: {
                         display: true,
-                        text: 'User Count'
+                        text: 'Date'
                     }
                 }
             }
         }
     });
-});
-</script>
-{% endblock %}
+
+
+
+
+    //     const totalUsers = {{ total_users.total if total_users and total_users.total else 0 }};
+    //     const walletLabels = [];
+    //     const walletData = [];
+
+    //     for (let i = 0; i <= totalUsers; i++) {
+    //         walletLabels.push(i.toString());
+    //         walletData.push(i);
+    //     }
+
+    //     const walletUserGrowthCtx = document.getElementById('walletUserGrowthChart').getContext('2d');
+    //     new Chart(walletUserGrowthCtx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: walletLabels,
+    //             datasets: [{
+    //                 label: 'User Count',
+    //                 data: walletData,
+    //                 borderColor: '#1e40af',
+    //                 backgroundColor: 'rgba(30, 64, 175, 0.1)',
+    //                 tension: 0,
+    //                 fill: true,
+    //                 pointRadius: 4,
+    //                 pointBackgroundColor: '#1e40af'
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             plugins: {
+    //                 legend: { display: false }
+    //             },
+    //             scales: {
+    //                 y: {
+    //                     beginAtZero: true,
+    //                     ticks: { stepSize: 1 }
+    //                 },
+    //                 x: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'User Count'
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     });
+
+    // });
+
+    // </script>
+// {% endblock %}

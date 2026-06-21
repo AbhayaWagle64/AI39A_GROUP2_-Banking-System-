@@ -1,3 +1,4 @@
+<!-- transaction  -->
 {% extends "base.html" %}
 
 {% block title %}
@@ -75,6 +76,7 @@ Transactions — ePaisa
                                     <span style="text-transform:capitalize;">{{ row.status or 'completed' }}</span>
                                 {% endif %}
                             </td>
+                       
                         </tr>
                     {% endfor %}
                 {% else %}
@@ -86,7 +88,6 @@ Transactions — ePaisa
         </table>
         </div>
     </div>
-
 </div>
 
 {% endblock %}

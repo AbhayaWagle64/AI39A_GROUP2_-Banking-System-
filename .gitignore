@@ -3,6 +3,8 @@
 *.egg-info/
 *.env
 *.log
+venv/
+__pycache__/
 *.pyc
 *.pyd
 *.pyo
@@ -23,4 +25,3 @@ instance/
 pip-wheel-metadata/
 static/images/
 static/uploads
-venv/

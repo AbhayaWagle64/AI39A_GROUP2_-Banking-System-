@@ -101,7 +101,7 @@ Profile — ePaisa
                 </div>
 
                 <div class="p-field">
-                    <span class="p-label">📅 Member Since</span>
+                    <span class="p-label">📅 Member Since </span>
                     <span class="p-value">{{ user.date_joined }}</span>
                 </div>
 
@@ -125,9 +125,7 @@ Profile — ePaisa
     </div>
 
 </div>
-
 {% endblock %}
-
 {% block js %}
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

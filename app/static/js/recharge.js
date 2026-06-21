@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const operator = operatorInput.value;
         const amount = parseFloat(amountInput.value);
 
-        // Reset errors
+        // RESET ERRORS
         phoneError.textContent = "";
         phoneError.className = "field-hint";
         operatorError.textContent = "";
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         amountError.textContent = "";
         amountError.className = "field-hint";
 
-        // Validation
+        // VALIDATION
         if (!phone || !/^[0-9]{10}$/.test(phone)) {
             phoneError.textContent = "Enter a valid 10-digit phone number";
             phoneError.className = "field-hint error";
