@@ -4,6 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Paisa Register</title>
+<<<<<<< HEAD
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body>
+
+    <div class="landing-wrapper">
+
+        <!-- LEFT HERO -->
+        <div class="landing-hero">
+
+            <div class="hero-chip">
+                <span>★</span>
+                <span>Trusted Nepali Digital Wallet</span>
+            </div>
+
+            <img
+                src="{{ url_for('static', filename='images/logo.svg') }}"
+                alt="ePaisa"
+                class="hero-logo-lg"
+                width="100"
+                height="100">
+
+            <h1 class="hero-title">Smart Banking <span>For Nepal</span></h1>
+
+            <p class="hero-subtitle">
+                Send money, pay bills, manage your wallet and experience secure digital
+                finance with E-Paisa.
+            </p>
+
+            <ul class="hero-features">
+                <li>Instant Payments</li>
+                <li>Bank-Level Security</li>
+                <li>नेपालमै विश्वास</li>
+            </ul>
+
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <div class="metric-value">50K+</div>
+                    <div class="metric-label">Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">₹10M+</div>
+                    <div class="metric-label">Transactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.9★</div>
+                    <div class="metric-label">Rating</div>
+                </div>
+            </div>
+
+            <p class="hero-footer">
+                Secure • Reliable • Fast
+            </p>
+        </div>
+
+        <!-- RIGHT AUTH PANEL-->
+        <div class="landing-auth">
+
+            <div class="auth-box">
+
+                <div class="auth-box-header">
+                    <img
+                        src="{{ url_for('static', filename='images/logo.svg') }}"
+                        alt="ePaisa"
+                        class="auth-box-logo"
+                        width="52"
+                        height="52">
+
+                    <h2>Create Your Account</h2>
+                    <p>Start your secure digital banking journey today</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flashes" style="margin-bottom:16px;">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}" style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;{% if category == 'success' %}background:var(--green-50);color:var(--green-700);{% elif category == 'danger' %}background:#fee;border:1px solid #fcc;color:#c00;{% elif category == 'error' %}background:#fff3cd;border:1px solid #ffc107;color:#856404;{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
+
+                    <div class="form-group">
+                        <label for="full_name">
+                            <span>👤</span>
+                            <span>Full Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="fullname"
+                            class="input"
+                            placeholder="Enter your full name"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <span>📧</span>
+                            <span>Email Address</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="input"
+                            placeholder="example@gmail.com"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <span>📱</span>
+                            <span>Phone Number</span>
+                        </label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            class="input"
+                            placeholder="98XXXXXXXX"
+                            maxlength="10"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <span>🔒</span>
+                            <span>Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="input"
+                            placeholder="Create a secure password"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">
+                            <span>🔒</span>
+                            <span>Confirm Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            class="input"
+                            placeholder="Re-enter password"
+                            required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary auth-btn">
+                        Create Account
+                    </button>
+
+                    <div class="divider">OR</div>
+
+                    <p class="auth-footer">
+                        Already have an account?
+                        <a href="/login">Login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/style.js') }}"></script>
+
+=======
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <script src="{{ url_for('static', filename='js/register.js') }}" defer></script>
@@ -84,5 +261,6 @@
     </div>
 
     <div id="toast" class="hidden"></div>
+>>>>>>> origin/sakina-maharjan
 </body>
 </html>

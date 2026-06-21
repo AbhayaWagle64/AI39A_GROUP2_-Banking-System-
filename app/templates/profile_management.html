@@ -1,12 +1,200 @@
+<<<<<<< HEAD
+<!-- PROFILE_MANAGEMENT  -->
+{% extends "base.html" %}
+{% block title %}
+Manage Profile — ePaisa
+{% endblock %}
+=======
 {% extends "base.html" %}
 
 {% block title %}Edit Profile - ePaisa{% endblock %}
+>>>>>>> origin/sakina-maharjan
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_management.css') }}">
 {% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
+
+<div class="pm-container">
+
+    <div class="pm-sidebar">
+
+        <div class="pm-brand">
+            <img
+            src="{{ url_for('static', filename='images/logo.svg') }}"
+            alt="ePaisa"
+            class="pm-brand-logo"
+            width="60"
+            height="60">
+        </div>
+
+        <h2 class="pm-sidebar-title">Edit Your Profile</h2>
+
+        <p class="pm-sidebar-desc">
+            Update your personal information, change your password, or upload a new
+            profile picture to keep your account up to date.
+        </p>
+
+        <ul class="pm-features">
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">👤</span>
+                <span>Personal Info</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">🔐</span>
+                <span>Change Password</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">📸</span>
+                <span>Profile Photo</span>
+            </li>
+
+            <li class="pm-feature-item">
+                <span class="pm-feature-icon">📬</span>
+                <span>Contact Details</span>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="pm-form-panel">
+
+        <form
+        action="{{ url_for('user.profile_management') }}"
+        method="POST"
+        class="pm-form-inner"
+        enctype="multipart/form-data">
+
+            <h1>Manage Profile</h1>
+
+            <div class="avatar-edit-section">
+
+                <div class="avatar-ring">
+                    <div class="avatar-ring-inner">
+                        {% if uploaded_image %}
+                        <img
+                        src="{{ url_for('static', filename='uploads/' + uploaded_image) }}"
+                        alt="Profile"
+                        class="avatar-img"
+                        id="avatarPreview">
+                        {% else %}
+                        <img
+                        src="{{ url_for('static', filename='images/default_avatar.svg') }}"
+                        alt="Default Avatar"
+                        class="avatar-img avatar-default-fit"
+                        id="avatarPreview">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <label for="profile_image" class="avatar-edit-btn">
+                    <span class="upload-icon">📁</span>
+                    {{ uploaded_image | default('Upload Photo') }}
+                </label>
+                <input
+                type="file"
+                id="profile_image"
+                name="profile_image"
+                accept="image/*"
+                class="avatar-hidden-input">
+
+            </div>
+
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input
+                type="text"
+                id="full_name"
+                name="full_name"
+                class="input"
+                value="{{ user.full_name }}"
+                required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                type="email"
+                id="email"
+                name="email"
+                class="input"
+                value="{{ user.email }}"
+                required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                type="tel"
+                id="phone"
+                name="phone"
+                class="input"
+                value="{{ user.phone }}"
+                required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea
+                id="address"
+                name="address"
+                class="input"
+                rows="3"
+                required>{{ user.address }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="password">New Password <span class="optional-tag">(optional)</span></label>
+                <input
+                type="password"
+                id="password"
+                name="password"
+                class="input"
+                placeholder="Leave blank to keep current">
+                <div class="password-strength">
+                    <div class="password-strength-bar"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                class="input"
+                placeholder="Re-enter new password">
+            </div>
+
+            <div class="pm-actions">
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+
+                <a href="{{ url_for('user.profile') }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/profile_management.js') }}"></script>
+=======
 <section class="panel">
     <h1>Edit Profile</h1>
     <form method="POST" enctype="multipart/form-data" class="simple-form">
@@ -41,4 +229,5 @@
         <button type="submit" class="btn primary">Save Changes</button>
     </form>
 </section>
+>>>>>>> origin/sakina-maharjan
 {% endblock %}

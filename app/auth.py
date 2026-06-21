@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
 from functools import wraps
 
-
+#  login
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -13,7 +13,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
+# admin required 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -25,6 +25,6 @@ def admin_required(f):
         user = session.get('user', {})
         if user.get('account_type') != 'admin':
             flash('Admin access required.', 'danger')
-            return redirect(url_for('user.home'))
+            return redirect(url_for('user.dashboard'))
         return f(*args, **kwargs)
     return decorated_function

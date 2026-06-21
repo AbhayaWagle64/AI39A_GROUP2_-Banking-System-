@@ -1,5 +1,4 @@
 import os
-
 from flask import flash, redirect, render_template, request, session, url_for
 from werkzeug.security import generate_password_hash
 
@@ -7,11 +6,15 @@ from app.database import Database
 
 
 class UserController:
-    def __init__(self):
+    def __init__(self, app=None):
+        from app.controllers.auth_controller import AuthController
+        if app:
+            self.auth_controller = AuthController(app)
+        else:
+            self.auth_controller = None
         self.upload_folder = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "static",
-            "uploads",
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "app", "static", "uploads"
         )
         os.makedirs(self.upload_folder, exist_ok=True)
         self.allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}

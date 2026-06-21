@@ -1,3 +1,97 @@
+<<<<<<< HEAD
+<!-- transaction  -->
+{% extends "base.html" %}
+
+{% block title %}
+Transactions — ePaisa
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-wrap" style="padding:24px;">
+
+    <h1 class="dashboard-title" style="margin:0 0 16px;">Transactions</h1>
+
+    {% if user %}
+    <div class="card account-ref-card" style="max-width:420px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+        <div>
+            <span class="balance-label">Your ePaisa Number</span>
+            <div class="balance-amount" style="font-size:22px;">{{ user.customer_id or 'EP-10000' }}</div>
+        </div>
+        <span class="badge badge-success">Active</span>
+    </div>
+    {% endif %}
+
+    <div class="card" style="max-width:900px;">
+        <h3 style="margin:0 0 16px;">Transaction History</h3>
+        <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <thead>
+                <tr style="background:#f8fafc; text-align:left; border-bottom:2px solid #e2e8f0;">
+                    <th style="padding:10px 12px;">#</th>
+                    <th style="padding:10px 12px;">Date</th>
+                    <th style="padding:10px 12px;">Type</th>
+                    <th style="padding:10px 12px;">Sender Email</th>
+                    <th style="padding:10px 12px;">Sender ePaisa ID</th>
+                    <th style="padding:10px 12px;">Receiver Email</th>
+                    <th style="padding:10px 12px;">Receiver ePaisa ID</th>
+                    <th style="padding:10px 12px;">Amount (₹)</th>
+                    <th style="padding:10px 12px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if rows %}
+                    {% for row in rows %}
+{% set sent = (row.sender_email == (user.email if user else '')) %}
+                        <tr style="border-bottom:1px solid #e2e8f0;">
+                            <td style="padding:10px 12px;">{{ loop.index }}</td>
+                            <td style="padding:10px 12px;">{{ row.transaction_date.strftime('%Y-%m-%d %H:%M') if row.transaction_date else '' }}</td>
+                            <td style="padding:10px 12px;">
+                                <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600; {% if sent %}background:#fee;color:#c00;{% else %}background:#e6f7ee;color:#006b27;{% endif %}">
+                                    {{ 'Sent' if sent else 'Received' }}
+                                </span>
+                            </td>
+                            <td style="padding:10px 12px;">{{ row.sender_email or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ row.sender_epaisa_id or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ row.receiver_email or '-' }}</td>
+                            <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or '-' }}</td>
+                            <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount else '0.00' }}</td>
+                            <td style="padding:10px 12px;">
+                                {% if row.status == 'recharge' %}
+                                    <span style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge</span>
+                                {% elif row.status == 'recharge_failed' %}
+                                    <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge Failed</span>
+                                {% elif row.status == 'failed_otp' %}
+                                    <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed OTP</span>
+                                {% elif row.status == 'failed_internet' %}
+                                    <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Internet Failed</span>
+                                {% elif row.status == 'failed_processed' %}
+                                    <span style="background:#fff7ed; color:#c2410c; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Processed Failed</span>
+                                {% elif row.status == 'failed' %}
+                                    <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Failed</span>
+                                {% else %}
+                                    <span style="text-transform:capitalize;">{{ row.status or 'completed' }}</span>
+                                {% endif %}
+                            </td>
+                       
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="padding:20px 12px; text-align:center; color:#64748b;">No transactions yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+=======
 {% extends "base.html" %}
 
 {% block title %}Transactions - ePaisa{% endblock %}
@@ -33,4 +127,5 @@
     {% endif %}
     <a class="btn primary" href="{{ url_for('wallet.show_wallet') }}">Back to Wallet</a>
 </section>
+>>>>>>> origin/sakina-maharjan
 {% endblock %}

@@ -1,21 +1,43 @@
-from flask import flash, render_template, request
+import csv
+
+from app.database import get_connection
 
 
-def reports():
-    return render_template("report_wrong_transaction.html")
+class ReportController:
 
+    @staticmethod
+    def generate_csv():
 
-def report_wrong_transaction():
-    if request.method == "POST":
-        transaction_id = request.form.get("transaction_id", "").strip()
-        reason = request.form.get("reason", "").strip()
-        description = request.form.get("description", "").strip()
+        conn = get_connection()
 
-        if not transaction_id or not reason:
-            flash("Transaction ID and reason are required.", "danger")
-            return render_template("report_wrong_transaction.html")
+        data = conn.execute(
+            "SELECT * FROM transactions"
+        ).fetchall()
 
-        flash("Report submitted successfully. Our support team will review it.", "success")
-        return render_template("report_wrong_transaction.html")
+        filename = "report.csv"
 
-    return render_template("report_wrong_transaction.html")
+        with open(filename, "w", newline="") as file:
+
+            writer = csv.writer(file)
+
+            writer.writerow([
+                "Sender",
+                "Receiver",
+                "Amount",
+                "Status",
+                "Date"
+            ])
+
+            for row in data:
+
+                writer.writerow([
+                    row["sender_wallet"],
+                    row["receiver_wallet"],
+                    row["amount"],
+                    row["status"],
+                    row["created_at"]
+                ])
+
+        conn.close()
+
+        return filename

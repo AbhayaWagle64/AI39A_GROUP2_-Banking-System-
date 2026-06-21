@@ -1,0 +1,143 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Wallet Analytics — Admin{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-wrap" style="padding:24px;">
+
+    <h1 class="dashboard-title" style="margin:0 0 16px;">Wallet Analytics</h1>
+    <p style="color:var(--text-secondary); margin-bottom:24px;">User growth and balance analytics</p>
+
+    <div class="card" style="max-width:900px; margin-bottom:24px;">
+        <h3 style="margin:0 0 16px; font-size:18px;">User Growth Over Time</h3>
+        <p style="color:var(--text-secondary); margin-bottom:12px;">Total Users: {{ total_users.total if total_users else 0 }}</p>
+        <canvas id="userGrowthChart" height="100"></canvas>
+    </div>
+
+    <div class="card" style="max-width:900px;">
+        <h3 style="margin:0 0 16px; font-size:18px;">Top 5 Users by Balance</h3>
+        <canvas id="topUsersChart" height="100"></canvas>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutLinks = document.querySelectorAll('.logout-link');
+    const logoutModal = document.getElementById('logoutModal');
+    const modalCancel = document.getElementById('modalCancel');
+
+    logoutLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            logoutModal.classList.add('active');
+        });
+    });
+
+    if (modalCancel) {
+        modalCancel.addEventListener('click', () => {
+            logoutModal.classList.remove('active');
+        });
+    }
+
+    if (logoutModal) {
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) {
+                logoutModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Line graph: cumulative user growth (0, 1, 2, ..., current total)
+    const totalUsers = {{ total_users.total if total_users and total_users.total else 0 }};
+    const labels = [];
+    const cumulativeData = [];
+    
+    // Build array: 0, 1, 2, 3, ..., totalUsers
+    for (let i = 0; i <= totalUsers; i++) {
+        labels.push(i.toString());
+        cumulativeData.push(i);
+    }
+
+    const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+    const userGrowthChart = new Chart(userGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'User Count',
+                data: cumulativeData,
+                borderColor: '#1e40af',
+                backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                tension: 0,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#1e40af'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'User Count'
+                    }
+                }
+            }
+        }
+    });
+
+    // Top users chart - fetch via API for automatic updates
+    fetch('/api/admin/user-stats')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const topLabels = data.top_users.length > 0 ? data.top_users.map(u => u.full_name) : ['No Data'];
+                const topBalances = data.top_users.length > 0 ? data.top_users.map(u => u.balance) : [0];
+
+                const topUsersCtx = document.getElementById('topUsersChart').getContext('2d');
+                new Chart(topUsersCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topLabels,
+                        datasets: [{
+                            label: 'Balance (₹)',
+                            data: topBalances,
+                            backgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+});
+</script>
+{% endblock %}

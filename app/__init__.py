@@ -1,24 +1,34 @@
 from flask import Flask
-
-from .extensions import db
-from .routes import register_blueprints
-from .errors.handlers import register_error_handlers
-from .middlewares.rate_limiter import init_rate_limiter
-from .middlewares.request_logger import init_request_logger
+from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
 
 
-def create_app(config_class=None):
-    app = Flask(
-        __name__,
-        static_folder="static",
-        template_folder="templates"
-    )
-    app.config.from_object(config_class or "config.Config")
+def create_app():
+    app = Flask(__name__)
 
-    db.init_app(app)
-    register_blueprints(app)
-    register_error_handlers(app)
-    init_rate_limiter(app)
-    init_request_logger(app)
+    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+    app.config["ALLOWED_EXTENSIONS"] = ALLOWED_EXTENSIONS
+    app.config["MAIL_SERVER"] = MAIL_SERVER
+    app.config["MAIL_PORT"] = MAIL_PORT
+    app.config["MAIL_USE_TLS"] = MAIL_USE_TLS
+    app.config["MAIL_USERNAME"] = MAIL_USERNAME
+    app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
+    app.config["MAIL_DEFAULT_SENDER"] = MAIL_DEFAULT_SENDER
+
+    from app.database import Database
+    from app.routes.auth_routes import main as auth_bp
+    from app.routes.user_routes import main as user_bp
+    from app.routes.admin_routes import main as admin_bp
+    from app.utils.mailer import Mailer
+
+    with app.app_context():
+        Database.create_tables()
+
+    mailer = Mailer(app)
+    app.mailer = mailer
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(admin_bp)
 
     return app

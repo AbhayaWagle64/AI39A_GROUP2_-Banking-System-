@@ -1,2 +1,7 @@
-# app/controllers/__init__.py
-# Controller package initializer. It helps Python treat this folder as a package.
+from app.controllers.base_controller import BaseController
+
+
+class AuthController:
+    def login(self): pass
+    def register(self): pass
+    def logout(self): pass

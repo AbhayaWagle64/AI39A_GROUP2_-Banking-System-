@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Transaction - ePaisa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: url("{{ url_for('static', filename='images/nepal_bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #eee;
+      text-align: center;
+    }
+/* icon */
+    .icon {
+      font-size: 50px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .amount-box {
+      background: #f0fff0;
+      border: 1px solid #c3e6cb;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 24px;
+    }
+    .amount-box p { font-size: 13px; color: #555; margin-bottom: 4px; }
+    .amount-box h3 { font-size: 24px; color: #4CAF50; font-weight: bold; }
+
+    /*flash masage */
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+    .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .alert-danger  { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .alert button  { background: none; border: none; font-size: 18px; cursor: pointer; color: inherit; }
+
+    /* otp input */
+    .otp-inputs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .otp-inputs input {
+      width: 50px;
+      height: 55px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      color: #333;
+    }
+
+    .otp-inputs input:focus {
+      border-color: #4CAF50;
+    }
+
+    .btn-verify {
+      width: 100%;
+      padding: 13px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .btn-verify:hover { background: #45a049; }
+
+
+/* resend */
+    .resend-row {
+      font-size: 13px;
+      color: #888;
+    }
+    .resend-row a {
+      color: #4CAF50;
+      text-decoration: none;
+      font-weight: 500;
+    }
+/* time */
+    .timer {
+      font-size: 13px;
+      color: #f44336;
+      margin-top: 8px;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #888;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="icon">🔐</div>
+    <h2>Verify Transaction</h2>
+    <p class="subtitle">
+      A 6-digit OTP has been sent to your registered<br>
+      mobile number or email. Please enter it below.
+    </p>
+
+    <!-- transaction amount -->
+    <div class="amount-box">
+      <p>Transaction Amount</p>
+      <h3>Rs. {{ amount if amount else '0.00' }}</h3>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- otp form -->
+    <form method="POST" action="/verify-transaction-otp" id="otpForm">
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" class="otp-box" id="otp1" autofocus>
+        <input type="text" maxlength="1" class="otp-box" id="otp2">
+        <input type="text" maxlength="1" class="otp-box" id="otp3">
+        <input type="text" maxlength="1" class="otp-box" id="otp4">
+        <input type="text" maxlength="1" class="otp-box" id="otp5">
+        <input type="text" maxlength="1" class="otp-box" id="otp6">
+      </div>
+      <input type="hidden" name="otp" id="otpHidden">
+      <button type="submit" class="btn-verify">Verify & Confirm Transaction</button>
+    </form>
+
+    <div class="resend-row">
+      Didn't receive OTP? <a href="/resend-transaction-otp">Resend OTP</a>
+    </div>
+
+    <div class="timer" id="timer">OTP expires in: 05:00</div>
+
+    <a href="/wallet" class="back-link">← Cancel Transaction</a>
+
+  </div>
+
+  <script>
+    // Auto move to next input box
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach((box, index) => {
+      box.addEventListener('input', () => {
+        if (box.value.length === 1 && index < boxes.length - 1) {
+          boxes[index + 1].focus();
+        }
+        // Combine all boxes into hidden input
+        document.getElementById('otpHidden').value =
+          Array.from(boxes).map(b => b.value).join('');
+      });
+
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && box.value === '' && index > 0) {
+          boxes[index - 1].focus();
+        }
+      });
+    });
+
+    // Countdown timer
+    let seconds = 300;
+    const timerEl = document.getElementById('timer');
+    const countdown = setInterval(() => {
+      seconds--;
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      timerEl.textContent = `OTP expires in: ${m}:${s}`;
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        timerEl.textContent = 'OTP has expired. Please resend.';
+        timerEl.style.color = '#f44336';
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

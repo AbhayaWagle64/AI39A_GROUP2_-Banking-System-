@@ -12,7 +12,11 @@
     border:1px solid var(--border-subtle);
 }
 
+<<<<<<< HEAD
+/* ── LEFT PANEL ──────────── */
+=======
 /* ── LEFT PANEL ──────────────────── */
+>>>>>>> origin/sakina-maharjan
 .pm-sidebar{
     flex:1.2;
     background:linear-gradient(150deg, var(--green-50) 0%, var(--surface-white) 100%);
