@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0d4a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -341,9 +342,17 @@
  
     {% block css %}
     {% endblock %}
+=======
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ePaisa{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block css %}{% endblock %}
+>>>>>>> origin/sakina-maharjan
 </head>
  
 <body>
+<<<<<<< HEAD
  
     <nav class="navbar">
 
@@ -640,5 +649,37 @@
         </div>
     </div>
  
+=======
+    <nav class="navbar">
+        <a href="{{ url_for('user.home') }}" class="brand">ePaisa</a>
+        <div class="nav-links">
+            <a href="{{ url_for('user.home') }}">Home</a>
+            <a href="{{ url_for('user.profile') }}">Profile</a>
+            <a href="{{ url_for('wallet.show_wallet') }}">Wallet</a>
+            <a href="{{ url_for('transaction.transaction_history') }}">Transactions</a>
+            <a href="{{ url_for('bill_payment.bill_payment') }}">Pay Bills</a>
+            <a href="{{ url_for('report.reports') }}">Reports</a>
+            <a href="{{ url_for('notification.notifications') }}">Notifications</a>
+        </div>
+    </nav>
+
+    <main class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/style.js') }}"></script>
+    {% if session.get('user_id') %}
+        <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
+    {% block js %}{% endblock %}
+>>>>>>> origin/sakina-maharjan
 </body>
 </html>

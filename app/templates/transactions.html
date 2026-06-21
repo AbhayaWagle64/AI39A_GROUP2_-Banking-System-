@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- transaction  -->
 {% extends "base.html" %}
 
@@ -90,4 +91,41 @@ Transactions — ePaisa
     </div>
 </div>
 
+=======
+{% extends "base.html" %}
+
+{% block title %}Transactions - ePaisa{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Transactions</h1>
+    {% if transactions %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.id }}</td>
+                    <td>{{ transaction.transaction_date }}</td>
+                    <td>Rs. {{ transaction.amount }}</td>
+                    <td>{{ transaction.status }}</td>
+                    <td><a href="{{ url_for('transaction.transaction_details', transaction_id=transaction.id) }}">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No transactions found.</p>
+    {% endif %}
+    <a class="btn primary" href="{{ url_for('wallet.show_wallet') }}">Back to Wallet</a>
+</section>
+>>>>>>> origin/sakina-maharjan
 {% endblock %}

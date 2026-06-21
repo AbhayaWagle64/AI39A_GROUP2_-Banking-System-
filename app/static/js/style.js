@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+<<<<<<< HEAD
     const modal = document.getElementById("logoutModal");
     const cancelBtn = document.getElementById("modalCancel");
     const logoutLinks = document.querySelectorAll(".logout-link");
@@ -219,6 +220,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (e.target === qrScannerModal) {
                 stopScanner();
             }
+=======
+    const logoutLinks = document.querySelectorAll(".logout-link");
+    const modal = document.getElementById("logoutModal");
+    const cancel = document.getElementById("modalCancel");
+
+    logoutLinks.forEach(link => {
+        link.addEventListener("click", event => {
+            event.preventDefault();
+            if (modal) modal.style.display = "flex";
+        });
+    });
+
+    if (cancel) {
+        cancel.addEventListener("click", () => {
+            if (modal) modal.style.display = "none";
+>>>>>>> origin/sakina-maharjan
         });
     }
 });

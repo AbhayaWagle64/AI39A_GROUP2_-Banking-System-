@@ -77,9 +77,64 @@ class Database:
                 receiver_email VARCHAR(100),
                 receiver_epaisa_id VARCHAR(20),
                 amount DECIMAL(10,2),
+                transaction_type VARCHAR(30),
                 transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 status VARCHAR(20) DEFAULT 'completed'
             )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS recharges (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id VARCHAR(100) NOT NULL,
+                transaction_id INT NULL,
+                mobile_number VARCHAR(15) NOT NULL,
+                operator VARCHAR(50) NOT NULL,
+                amount DECIMAL(10,2) NOT NULL,
+                plan_description VARCHAR(255),
+                status VARCHAR(20) DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (transaction_id)
+                REFERENCES transactions(id)
+                ON DELETE SET NULL
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS saved_payments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id VARCHAR(100) NOT NULL,
+                recipient_name VARCHAR(100) NOT NULL,
+                recipient_email VARCHAR(150),
+                recipient_phone VARCHAR(20),
+                nickname VARCHAR(50),
+                payment_type VARCHAR(30) DEFAULT 'wallet_transfer',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )           
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS wrong_transaction_reports (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) NOT NULL,
+                transaction_id INT NOT NULL,
+                reason VARCHAR(255) NOT NULL,
+                description TEXT,
+                status VARCHAR(20) DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS profile_management (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) NOT NULL,
+                full_name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                phone VARCHAR(20),
+                address VARCHAR(255),
+                account_type VARCHAR(20) DEFAULT 'Savings',
+                profile_picture VARCHAR(255),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+           )
         """)
 
         # Insert default admin users
@@ -114,6 +169,37 @@ class Database:
         add_column_if_missing("transactions", "receiver_epaisa_id", "receiver_epaisa_id VARCHAR(20)")
         add_column_if_missing("transactions", "transaction_date", "transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
         add_column_if_missing("transactions", "status", "status VARCHAR(20) DEFAULT 'completed'")
+        add_column_if_missing("recharges","user_id","user_id VARCHAR(100) NOT NULL")
+        add_column_if_missing("recharges","transaction_id","transaction_id INT NULL")
+        add_column_if_missing("recharges","mobile_number","mobile_number VARCHAR(15) NOT NULL")
+        add_column_if_missing("recharges","operator","operator VARCHAR(50) NOT NULL")
+        add_column_if_missing("recharges","amount","amount DECIMAL(10,2) NOT NULL")
+        add_column_if_missing("recharges","plan_description","plan_description VARCHAR(255)")
+        add_column_if_missing("recharges","status","status VARCHAR(20) DEFAULT 'pending'")
+        add_column_if_missing("recharges","created_at","created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        add_column_if_missing("saved_payments","user_id","user_id VARCHAR(100) NOT NULL")
+        add_column_if_missing("saved_payments","recipient_name","recipient_name VARCHAR(100) NOT NULL")
+        add_column_if_missing("saved_payments","recipient_email","recipient_email VARCHAR(150)")
+        add_column_if_missing("saved_payments","recipient_phone","recipient_phone VARCHAR(20)")
+        add_column_if_missing("saved_payments","nickname","nickname VARCHAR(50)")
+        add_column_if_missing("saved_payments","payment_type","payment_type VARCHAR(30) DEFAULT 'wallet_transfer'")
+        add_column_if_missing("saved_payments","created_at","created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        add_column_if_missing("transactions","transaction_type","transaction_type VARCHAR(30)")
+        add_column_if_missing("register","balance","balance DECIMAL(10,2) DEFAULT 0.00")
+        add_column_if_missing("wrong_transaction_reports","username","username VARCHAR(100) NOT NULL")
+        add_column_if_missing("wrong_transaction_reports","transaction_id","transaction_id INT NOT NULL")
+        add_column_if_missing("wrong_transaction_reports","reason","reason VARCHAR(255) NOT NULL")
+        add_column_if_missing("wrong_transaction_reports","description","description TEXT")
+        add_column_if_missing("wrong_transaction_reports","status","status VARCHAR(20) DEFAULT 'pending'")
+        add_column_if_missing("wrong_transaction_reports","created_at","created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        add_column_if_missing("profile_management","username","username VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","full_name","full_name VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","email","email VARCHAR(100) NOT NULL")
+        add_column_if_missing("profile_management","phone","phone VARCHAR(20)")
+        add_column_if_missing("profile_management","address","address VARCHAR(255)")
+        add_column_if_missing("profile_management","account_type","account_type VARCHAR(20) DEFAULT 'Savings'")
+        add_column_if_missing("profile_management","profile_picture","profile_picture VARCHAR(255)")
+        add_column_if_missing("profile_management","updated_at","updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 
         cols_check = db.fetch_all("SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name='register' AND table_schema=DATABASE()")
         col_names = {r.get('COLUMN_NAME','') for r in cols_check}

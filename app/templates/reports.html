@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - ePaisa{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Reports</h1>
+    <p>Report a wrong transaction or contact support.</p>
+    <a class="btn primary" href="{{ url_for('report.report_wrong_transaction') }}">Report Wrong Transaction</a>
+</section>
+{% endblock %}
