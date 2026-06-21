@@ -24,11 +24,19 @@ def _get_env(name, default=""):
     return os.environ.get(name, ENV_VALUES.get(name, default))
 
 
+<<<<<<< HEAD
 SECRET_KEY = _get_env("SECRET_KEY", "epaisa-secret-key-2026")
 MYSQL_HOST = _get_env("MYSQL_HOST", "localhost")
 MYSQL_USER = _get_env("MYSQL_USER", "root")
 MYSQL_PASSWORD = _get_env("MYSQL_PASSWORD", "lakpa123$$$$@.>!")
 MYSQL_DATABASE = _get_env("MYSQL_DATABASE", "epaisa")
+=======
+SECRET_KEY = "epaisa-secret-key-2026"
+MYSQL_HOST = "localhost"
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "admin#abhaya64$"
+MYSQL_DATABASE = "ePaisa"
+>>>>>>> abhaya-wagle
 
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),

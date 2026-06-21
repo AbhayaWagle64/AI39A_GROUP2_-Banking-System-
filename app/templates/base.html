@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> abhaya-wagle
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0d4a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,6 +23,7 @@
  
     <link rel="stylesheet"
     href="{{ url_for('static', filename='css/style.css') }}">
+<<<<<<< HEAD
 
     <style>
         /* ── HAMBURGER MENU BUTTON ──────────────────── */
@@ -369,6 +373,18 @@
                 </span>
             </button>
         </div>
+=======
+ 
+    {% block css %}
+    {% endblock %}
+</head>
+ 
+<body>
+ 
+    <nav class="navbar">
+ 
+        <span class="logo-text">ePaisa</span>
+>>>>>>> abhaya-wagle
  
         <ul class="nav-links">
  
@@ -409,6 +425,7 @@
         </ul>
  
     </nav>
+<<<<<<< HEAD
 
     <!-- Side Drawer Overlay -->
     <div class="side-drawer-overlay" id="sideDrawerOverlay"></div>
@@ -540,6 +557,8 @@
         </div>
 
     </aside>
+=======
+>>>>>>> abhaya-wagle
  
     <main class="page-enter">
  
@@ -587,6 +606,7 @@
  
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="{{ url_for('static', filename='js/style.js') }}"></script>
+<<<<<<< HEAD
 
     <script>
         // ── SIDE DRAWER LOGIC ────────────────────────
@@ -625,6 +645,8 @@
             });
         })();
     </script>
+=======
+>>>>>>> abhaya-wagle
  
     {% block js %}
     {% endblock %}
@@ -640,6 +662,7 @@
             </div>
             <h3 class="modal-title">Are you sure you want to logout?</h3>
             <p class="modal-subtitle">You will be redirected to the login page and your session will be closed.</p>
+<<<<<<< HEAD
             <div class="modal-actions">
                 <button class="btn-cancel" id="modalCancel">No, Stay</button>
                 <form id="logoutForm" action="/logout" method="POST" style="display:inline;">
@@ -681,5 +704,20 @@
     {% endif %}
     {% block js %}{% endblock %}
 >>>>>>> origin/sakina-maharjan
+=======
+            <form id="logoutForm" action="/logout" method="POST">
+                <div class="logout-checkbox">
+                    <input type="checkbox" id="oneWeek" name="one_week_session" value="1">
+                    <label for="oneWeek">Agree to our 1 week session</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="modalCancel">No, Stay</button>
+                    <button type="submit" class="btn-confirm">Yes, Logout</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+>>>>>>> abhaya-wagle
 </body>
 </html>

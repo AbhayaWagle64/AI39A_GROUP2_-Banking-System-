@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.bak
 *.db
 *.egg-info/
@@ -24,3 +25,13 @@ pip-wheel-metadata/
 static/images/
 static/uploads
 venv/
+=======
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+static/images/
+static/uploads/
+app/query
+>>>>>>> abhaya-wagle

@@ -1,7 +1,11 @@
 import re
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+<<<<<<< HEAD
 from flask import flash, redirect, url_for, session, render_template, request
+=======
+from flask import flash, redirect, url_for, session, render_template, request, current_app, make_response
+>>>>>>> abhaya-wagle
 from app.controllers.base_controller import BaseController
 from app.database import Database
 from app.models.register_model import RegisterModel
@@ -85,7 +89,11 @@ class AuthController(BaseController):
             reg_data = self.register_model.find_by_username(username)
             if not reg_data:
                 db = Database()
+<<<<<<< HEAD
                 results = db.fetch_all("SELECT * FROM register WHERE email = ?", (username,))
+=======
+                results = db.fetch_all("SELECT * FROM register WHERE email = %s", (username,))
+>>>>>>> abhaya-wagle
                 db.close()
                 if results:
                     reg_data = results[0]
@@ -162,7 +170,11 @@ class AuthController(BaseController):
                 address='',
                 account_type='Savings',
                 date_joined='2026-01-01',
+<<<<<<< HEAD
                 balance=0.0
+=======
+                balance=1000.0
+>>>>>>> abhaya-wagle
             )
 
             flash('Registration successful! Please login.', 'success')
@@ -173,6 +185,24 @@ class AuthController(BaseController):
     def logout(self):
         user_id = session.get("user_id")
         if user_id:
+<<<<<<< HEAD
+=======
+            if request.method == 'POST' and request.form.get('one_week_session'):
+                from itsdangerous import URLSafeTimedSerializer
+                # ensure login entry exists
+                existing = self.login_model.find_by_username(user_id)
+                if not existing:
+                    reg = self.register_model.find_by_username(user_id)
+                    if reg:
+                        self.login_model.create(reg['username'], reg['password'], reg.get('full_name', ''))
+
+                s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+                token = s.dumps({'username': user_id})
+                resp = make_response(redirect(url_for('user.wallet')))
+                resp.set_cookie('one_week_token', token, max_age=7*24*3600, httponly=True, samesite='Lax')
+                flash("You will remain logged in for 1 week.", "success")
+                return resp
+>>>>>>> abhaya-wagle
             self.login_model.delete(user_id)
         session.clear()
         flash("Logged out successfully.", "success")

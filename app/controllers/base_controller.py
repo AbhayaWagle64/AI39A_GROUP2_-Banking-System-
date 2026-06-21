@@ -1,5 +1,8 @@
 import os
+<<<<<<< HEAD
 from flask import flash, redirect, request, session, url_for
+=======
+>>>>>>> abhaya-wagle
 
 
 class BaseController:
@@ -27,6 +30,7 @@ class BaseController:
         if filename:
             filepath = os.path.join(self.upload_folder, filename)
             if os.path.exists(filepath):
+<<<<<<< HEAD
                 os.remove(filepath)
 
     def get_form_data(self, *fields):
@@ -47,3 +51,6 @@ class BaseController:
     def flash_and_redirect(self, message, category, endpoint):
         flash(message, category)
         return redirect(url_for(endpoint))
+=======
+                os.remove(filepath)
+>>>>>>> abhaya-wagle

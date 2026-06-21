@@ -17,7 +17,11 @@
     border:1px solid var(--border-subtle);
 }
 
+<<<<<<< HEAD
 /*CARD HEADER */
+=======
+/* ── CARD HEADER ──────────────────── */
+>>>>>>> abhaya-wagle
 .profile-banner{
     background:linear-gradient(150deg, #e6ffea 0%, #d6f5df 50%, #a3e6b5 100%);
     padding:44px 38px 38px;

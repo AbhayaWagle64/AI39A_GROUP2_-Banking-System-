@@ -73,4 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> abhaya-wagle
 });

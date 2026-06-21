@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 document.addEventListener("DOMContentLoaded", () => {    const form = document.querySelector(".auth-form");    const usernameInput = document.getElementById("username");    const passwordInput = document.getElementById("password");    if (form) {        form.addEventListener("submit", (e) => {            let valid = true;            if (usernameInput && usernameInput.value.trim() === "") {                valid = false;            }            if (passwordInput && passwordInput.value.trim() === "") {                valid = false;            }            if (!valid) {                e.preventDefault();            }        });    }});
 =======
 document.addEventListener("DOMContentLoaded", () => {
@@ -152,3 +153,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 >>>>>>> origin/sakina-maharjan
+=======
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.querySelector(".auth-form");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            let valid = true;
+
+            if (usernameInput && usernameInput.value.trim() === "") {
+                valid = false;
+            }
+
+            if (passwordInput && passwordInput.value.trim() === "") {
+                valid = false;
+            }
+
+            if (!valid) {
+                e.preventDefault();
+            }
+        });
+    }
+
+});
+>>>>>>> abhaya-wagle
