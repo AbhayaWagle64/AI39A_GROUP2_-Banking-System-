@@ -310,11 +310,7 @@ def edit_user(username):
         return redirect(url_for("user.dashboard"))
 
     db = Database()
-<<<<<<< HEAD
-    user = db.fetch_one("SELECT * FROM register WHERE username = ?", (username,))
-=======
     user = db.fetch_one("SELECT * FROM register WHERE username = %s", (username,))
->>>>>>> abhaya-wagle
 
     if request.method == "POST":
         full_name = request.form.get("full_name", "")
@@ -324,19 +320,11 @@ def edit_user(username):
         balance = request.form.get("balance", "0")
 
         db.execute(
-<<<<<<< HEAD
-            "UPDATE register SET full_name = ?, email = ?, phone = ?, address = ?, balance = ? WHERE username = ?",
-            (full_name, email, phone, address, balance, username)
-        )
-        db.execute(
-            "UPDATE login SET full_name = ? WHERE username = ?",
-=======
             "UPDATE register SET full_name = %s, email = %s, phone = %s, address = %s, balance = %s WHERE username = %s",
             (full_name, email, phone, address, balance, username)
         )
         db.execute(
             "UPDATE login SET full_name = %s WHERE username = %s",
->>>>>>> abhaya-wagle
             (full_name, username)
         )
         db.close()
@@ -355,13 +343,8 @@ def delete_user(username):
         return redirect(url_for("user.dashboard"))
 
     db = Database()
-<<<<<<< HEAD
-    db.execute("DELETE FROM register WHERE username = ?", (username,))
-    db.execute("DELETE FROM login WHERE username = ?", (username,))
-=======
     db.execute("DELETE FROM register WHERE username = %s", (username,))
     db.execute("DELETE FROM login WHERE username = %s", (username,))
->>>>>>> abhaya-wagle
     db.close()
     flash("User deleted successfully!", "success")
     return redirect(url_for("admin.admin_dashboard"))

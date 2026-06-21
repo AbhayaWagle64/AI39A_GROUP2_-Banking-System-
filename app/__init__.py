@@ -1,9 +1,5 @@
 from flask import Flask
-<<<<<<< HEAD
-from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
-=======
 from config import SECRET_KEY, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER
->>>>>>> abhaya-wagle
 
 
 def create_app():
@@ -12,13 +8,10 @@ def create_app():
     app.config["SECRET_KEY"] = SECRET_KEY
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
     app.config["ALLOWED_EXTENSIONS"] = ALLOWED_EXTENSIONS
-<<<<<<< HEAD
-=======
     app.config["MYSQL_HOST"] = MYSQL_HOST
     app.config["MYSQL_USER"] = MYSQL_USER
     app.config["MYSQL_PASSWORD"] = MYSQL_PASSWORD
     app.config["MYSQL_DATABASE"] = MYSQL_DATABASE
->>>>>>> abhaya-wagle
     app.config["MAIL_SERVER"] = MAIL_SERVER
     app.config["MAIL_PORT"] = MAIL_PORT
     app.config["MAIL_USE_TLS"] = MAIL_USE_TLS
@@ -41,8 +34,6 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
-<<<<<<< HEAD
-=======
 
     @app.before_request
     def _check_one_week_cookie():
@@ -77,6 +68,5 @@ def create_app():
                     LoginModel().delete(username)
             except Exception:
                 pass
->>>>>>> abhaya-wagle
 
     return app

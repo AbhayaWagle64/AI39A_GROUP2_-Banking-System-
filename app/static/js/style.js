@@ -1,8 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> abhaya-wagle
     const modal = document.getElementById("logoutModal");
     const cancelBtn = document.getElementById("modalCancel");
     const logoutLinks = document.querySelectorAll(".logout-link");
@@ -53,27 +49,20 @@ document.addEventListener("DOMContentLoaded", () => {
  
     if (qrCodeBtn) {
         qrCodeBtn.addEventListener("click", () => {
-<<<<<<< HEAD
-            qrImage.src = "/qr-code?" + new Date().getTime();
-=======
             if (qrImage) {
                 qrImage.alt = "Loading QR Code...";
                 qrImage.src = "/qr-code?" + new Date().getTime();
             }
->>>>>>> abhaya-wagle
             qrCodeModal.classList.add("active");
         });
     }
  
-<<<<<<< HEAD
-=======
     if (qrImage) {
         qrImage.onerror = () => {
             qrImage.alt = "Failed to load QR Code";
         };
     }
  
->>>>>>> abhaya-wagle
     if (closeQrModal) {
         closeQrModal.addEventListener("click", () => {
             qrCodeModal.classList.remove("active");
@@ -156,11 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 canvas.width = scannerVideo.videoWidth;
                 canvas.height = scannerVideo.videoHeight;
-<<<<<<< HEAD
-                ctx.drawImage(canvas, 0, 0);
-=======
                 ctx.drawImage(scannerVideo, 0, 0);
->>>>>>> abhaya-wagle
                 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
@@ -243,29 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (e.target === qrScannerModal) {
                 stopScanner();
             }
-<<<<<<< HEAD
-=======
-    const logoutLinks = document.querySelectorAll(".logout-link");
-    const modal = document.getElementById("logoutModal");
-    const cancel = document.getElementById("modalCancel");
-
-    logoutLinks.forEach(link => {
-        link.addEventListener("click", event => {
-            event.preventDefault();
-            if (modal) modal.style.display = "flex";
-        });
-    });
-
-    if (cancel) {
-        cancel.addEventListener("click", () => {
-            if (modal) modal.style.display = "none";
->>>>>>> origin/sakina-maharjan
-        });
-    }
-});
-=======
         });
     }
  
 });
->>>>>>> abhaya-wagle

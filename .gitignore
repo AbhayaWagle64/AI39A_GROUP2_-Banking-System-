@@ -1,31 +1,3 @@
-<<<<<<< HEAD
-*.bak
-*.db
-*.egg-info/
-*.env
-*.log
-*.pyc
-*.pyd
-*.pyo
-*.sqlite3
-*.swp
-*.tmp
-*~
-.DS_Store
-.env
-.env.*
-.idea/
-.vscode/
-__pycache__/
-app/query
-build/
-dist/
-instance/
-pip-wheel-metadata/
-static/images/
-static/uploads
-venv/
-=======
 venv/
 __pycache__/
 *.pyc
@@ -34,4 +6,3 @@ __pycache__/
 static/images/
 static/uploads/
 app/query
->>>>>>> abhaya-wagle

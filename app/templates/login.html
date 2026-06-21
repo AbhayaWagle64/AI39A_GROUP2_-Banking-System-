@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Paisa Login</title>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> abhaya-wagle
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
@@ -98,17 +94,6 @@
                     <div class="form-group">
                         <label for="username">
                             <span>👤</span>
-<<<<<<< HEAD
-                            <span>Username / Email / Phone Number</span>
-                        </label>
-                        <input
-                             type="text"
-                             id="username"
-                             name="username"
-                             class="input"
-                             placeholder="Enter your username, email or phone"
-                             required>
-=======
                             <span>Username / Email</span>
                         </label>
                         <input
@@ -118,7 +103,6 @@
                             class="input"
                             placeholder="Enter your username or email"
                             required>
->>>>>>> abhaya-wagle
                     </div>
 
                     <div class="form-group">
@@ -153,59 +137,4 @@
     <script src="{{ url_for('static', filename='js/style.js') }}"></script>
 
 </body>
-<<<<<<< HEAD
 </html>
-=======
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-    <script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
-</head>
-<body>
-    <div class="login-container">
-        <div class="login-box">
-            <h1>E-Paisa</h1>
-            <p class="subtitle">Digital Wallet Login</p>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="flash flash-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form id="loginForm" action="{{ url_for('auth.login') }}" method="POST">
-                <div class="input-group">
-                    <label for="email">Email or Username</label>
-                    <input type="text" id="email" name="email" placeholder="Enter your email" required>
-                    <p id="emailError" class="error-message"></p>
-                </div>
-
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <div class="password-row">
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                        <button type="button" id="togglePassword" class="toggle-password">Show</button>
-                    </div>
-                    <p id="passwordError" class="error-message"></p>
-                </div>
-
-                <button type="submit" id="btnText">
-                    Login <span id="btnLoader" class="hidden">Processing...</span>
-                </button>
-            </form>
-
-            <p class="register-text">
-                Don't have an account?
-                <a href="{{ url_for('auth.register') }}">Register</a>
-            </p>
-        </div>
-    </div>
-
-    <div id="toast" class="hidden"></div>
-</body>
-</html>
->>>>>>> origin/sakina-maharjan
-=======
-</html>
->>>>>>> abhaya-wagle

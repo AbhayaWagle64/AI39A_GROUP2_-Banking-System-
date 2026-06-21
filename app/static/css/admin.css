@@ -23,21 +23,13 @@
     background:#60a5fa;
 }
 
-<<<<<<< HEAD
-/* ── DELETE MODEL ──────────────────── */
-=======
 /* ── DELETE MODAL ICON ──────────────────── */
->>>>>>> abhaya-wagle
 #deleteModal .modal-icon{
     background:#fee;
     color:#dc2626;
 }
 
-<<<<<<< HEAD
-/* ──  STYLES ──────────────────── */
-=======
 /* ── FORM STYLES ──────────────────── */
->>>>>>> abhaya-wagle
 .form-group{
     margin-bottom:16px;
 }
@@ -55,30 +47,17 @@
     gap:12px;
 }
 
-<<<<<<< HEAD
-/* ── BUTTOME ──────────────────── */
-=======
 /* ── BUTTONS ──────────────────── */
->>>>>>> abhaya-wagle
 .btn-danger{
     background:#dc2626;
     color:white;
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> abhaya-wagle
 .btn-danger:hover{
     background:#b91c1c;
 }
 
-<<<<<<< HEAD
-
-/* ── RESPONSIVE ────────────── */
-=======
 /* ── RESPONSIVE ──────────────────── */
->>>>>>> abhaya-wagle
 @media(max-width:768px){
     .admin-navbar{
         background:#1e40af;

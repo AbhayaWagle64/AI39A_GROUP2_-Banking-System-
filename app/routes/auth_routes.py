@@ -1,11 +1,7 @@
 import os
 import re
 import uuid
-<<<<<<< HEAD
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request
-=======
 from flask import Blueprint, render_template, redirect, url_for, session, flash, request, current_app, make_response
->>>>>>> abhaya-wagle
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.register_model import RegisterModel
 from app.models.login_model import LoginModel
@@ -13,13 +9,6 @@ from app.models.wallet_model import WalletModel
 from app.models.admin_model import AdminModel
 from app.database import Database
 
-<<<<<<< HEAD
-def _row_to_dict(row):
-    """Convert sqlite3.Row object to dictionary"""
-    return dict(row) if row else {}
-
-=======
->>>>>>> abhaya-wagle
 main = Blueprint("auth", __name__)
 
 register_model = RegisterModel()
@@ -60,16 +49,9 @@ def get_customer_id(username=None):
     customer_id = "EP-10001"
     db = Database()
     if username:
-<<<<<<< HEAD
-        result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = ?", (username,))
-        if result:
-            db.close()
-            result = _row_to_dict(result)
-=======
         result = db.fetch_one("SELECT epaisa_id, customer_id, phone FROM register WHERE username = %s", (username,))
         if result:
             db.close()
->>>>>>> abhaya-wagle
             if result.get("epaisa_id"):
                 return result["epaisa_id"]
             if result.get("customer_id"):
@@ -81,38 +63,21 @@ def get_customer_id(username=None):
     result = db.fetch_one("SELECT COUNT(*) AS total FROM register")
     db.close()
     if result:
-<<<<<<< HEAD
-        result = _row_to_dict(result)
-        customer_id = f"EP-{10001 + result['total']}"
-    return customer_id
-
-=======
         customer_id = f"EP-{10001 + result['total']}"
     return customer_id
 
 
->>>>>>> abhaya-wagle
 def _generate_epaisa_id(phone=None, db=None):
     if phone and phone.startswith("98") and len(phone) >= 10:
         return f"eP-{phone}"
     base = 1001
     if db:
         result = db.fetch_one(
-<<<<<<< HEAD
-            "SELECT epaisa_id FROM register WHERE epaisa_id LIKE 'eP-%' ORDER BY epaisa_id DESC LIMIT 1"
-        )
-        if result and result.get("epaisa_id"):
-            try:
-                base = int(result["epaisa_id"].split("-")[1]) + 1
-            except (ValueError, IndexError):
-                base = 1001
-=======
             "SELECT CAST(SUBSTRING_INDEX(epaisa_id, '-', -1) AS UNSIGNED) AS num FROM register WHERE epaisa_id REGEXP %s ORDER BY num DESC LIMIT 1",
             ("^eP-[0-9]+$",)
         )
         if result and result.get("num"):
             base = int(result["num"]) + 1
->>>>>>> abhaya-wagle
     return f"eP-{base}"
 
 
@@ -124,13 +89,7 @@ def get_current_user():
     if not login_data:
         session.clear()
         return None
-<<<<<<< HEAD
-    login_data = _row_to_dict(login_data)
     reg_data = register_model.find_by_username(user_id)
-    reg_data = _row_to_dict(reg_data) if reg_data else {}
-=======
-    reg_data = register_model.find_by_username(user_id)
->>>>>>> abhaya-wagle
     balance = 0.0
     try:
         if reg_data and reg_data.get("balance"):
@@ -167,10 +126,6 @@ def login():
             flash('Username/email and password are required.', 'danger')
             return render_template("login.html")
 
-<<<<<<< HEAD
-        # Check admin first
-=======
->>>>>>> abhaya-wagle
         admin = admin_model.find_by_email(username)
         if admin and check_password_hash(admin['password'], password):
             session['user_id'] = username
@@ -179,18 +134,6 @@ def login():
             flash('Admin login successful!', 'success')
             return redirect(url_for('admin.admin_dashboard'))
 
-<<<<<<< HEAD
-        # Find in register table by username (email), email, phone, or epaisa_id
-        db = Database()
-        reg_data = db.fetch_one(
-            "SELECT * FROM register WHERE username = ? OR email = ? OR phone = ? OR epaisa_id = ?",
-            (username, username, username, username)
-        )
-        db.close()
-
-        if reg_data:
-            reg_data = _row_to_dict(reg_data)
-=======
         login_data = login_model.find_by_username(username)
         if login_data:
             reg_data = register_model.find_by_username(username)
@@ -219,7 +162,6 @@ def login():
                 reg_data = results[0]
         
         if reg_data:
->>>>>>> abhaya-wagle
             if check_password_hash(reg_data['password'], password):
                 epaisa_id = reg_data.get("epaisa_id") or f"eP-{reg_data['phone']}"
                 login_model.create(reg_data['username'], reg_data['password'], reg_data['full_name'], epaisa_id=epaisa_id)
@@ -288,19 +230,11 @@ def register():
         epaisa_id = _generate_epaisa_id(phone=phone, db=db)
         customer_id = f"SB-{phone}" if phone.startswith("98") else f"SB-{10001}"
         db.execute(
-<<<<<<< HEAD
-            "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 0.0, '', 'Savings', '2026-01-01')
-        )
-        db.execute(
-            "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (?, ?, ?, ?)",
-=======
             "INSERT INTO register (username, password, full_name, email, phone, customer_id, epaisa_id, balance, address, account_type, date_joined) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (username, password_hash, full_name, email, phone, customer_id, epaisa_id, 1000.0, '', 'Savings', '2026-01-01')
         )
         db.execute(
             "INSERT INTO login (username, password, full_name, epaisa_id) VALUES (%s, %s, %s, %s)",
->>>>>>> abhaya-wagle
             (username, password_hash, full_name, epaisa_id)
         )
         db.close()
@@ -314,8 +248,6 @@ def register():
 def logout():
     user_id = session.get("user_id")
     if user_id:
-<<<<<<< HEAD
-=======
         # If user agreed to 1-week session, keep login record and set a signed cookie
         if request.method == 'POST' and request.form.get('one_week_session'):
             from itsdangerous import URLSafeTimedSerializer
@@ -333,7 +265,6 @@ def logout():
             flash("You will remain logged in for 1 week.", "success")
             return resp
         # default logout behaviour: remove login record
->>>>>>> abhaya-wagle
         login_model.delete(user_id)
     session.clear()
     flash("Logged out successfully.", "success")

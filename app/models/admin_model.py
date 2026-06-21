@@ -9,11 +9,7 @@ class AdminModel:
     def find_by_email(self, admin_email):
         db = Database()
         result = db.fetch_one(
-<<<<<<< HEAD
-            f"SELECT * FROM {self.table} WHERE admin_email = ?", (admin_email,)
-=======
             f"SELECT * FROM {self.table} WHERE admin_email = %s", (admin_email,)
->>>>>>> abhaya-wagle
         )
         db.close()
         return result

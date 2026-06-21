@@ -18,12 +18,6 @@ login_model = LoginModel()
 register_model = RegisterModel()
 wallet_model = WalletModel()
 logger = logging.getLogger(__name__)
-<<<<<<< HEAD
- 
-def _get_mailer():
-    from flask import current_app
-    return getattr(current_app, "mailer", None)
-=======
 
 MAX_OTP_VERIFY_ATTEMPTS = 3
 
@@ -61,7 +55,6 @@ def _record_failed_otp_transaction(pending, recharge=False):
         "",
         "failed_otp"
     )
->>>>>>> abhaya-wagle
  
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -83,11 +76,7 @@ def insert_failed_transaction(user, amount, receiver_epaisa_id="", receiver_emai
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db = Database()
     db.execute(
-<<<<<<< HEAD
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
-=======
         "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
->>>>>>> abhaya-wagle
         (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status)
     )
     db.close()
@@ -145,11 +134,7 @@ def lookup_user():
     
     db = Database()
     user = db.fetch_one(
-<<<<<<< HEAD
-        "SELECT username, epaisa_id FROM register WHERE epaisa_id = ? OR phone = ? OR username = ?",
-=======
         "SELECT username, epaisa_id FROM register WHERE epaisa_id = %s OR phone = %s OR username = %s",
->>>>>>> abhaya-wagle
         (epaisa_id, epaisa_id, epaisa_id)
     )
     db.close()
@@ -170,22 +155,14 @@ def home():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
  
-<<<<<<< HEAD
-# DASHBOARD
-=======
  
->>>>>>> abhaya-wagle
 @main.route("/dashboard")
 @login_required
 def dashboard():
     user = get_current_user()
     return render_template("dashboard.html", user=user)
  
-<<<<<<< HEAD
-#  PROFILE
-=======
  
->>>>>>> abhaya-wagle
 @main.route("/profile")
 @login_required
 def profile():
@@ -240,36 +217,20 @@ def profile_management():
  
         db = Database()
         db.execute(
-<<<<<<< HEAD
-            "UPDATE register SET full_name=?, email=?, phone=?, address=? WHERE username=?",
-            (full_name, email, phone, address, session.get("user_id"))
-        )
-        db.execute(
-            "UPDATE login SET full_name=? WHERE username=?",
-=======
             "UPDATE register SET full_name=%s, email=%s, phone=%s, address=%s WHERE username=%s",
             (full_name, email, phone, address, session.get("user_id"))
         )
         db.execute(
             "UPDATE login SET full_name=%s WHERE username=%s",
->>>>>>> abhaya-wagle
             (full_name, session.get("user_id"))
         )
         if password:
             db.execute(
-<<<<<<< HEAD
-                "UPDATE login SET password=? WHERE username=?",
-                (generate_password_hash(password), session.get("user_id"))
-            )
-            db.execute(
-                "UPDATE register SET password=? WHERE username=?",
-=======
                 "UPDATE login SET password=%s WHERE username=%s",
                 (generate_password_hash(password), session.get("user_id"))
             )
             db.execute(
                 "UPDATE register SET password=%s WHERE username=%s",
->>>>>>> abhaya-wagle
                 (generate_password_hash(password), session.get("user_id"))
             )
         db.close()
@@ -347,11 +308,7 @@ def send_money():
  
     db = Database()
     recipient = db.fetch_one(
-<<<<<<< HEAD
-        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = ? OR phone = ?",
-=======
         "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
->>>>>>> abhaya-wagle
         (recipient_epaisa, recipient_epaisa)
     )
     if not recipient:
@@ -435,9 +392,6 @@ def verify_otp_page(error=None):
         masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
     else:
         masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
-<<<<<<< HEAD
-    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=error)
-=======
     attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
     return render_template(
         "wallet/verify_otp.html",
@@ -446,7 +400,6 @@ def verify_otp_page(error=None):
         error=error,
         attempts_left=attempts_left
     )
->>>>>>> abhaya-wagle
  
  
 @main.route("/transaction-success")
@@ -493,15 +446,9 @@ def request_otp():
         sent = mailer.send_otp(sender_email, otp, async_send=False)
         if not sent:
             raise RuntimeError("Mailer returned false")
-<<<<<<< HEAD
-        logger.info("OTP email sent to ?", sender_email)
-    except Exception as exc:
-        logger.exception("OTP email failed: ?", exc)
-=======
         logger.info("OTP email sent to %s", sender_email)
     except Exception as exc:
         logger.exception("OTP email failed: %s", exc)
->>>>>>> abhaya-wagle
         _clear_otp_session()
         return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
  
@@ -521,57 +468,10 @@ def verify_otp():
         code = (payload.get("otp") or "").strip()
     else:
         code = (request.form.get("otp") or "").strip()
-<<<<<<< HEAD
-    if not code or len(code) != 6 or not code.isdigit():
-        pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
-        _clear_otp_session()
-        session.pop("pending_transaction", None)
-        return redirect(url_for("user.transaction_failed"))
-=======
->>>>>>> abhaya-wagle
     stored_otp = session.get("verified_otp")
     expires_at = session.get("otp_expires_at")
     attempts = int(session.get("otp_attempts", 0) or 0) + 1
     session["otp_attempts"] = attempts
-<<<<<<< HEAD
-    if attempts >= 5:
-        pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
-        _clear_otp_session()
-        session.pop("pending_transaction", None)
-        return redirect(url_for("user.transaction_failed"))
-    if not stored_otp or stored_otp != code:
-        pending = session.get("pending_transaction")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    pending.get("recipient_epaisa", ""),
-                    "",
-                    "failed_otp"
-                )
-=======
     if attempts > MAX_OTP_VERIFY_ATTEMPTS:
         pending = session.get("pending_transaction")
         _record_failed_otp_transaction(pending)
@@ -581,7 +481,6 @@ def verify_otp():
     if not code or len(code) != 6 or not code.isdigit():
         return redirect(url_for("user.verify_otp_page", error="invalid"))
     if not stored_otp or stored_otp != code:
->>>>>>> abhaya-wagle
         return redirect(url_for("user.verify_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
         pending = session.get("pending_transaction")
@@ -614,11 +513,7 @@ def verify_otp():
  
     db = Database()
     recipient = db.fetch_one(
-<<<<<<< HEAD
-        "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = ? OR phone = ?",
-=======
         "SELECT username, email, phone, epaisa_id, balance FROM register WHERE epaisa_id = %s OR phone = %s",
->>>>>>> abhaya-wagle
         (recipient_epaisa, recipient_epaisa)
     )
     if not recipient:
@@ -663,24 +558,15 @@ def verify_otp():
  
     sender_balance = sender_balance - amount
     recipient_balance = recipient_balance + amount
-<<<<<<< HEAD
-    db.execute("UPDATE register SET balance = ? WHERE username = ?", (sender_balance, user["username"]))
-    db.execute("UPDATE register SET balance = ? WHERE username = ?", (recipient_balance, recipient["username"]))
-=======
     db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
     db.execute("UPDATE register SET balance = %s WHERE username = %s", (recipient_balance, recipient["username"]))
->>>>>>> abhaya-wagle
  
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     receiver_email = recipient.get("email") or ""
     receiver_epaisa_id = recipient.get("epaisa_id") or recipient.get("customer_id") or recipient.get("username") or ""
     db.execute(
-<<<<<<< HEAD
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, 'completed')",
-=======
         "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'completed')",
->>>>>>> abhaya-wagle
         (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount)
     )
     db.close()
@@ -689,22 +575,14 @@ def verify_otp():
 
     return redirect(url_for("user.transaction_success"))
 
-<<<<<<< HEAD
-# RECHARGE
-=======
 
->>>>>>> abhaya-wagle
 @main.route("/recharge")
 @login_required
 def recharge_page():
     user = get_current_user()
     return render_template("wallet/recharge.html", user=user)
 
-<<<<<<< HEAD
-# MERCHANT-PAY
-=======
 
->>>>>>> abhaya-wagle
 @main.route("/merchant-pay")
 @login_required
 def merchant_pay_page():
@@ -745,21 +623,13 @@ def merchant_pay():
     sender_balance = sender_balance - amount_val
     db = Database()
     db.execute(
-<<<<<<< HEAD
-        "UPDATE register SET balance = ? WHERE username = ?",
-=======
         "UPDATE register SET balance = %s WHERE username = %s",
->>>>>>> abhaya-wagle
         (sender_balance, user["username"])
     )
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db.execute(
-<<<<<<< HEAD
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, 'merchant_payment')",
-=======
         "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, 'merchant_payment')",
->>>>>>> abhaya-wagle
         (sender_email, sender_epaisa_id, '', merchant, amount_val)
     )
     db.close()
@@ -875,9 +745,6 @@ def verify_recharge_otp_page():
         masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
     else:
         masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
-<<<<<<< HEAD
-    return render_template("wallet/verify_otp.html", user=sender, masked_email=masked, error=None, recharge_mode=True)
-=======
     attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
     return render_template(
         "wallet/verify_otp.html",
@@ -887,7 +754,6 @@ def verify_recharge_otp_page():
         recharge_mode=True,
         attempts_left=attempts_left
     )
->>>>>>> abhaya-wagle
 
 
 @main.route("/api/request-recharge-otp", methods=["POST"])
@@ -918,15 +784,9 @@ def request_recharge_otp():
         sent = mailer.send_otp(sender_email, otp, async_send=False)
         if not sent:
             raise RuntimeError("Mailer returned false")
-<<<<<<< HEAD
-        logger.info("OTP email sent to ?", sender_email)
-    except Exception as exc:
-        logger.exception("OTP email failed: ?", exc)
-=======
         logger.info("OTP email sent to %s", sender_email)
     except Exception as exc:
         logger.exception("OTP email failed: %s", exc)
->>>>>>> abhaya-wagle
         _clear_otp_session()
         return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
 
@@ -946,65 +806,10 @@ def verify_recharge_otp():
         code = (payload.get("otp") or "").strip()
     else:
         code = (request.form.get("otp") or "").strip()
-<<<<<<< HEAD
-    if not code or len(code) != 6 or not code.isdigit():
-        pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                amount = float(pending.get("amount", 0))
-                phone = pending.get("phone", "")
-                operator = pending.get("operator", "")
-                sender_email = user.get("email") or ""
-                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
-                db = Database()
-                db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
-                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
-                )
-                db.close()
-        _clear_otp_session()
-        session.pop("pending_recharge", None)
-        return redirect(url_for("user.recharge_failed"))
-=======
->>>>>>> abhaya-wagle
     stored_otp = session.get("verified_otp")
     expires_at = session.get("otp_expires_at")
     attempts = int(session.get("otp_attempts", 0) or 0) + 1
     session["otp_attempts"] = attempts
-<<<<<<< HEAD
-    if attempts >= 5:
-        pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                amount = float(pending.get("amount", 0))
-                phone = pending.get("phone", "")
-                operator = pending.get("operator", "")
-                sender_email = user.get("email") or ""
-                sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
-                db = Database()
-                db.execute(
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
-                    (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
-                )
-                db.close()
-        _clear_otp_session()
-        session.pop("pending_recharge", None)
-        return redirect(url_for("user.recharge_failed"))
-    if not stored_otp or stored_otp != code:
-        pending = session.get("pending_recharge")
-        if pending:
-            user = get_current_user()
-            if user:
-                insert_failed_transaction(
-                    user,
-                    float(pending.get("amount", 0)),
-                    '',
-                    f"{pending.get('operator', '')} - {pending.get('phone', '')}",
-                    "failed_otp"
-                )
-=======
     if attempts > MAX_OTP_VERIFY_ATTEMPTS:
         pending = session.get("pending_recharge")
         _record_failed_otp_transaction(pending, recharge=True)
@@ -1014,7 +819,6 @@ def verify_recharge_otp():
     if not code or len(code) != 6 or not code.isdigit():
         return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
     if not stored_otp or stored_otp != code:
->>>>>>> abhaya-wagle
         return redirect(url_for("user.verify_recharge_otp_page", error="invalid"))
     if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
         pending = session.get("pending_recharge")
@@ -1028,11 +832,7 @@ def verify_recharge_otp():
                 sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
                 db = Database()
                 db.execute(
-<<<<<<< HEAD
-                    "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
-=======
                     "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
->>>>>>> abhaya-wagle
                     (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge_failed')
                 )
                 db.close()
@@ -1062,20 +862,12 @@ def verify_recharge_otp():
         return redirect(url_for("user.recharge_failed"))
 
     sender_balance = sender_balance - amount
-<<<<<<< HEAD
-    db.execute("UPDATE register SET balance = ? WHERE username = ?", (sender_balance, user["username"]))
-=======
     db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
->>>>>>> abhaya-wagle
 
     sender_email = user.get("email") or ""
     sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
     db.execute(
-<<<<<<< HEAD
-        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (?, ?, ?, ?, ?, ?)",
-=======
         "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
->>>>>>> abhaya-wagle
         (sender_email, sender_epaisa_id, '', f'{operator} - {phone}', amount, 'recharge')
     )
     db.close()
@@ -1098,8 +890,4 @@ def mask_email(email: str) -> str:
         masked_local = local[0] + "*" * (len(local) - 1)
     else:
         masked_local = local[:2] + "*" * (len(local) - 2)
-<<<<<<< HEAD
     return f"{masked_local}@{domain}"
-=======
-    return f"{masked_local}@{domain}"
->>>>>>> abhaya-wagle

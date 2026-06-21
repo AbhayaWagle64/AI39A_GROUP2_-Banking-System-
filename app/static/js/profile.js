@@ -9,8 +9,5 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/profile-management";
         });
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> abhaya-wagle
 });

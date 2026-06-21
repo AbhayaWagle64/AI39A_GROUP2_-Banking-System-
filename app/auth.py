@@ -1,11 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
 from functools import wraps
 
-<<<<<<< HEAD
-#  login
-=======
 
->>>>>>> abhaya-wagle
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -17,11 +13,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-<<<<<<< HEAD
-# admin required 
-=======
 
->>>>>>> abhaya-wagle
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

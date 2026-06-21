@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> abhaya-wagle
 {% block title %}
 Profile — ePaisa
 {% endblock %}
@@ -105,11 +101,7 @@ Profile — ePaisa
                 </div>
 
                 <div class="p-field">
-<<<<<<< HEAD
-                    <span class="p-label">📅 Member Since </span>
-=======
                     <span class="p-label">📅 Member Since</span>
->>>>>>> abhaya-wagle
                     <span class="p-value">{{ user.date_joined }}</span>
                 </div>
 
@@ -133,39 +125,9 @@ Profile — ePaisa
     </div>
 
 </div>
-<<<<<<< HEAD
-{% endblock %}
-{% block js %}
-<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
-{% endblock %}
-=======
-{% block title %}Profile - ePaisa{% endblock %}
-
-{% block content %}
-<section class="panel">
-    <h1>Profile</h1>
-    {% if user %}
-        <div class="profile-grid">
-            <div><strong>Name</strong><p>{{ user.full_name }}</p></div>
-            <div><strong>Email</strong><p>{{ user.email }}</p></div>
-            <div><strong>Phone</strong><p>{{ user.phone }}</p></div>
-            <div><strong>Customer ID</strong><p>{{ user.customer_id }}</p></div>
-            <div><strong>ePaisa ID</strong><p>{{ user.epaisa_id }}</p></div>
-            <div><strong>Account Type</strong><p>{{ user.account_type }}</p></div>
-        </div>
-        <a class="btn primary" href="{{ url_for('user.profile_management') }}">Edit Profile</a>
-    {% else %}
-        <p>Please login to view your profile.</p>
-        <a class="btn primary" href="{{ url_for('auth.login') }}">Login</a>
-    {% endif %}
-</section>
-{% endblock %}
->>>>>>> origin/sakina-maharjan
-=======
 
 {% endblock %}
 
 {% block js %}
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}
->>>>>>> abhaya-wagle

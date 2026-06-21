@@ -16,15 +16,6 @@ Dashboard — ePaisa
     <p style="color:var(--text-secondary); margin-bottom:24px;">Manage your finances securely</p>
  
     <!-- Balance Card -->
-<<<<<<< HEAD
-    <div style="border-radius:var(--radius-lg); padding:24px; max-width:480px; margin-bottom:24px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <p style="font-size:14px; opacity:0.9; margin-bottom:4px; font-weight:500;">Current Balance</p>
-                <h2 style="font-size:36px; font-weight:700; margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">₹ {{ user.balance|default('0.00') }}</h2>
-            </div>
-            <div style="font-size:48px; opacity:0.9;">💵</div>
-=======
     <div class="card card-elevated" style="max-width:480px; margin-bottom:24px; background:linear-gradient(135deg, var(--green-600) 0%, var(--green-800) 100%); border:none; color:white;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
@@ -32,23 +23,11 @@ Dashboard — ePaisa
                 <h2 style="font-size:32px; font-weight:700; margin:0;">₹ {{ user.balance|default('12,450.00') }}</h2>
             </div>
             <div style="font-size:48px; opacity:.15;">💵</div>
->>>>>>> abhaya-wagle
         </div>
     </div>
  
     <!-- Quick Actions -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; max-width:680px; margin-bottom:24px;">
-<<<<<<< HEAD
-<a href="/wallet" class="btn btn-primary" style="padding:18px;">
-             <span>💳</span> Add Money
-         </a>
-         <button id="paymentBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
-             <span>💰</span> Payment
-         </button>
-         <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
-             <span>📤</span> Send Money
-         </a>
-=======
         <a href="/wallet" class="btn btn-primary" style="padding:18px;">
             <span>💳</span> Add Money
         </a>
@@ -58,7 +37,6 @@ Dashboard — ePaisa
         <a href="/wallet" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
             <span>📤</span> Send Money
         </a>
->>>>>>> abhaya-wagle
         <a href="/transactions" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
             <span>📊</span> History
         </a>
@@ -68,8 +46,6 @@ Dashboard — ePaisa
         <button id="qrCodeBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
             <span>🔲</span> My QR Code
         </button>
-<<<<<<< HEAD
-=======
         <div style="grid-column:1 / -1; display:flex; justify-content:center;">
             <button id="atmBtn" class="btn btn-secondary" style="padding:18px; min-width:220px; color:var(--green-700); text-align:center;">
                 <span>🏧</span> ATM
@@ -93,7 +69,6 @@ Dashboard — ePaisa
                 </a>
             </div>
         </div>
->>>>>>> abhaya-wagle
     </div>
  
     <!-- Recent Transactions -->
@@ -132,11 +107,7 @@ Dashboard — ePaisa
             </div>
         </div>
     </div>
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> abhaya-wagle
     <div class="modal-overlay" id="qrCodeModal">
         <div class="modal-box">
             <div style="text-align:center; margin-bottom:16px;">
@@ -145,11 +116,7 @@ Dashboard — ePaisa
                 <p style="font-size:14px; font-weight:600; color:var(--green-700); margin-top:8px;">{{ user.epaisa_id or user.username }}</p>
             </div>
             <div style="display:flex; justify-content:center; align-items:center; background:white; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
-<<<<<<< HEAD
-                <img id="qrImage" src="" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
-=======
                 <img id="qrImage" src="{{ url_for('user.qr_code') }}" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
->>>>>>> abhaya-wagle
             </div>
             <div style="display:flex; gap:12px; flex-direction:column;">
                 <button class="btn btn-secondary" id="closeQrModal" style="flex:1; color:var(--text-primary);">Close</button>
@@ -297,8 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-<<<<<<< HEAD
-=======
     const atmBtn = document.getElementById("atmBtn");
     const atmModal = document.getElementById("atmModal");
     const closeAtmModal = document.getElementById("closeAtmModal");
@@ -323,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
->>>>>>> abhaya-wagle
     merchantOptions.forEach(btn => {
         btn.addEventListener("click", () => {
             const merchant = btn.dataset.merchant;

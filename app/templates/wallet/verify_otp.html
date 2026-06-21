@@ -19,9 +19,6 @@
     <h2 style="margin:0 0 8px; font-size:20px;">Verify OTP</h2>
     <p class="otp-note">OTP has been sent to <strong>{{ masked_email or user.email }}</strong></p>
     {% if error == 'invalid' %}
-<<<<<<< HEAD
-    <p id="otpStatus" class="otp-note error" aria-live="polite" style="color:#dc2626;">Invalid OTP. Please try again.</p>
-=======
     <p id="otpStatus" class="otp-note error" aria-live="polite" style="color:#dc2626;">
       Invalid OTP. Please try again.
       {% if attempts_left is not none %}
@@ -32,7 +29,6 @@
         {% endif %}
       {% endif %}
     </p>
->>>>>>> abhaya-wagle
     {% else %}
     <p id="otpStatus" class="otp-note" aria-live="polite"></p>
     {% endif %}
