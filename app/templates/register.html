@@ -3,241 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - E-Paisa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .register-container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
-            padding: 48px;
-            width: 100%;
-            max-width: 420px;
-            margin: 20px;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .register-header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-        
-        .register-logo {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            color: white;
-            font-size: 32px;
-            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
-        }
-        
-        .register-header h1 {
-            color: #1a1a2e;
-            margin: 0 0 12px;
-            font-size: 32px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .register-header p {
-            color: #666;
-            margin: 0;
-            font-size: 15px;
-            font-weight: 400;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: #1a1a2e;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-            letter-spacing: 0.3px;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e8e8e8;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s;
-            box-sizing: border-box;
-            background: #fafafa;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #11998e;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
-        }
-        
-        .form-group input::placeholder {
-            color: #aaa;
-        }
-        
-        .register-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
-            letter-spacing: 0.5px;
-        }
-        
-        .register-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(17, 153, 142, 0.4);
-        }
-        
-        .register-btn:active {
-            transform: translateY(-1px);
-        }
-        
-        .register-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 24px;
-            border-top: 2px solid #f0f0f0;
-        }
-        
-        .register-footer p {
-            color: #666;
-            margin: 0;
-            font-size: 15px;
-        }
-        
-        .register-footer a {
-            color: #11998e;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        
-        .register-footer a:hover {
-            color: #38ef7d;
-            text-decoration: underline;
-        }
-        
-        .alert {
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #fee 0%, #fcc 100%);
-            color: #c33;
-            border: 2px solid #f99;
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #efe 0%, #cfc 100%);
-            color: #2d8a2d;
-            border: 2px solid #9f9;
-        }
-        
-        .password-requirements {
-            font-size: 13px;
-            color: #888;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-    </style>
+    <title>E-Paisa Register</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-header">
-            <div class="register-logo">
-                <i class="fas fa-wallet"></i>
+
+    <div class="landing-wrapper">
+
+        <!-- LEFT HERO -->
+        <div class="landing-hero">
+
+            <div class="hero-chip">
+                <span>★</span>
+                <span>Trusted Nepali Digital Wallet</span>
             </div>
-            <h1>Create Account</h1>
-            <p>Join E-Paisa today</p>
-        </div>
-        
-        
-                    <div class="alert alert-{{ category }}"> Your mobile number will be your USER ID</div>
-                
-        <form method="POST" action="{{ url_for('main.register') }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Choose a username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Create a password" required>
-                <div class="password-requirements">
-                    Minimum 6 characters recommended
+
+            <img
+                src="{{ url_for('static', filename='images/logo.svg') }}"
+                alt="ePaisa"
+                class="hero-logo-lg"
+                width="100"
+                height="100">
+
+            <h1 class="hero-title">Smart Banking <span>For Nepal</span></h1>
+
+            <p class="hero-subtitle">
+                Send money, pay bills, manage your wallet and experience secure digital
+                finance with E-Paisa.
+            </p>
+
+            <ul class="hero-features">
+                <li>Instant Payments</li>
+                <li>Bank-Level Security</li>
+                <li>नेपालमै विश्वास</li>
+            </ul>
+
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <div class="metric-value">50K+</div>
+                    <div class="metric-label">Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">₹10M+</div>
+                    <div class="metric-label">Transactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.9★</div>
+                    <div class="metric-label">Rating</div>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+
+            <p class="hero-footer">
+                Secure • Reliable • Fast
+            </p>
+        </div>
+
+        <!-- RIGHT AUTH PANEL-->
+        <div class="landing-auth">
+
+            <div class="auth-box">
+
+                <div class="auth-box-header">
+                    <img
+                        src="{{ url_for('static', filename='images/logo.svg') }}"
+                        alt="ePaisa"
+                        class="auth-box-logo"
+                        width="52"
+                        height="52">
+
+                    <h2>Create Your Account</h2>
+                    <p>Start your secure digital banking journey today</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flashes" style="margin-bottom:16px;">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}" style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;{% if category == 'success' %}background:var(--green-50);color:var(--green-700);{% elif category == 'danger' %}background:#fee;border:1px solid #fcc;color:#c00;{% elif category == 'error' %}background:#fff3cd;border:1px solid #ffc107;color:#856404;{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
+
+                    <div class="form-group">
+                        <label for="full_name">
+                            <span>👤</span>
+                            <span>Full Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="fullname"
+                            class="input"
+                            placeholder="Enter your full name"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <span>📧</span>
+                            <span>Email Address</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="input"
+                            placeholder="example@gmail.com"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <span>📱</span>
+                            <span>Phone Number</span>
+                        </label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            class="input"
+                            placeholder="98XXXXXXXX"
+                            maxlength="10"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <span>🔒</span>
+                            <span>Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="input"
+                            placeholder="Create a secure password"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">
+                            <span>🔒</span>
+                            <span>Confirm Password</span>
+                        </label>
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            class="input"
+                            placeholder="Re-enter password"
+                            required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary auth-btn">
+                        Create Account
+                    </button>
+
+                    <div class="divider">OR</div>
+
+                    <p class="auth-footer">
+                        Already have an account?
+                        <a href="/login">Login</a>
+                    </p>
+                </form>
             </div>
-            
-            <button type="submit" class="register-btn">
-                <i class="fas fa-user-plus"></i> Create Account
-            </button>
-        </form>
-        
-        <div class="register-footer">
-            <p>Already have an account? <a href="{{ url_for('main.login') }}">Login here</a></p>
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/style.js') }}"></script>
+
 </body>
 </html>

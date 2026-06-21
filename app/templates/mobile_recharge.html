@@ -1,0 +1,343 @@
+<!-- mobile recharge -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> Mobile Recharge - ePaisa </title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+
+    .container { max-width: 500px; margin: 0 auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .header h2 { font-size: 20px; color: #333; }
+    .back-link { font-size: 13px; color: #4CAF50; text-decoration: none; }
+
+    /*flash massage */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .alert-danger  { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .alert button  { background: none; border: none; font-size: 18px; cursor: pointer; color: inherit; }
+/* RECHERGE CARD  */
+    .card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #eee;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #4CAF50; }
+
+    /* OPERATOR BUTTONS */
+    .operator-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .operator-btn {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      transition: all 0.15s;
+    }
+    .operator-btn:hover { border-color: #4CAF50; }
+    .operator-btn.selected {
+      border-color: #4CAF50;
+      background: #f0fff0;
+      color: #4CAF50;
+    }
+
+    /* AMOUNT OPTIONS */
+    .amount-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    .amount-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .amount-btn:hover { border-color: #4CAF50; }
+    .amount-btn.selected {
+      border-color: #4CAF50;
+      background: #f0fff0;
+      color: #4CAF50;
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin: 10px 0;
+    }
+
+/* payment methods */
+    .payment-methods {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .payment-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .payment-btn:hover { border-color: #4CAF50; }
+    .payment-btn.selected {
+      border-color: #4CAF50;
+      background: #f0fff0;
+      color: #4CAF50;
+    }
+
+    /* SUBMIT BUTTON */
+    .btn-recharge {
+      width: 100%;
+      padding: 14px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn-recharge:hover { background: #45a049; }
+
+    /* SUMMARY BOX */
+    .summary-box {
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      color: #555;
+    }
+    .summary-row.total {
+      font-weight: bold;
+      color: #333;
+      border-top: 1px solid #ddd;
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h2>📱 Mobile Recharge</h2>
+      <a href="/dashboard" class="back-link">← Back</a>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">×</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/mobile-recharge" id="rechargeForm">
+
+      <!-- STEP 1: MOBILE NUMBER AND OPERATOR -->
+      <div class="card">
+        <h3>Step 1 — Mobile Details</h3>
+
+        <label>Mobile Number</label>
+        <input type="tel" name="mobile_number" id="mobileNumber"
+               placeholder="98XXXXXXXX" maxlength="10" required>
+
+        <label>Select Operator</label>
+        <div class="operator-btns">
+          <button type="button" class="operator-btn" onclick="selectOperator('Ncell', this)">
+            🟡 Ncell
+          </button>
+          <button type="button" class="operator-btn" onclick="selectOperator('NTC', this)">
+            🔵 NTC
+          </button>
+        </div>
+        <input type="hidden" name="operator" id="operatorInput" required>
+      </div>
+
+      <!-- STEP 2: RECHARGE AMOUNT -->
+      <div class="card">
+        <h3>Step 2 — Select Amount</h3>
+
+        <label>Quick Select</label>
+        <div class="amount-options">
+          <button type="button" class="amount-btn" onclick="selectAmount(50, this)">Rs. 50</button>
+          <button type="button" class="amount-btn" onclick="selectAmount(100, this)">Rs. 100</button>
+          <button type="button" class="amount-btn" onclick="selectAmount(200, this)">Rs. 200</button>
+          <button type="button" class="amount-btn" onclick="selectAmount(500, this)">Rs. 500</button>
+          <button type="button" class="amount-btn" onclick="selectAmount(1000, this)">Rs. 1000</button>
+          <button type="button" class="amount-btn" onclick="selectAmount(2000, this)">Rs. 2000</button>
+        </div>
+
+        <div class="divider">— or enter custom amount —</div>
+
+        <input type="number" name="amount" id="amountInput"
+               placeholder="Enter amount (Rs.)" min="10" max="5000">
+      </div>
+
+      <!-- STEP 3: PAYMENT METHOD -->
+      <div class="card">
+        <h3>Step 3 — Payment Method</h3>
+
+        <div class="payment-methods">
+          <button type="button" class="payment-btn" onclick="selectPayment('wallet', this)">
+            💰 Wallet
+          </button>
+          <button type="button" class="payment-btn" onclick="selectPayment('card', this)">
+            💳 Card
+          </button>
+          <button type="button" class="payment-btn" onclick="selectPayment('bank', this)">
+            🏦 Bank
+          </button>
+        </div>
+        <input type="hidden" name="payment_method" id="paymentInput" required>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Mobile Number</span>
+          <span id="summaryMobile">—</span>
+        </div>
+        <div class="summary-row">
+          <span>Operator</span>
+          <span id="summaryOperator">—</span>
+        </div>
+        <div class="summary-row">
+          <span>Recharge Amount</span>
+          <span id="summaryAmount">—</span>
+        </div>
+        <div class="summary-row">
+          <span>Payment Method</span>
+          <span id="summaryPayment">—</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="summaryTotal">Rs. 0</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-recharge">⚡ Recharge Now</button>
+
+    </form>
+  </div>
+
+  <script>
+    let selectedAmount = 0;
+
+    function selectOperator(name, btn) {
+      document.querySelectorAll('.operator-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('operatorInput').value = name;
+      document.getElementById('summaryOperator').textContent = name;
+    }
+
+    function selectAmount(amount, btn) {
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('amountInput').value = amount;
+      selectedAmount = amount;
+      document.getElementById('summaryAmount').textContent = 'Rs. ' + amount;
+      document.getElementById('summaryTotal').textContent = 'Rs. ' + amount;
+    }
+
+    function selectPayment(method, btn) {
+      document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('paymentInput').value = method;
+      document.getElementById('summaryPayment').textContent = method.charAt(0).toUpperCase() + method.slice(1);
+    }
+
+    // Update summary when typing mobile number
+    document.getElementById('mobileNumber').addEventListener('input', function() {
+      document.getElementById('summaryMobile').textContent = this.value || '—';
+    });
+
+    // Update summary when typing custom amount
+    document.getElementById('amountInput').addEventListener('input', function() {
+      const amt = this.value;
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('summaryAmount').textContent = amt ? 'Rs. ' + amt : '—';
+      document.getElementById('summaryTotal').textContent = amt ? 'Rs. ' + amt : 'Rs. 0';
+    });
+  </script>
+</body>
+</html>

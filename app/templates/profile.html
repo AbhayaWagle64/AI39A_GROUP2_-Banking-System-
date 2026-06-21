@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile — ePaisa
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="profile-scene">
+
+    <div class="profile-card">
+
+        <div class="profile-banner">
+
+            <div class="profile-head">
+
+                {% if uploaded_image %}
+                <img
+                src="{{ url_for('static', filename='uploads/' + uploaded_image) }}"
+                alt="Profile Photo"
+                class="profile-avatar"
+                width="104"
+                height="104">
+                {% else %}
+                <img
+                src="{{ url_for('static', filename='images/default_avatar.svg') }}"
+                alt="Default Avatar"
+                class="profile-avatar"
+                width="104"
+                height="104"
+                onclick="location.href='{{ url_for('user.profile_management') }}'"
+                style="cursor:pointer"
+                title="Tap to upload a photo">
+                {% endif %}
+
+                <div class="profile-identity">
+
+                    <div class="brand-row">
+                        <img
+                        src="{{ url_for('static', filename='images/logo.svg') }}"
+                        alt="ePaisa"
+                        class="brand-logo-sm"
+                        width="28"
+                        height="28">
+
+                        <h1>{{ user.full_name }}</h1>
+                    </div>
+
+                    <p class="cid">{{ user.customer_id }}</p>
+
+                    <div class="verified-row">
+                        <span class="badge badge-success">Verified Account</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="profile-body">
+
+            <div class="profile-stats">
+
+                <div class="stat-item">
+                    <div class="stat-value">₹ {{ "{:,.2f}".format(user.balance) }}</div>
+                    <div class="stat-label">Wallet Balance</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-value">{{ user.transaction_count }}</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Rewards</div>
+                </div>
+
+            </div>
+
+            <div class="profile-fields">
+
+                <div class="p-field">
+                    <span class="p-label">📧 Email Address</span>
+                    <span class="p-value">{{ user.email }}</span>
+                </div>
+
+                <div class="p-field">
+                    <span class="p-label">📱 Phone Number</span>
+                    <span class="p-value">{{ user.phone }}</span>
+                </div>
+
+                <div class="p-field">
+                    <span class="p-label">🏦 Account Type</span>
+                    <span class="p-value">{{ user.account_type }}</span>
+                </div>
+
+                <div class="p-field">
+                    <span class="p-label">📅 Member Since </span>
+                    <span class="p-value">{{ user.date_joined }}</span>
+                </div>
+
+                <div class="p-field wide">
+                    <span class="p-label">📍 Address</span>
+                    <span class="p-value">{{ user.address }}</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="profile-footer">
+
+            <a href="{{ url_for('user.profile_management') }}" class="btn btn-primary">
+                ✎ Edit Profile
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
