@@ -27,7 +27,7 @@ def _get_env(name, default=""):
 SECRET_KEY = "epaisa-secret-key-2026"
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "lakpa123$$$$@.>!"
+MYSQL_PASSWORD = "admin#abhaya64$"
 MYSQL_DATABASE = "epaisa"
 
 UPLOAD_FOLDER = os.path.join(
