@@ -28,9 +28,9 @@ Dashboard — ePaisa
  
     <!-- Quick Actions -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; max-width:680px; margin-bottom:24px;">
-        <a href="/wallet" class="btn btn-primary" style="padding:18px;">
+        <button id="addMoneyBtn" class="btn btn-primary" style="padding:18px;">
             <span>💳</span> Add Money
-        </a>
+        </button>
         <button id="paymentBtn" class="btn btn-secondary" style="padding:18px; color:var(--green-700);">
             <span>💰</span> Payment
         </button>
@@ -116,7 +116,7 @@ Dashboard — ePaisa
                 <p style="font-size:14px; font-weight:600; color:var(--green-700); margin-top:8px;">{{ user.epaisa_id or user.username }}</p>
             </div>
             <div style="display:flex; justify-content:center; align-items:center; background:white; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
-                <img id="qrImage" src="{{ url_for('user.qr_code') }}" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
+                <img id="qrImage" data-src="{{ url_for('user.qr_code') }}" alt="QR Code" style="width:220px; height:220px; image-rendering:pixelated;">
             </div>
             <div style="display:flex; gap:12px; flex-direction:column;">
                 <button class="btn btn-secondary" id="closeQrModal" style="flex:1; color:var(--text-primary);">Close</button>
@@ -166,6 +166,31 @@ Dashboard — ePaisa
         </div>
     </div>
 
+    <!-- Add Money Modal -->
+    <div class="modal-overlay" id="addMoneyModal">
+        <div class="modal-box" style="max-width:400px;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 8px;">Choose Bank</h3>
+                <p style="font-size:13px; color:var(--text-secondary);">Select your bank to add money</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button class="bank-option btn btn-primary" data-bank="NMB" style="justify-content:flex-start; gap:12px;">
+                    <span style="font-size:20px;">🏦</span>
+                    <span>NMB</span>
+                </button>
+                <button class="bank-option btn btn-secondary" data-bank="Global IME" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                    <span style="font-size:20px;">🏦</span>
+                    <span>Global IME</span>
+                </button>
+                <button class="bank-option btn btn-secondary" data-bank="Standard Chartered" style="justify-content:flex-start; gap:12px; background:white; border:1px solid var(--border-subtle);">
+                    <span style="font-size:20px;">🏦</span>
+                    <span>Standard Chartered</span>
+                </button>
+            </div>
+            <button class="btn btn-secondary" id="closeAddMoneyModal" style="margin-top:20px; width:100%; background:white; color:var(--text-primary);">Cancel</button>
+        </div>
+    </div>
+
     <!-- Merchant Shopping Modal -->
         <div class="modal-overlay" id="merchantModal">
             <div class="modal-box" style="max-width:480px;">
@@ -211,11 +236,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const paymentBtn = document.getElementById("paymentBtn");
     const paymentModal = document.getElementById("paymentModal");
     const closePaymentModal = document.getElementById("closePaymentModal");
+    const addMoneyBtn = document.getElementById("addMoneyBtn");
+    const addMoneyModal = document.getElementById("addMoneyModal");
+    const closeAddMoneyModal = document.getElementById("closeAddMoneyModal");
     const rechargeBtn = document.getElementById("rechargeBtn");
     const merchantPayBtn = document.getElementById("merchantPayBtn");
     const merchantModal = document.getElementById("merchantModal");
     const closeMerchantModal = document.getElementById("closeMerchantModal");
     const merchantOptions = document.querySelectorAll(".merchant-option");
+    const bankOptions = document.querySelectorAll(".bank-option");
 
     if (paymentBtn && paymentModal) {
         paymentBtn.addEventListener("click", () => {
@@ -233,6 +262,26 @@ document.addEventListener("DOMContentLoaded", () => {
         paymentModal.addEventListener("click", (e) => {
             if (e.target === paymentModal) {
                 paymentModal.classList.remove("active");
+            }
+        });
+    }
+
+    if (addMoneyBtn && addMoneyModal) {
+        addMoneyBtn.addEventListener("click", () => {
+            addMoneyModal.classList.add("active");
+        });
+    }
+
+    if (closeAddMoneyModal && addMoneyModal) {
+        closeAddMoneyModal.addEventListener("click", () => {
+            addMoneyModal.classList.remove("active");
+        });
+    }
+
+    if (addMoneyModal) {
+        addMoneyModal.addEventListener("click", (e) => {
+            if (e.target === addMoneyModal) {
+                addMoneyModal.classList.remove("active");
             }
         });
     }
@@ -287,6 +336,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    bankOptions.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const bank = btn.dataset.bank;
+            window.location.href = `/add-money?bank=${encodeURIComponent(bank)}`;
+        });
+    });
 
     merchantOptions.forEach(btn => {
         btn.addEventListener("click", () => {

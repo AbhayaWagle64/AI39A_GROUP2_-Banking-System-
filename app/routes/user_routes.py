@@ -5,8 +5,10 @@ import json
 import logging
 import secrets
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify, current_app
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify, current_app, send_file
 from werkzeug.security import generate_password_hash
+import qrcode
+import io
 from app.auth import login_required
 from app.database import Database
 from app.models.login_model import LoginModel
@@ -20,6 +22,11 @@ wallet_model = WalletModel()
 logger = logging.getLogger(__name__)
 
 MAX_OTP_VERIFY_ATTEMPTS = 3
+BANK_ADD_MONEY_OPTIONS = {
+    "NMB": "NMB",
+    "Global IME": "Global IME",
+    "Standard Chartered": "Standard Chartered",
+}
 
 
 def _get_mailer():
@@ -55,6 +62,26 @@ def _record_failed_otp_transaction(pending, recharge=False):
         "",
         "failed_otp"
     )
+
+
+def _record_failed_bank_add_money_transaction(pending):
+    if not pending:
+        return
+    user = get_current_user()
+    if not user:
+        return
+
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    receiver_email = ""
+    receiver_epaisa_id = pending.get("bank_code") or pending.get("recipient_epaisa") or ""
+    status = pending.get("bank") or "failed_otp"
+    db = Database()
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, float(pending.get("amount", 0)), status)
+    )
+    db.close()
  
 UPLOAD_FOLDER = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -262,8 +289,18 @@ def profile_management():
 def wallet():
     user = get_current_user()
     return render_template("wallet/wallet.html", user=user)
- 
- 
+
+
+@main.route("/add-money")
+@login_required
+def add_money_page():
+    bank = request.args.get("bank", "")
+    if bank not in BANK_ADD_MONEY_OPTIONS:
+        return redirect(url_for("user.dashboard"))
+    user = get_current_user()
+    return render_template("wallet/add_money.html", user=user, bank=bank)
+
+
 @main.route("/api/send-money", methods=["POST"])
 def send_money():
     if 'user_id' not in session:
@@ -351,22 +388,24 @@ def send_money():
 @login_required
 def qr_code():
     user = get_current_user()
-    epaisa_id = user.get("epaisa_id", user.get("username", ""))
- 
-    import qrcode
-    import io
-    from flask import send_file
- 
+    if not user:
+        session.clear()
+        return redirect(url_for("auth.login"))
+
+    epaisa_id = user.get("epaisa_id") or user.get("customer_id") or user.get("username") or ""
+    if not epaisa_id:
+        return "QR code data is not available", 404
+
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(epaisa_id)
     qr.make(fit=True)
- 
+
     img = qr.make_image(fill_color="black", back_color="white")
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
- 
-    return send_file(buf, mimetype="image/png")
+
+    return send_file(buf, mimetype="image/png", max_age=0)
  
  
 @main.route("/transactions")
@@ -385,23 +424,35 @@ def verify_otp_page(error=None):
     pending = session.get("pending_transaction")
     if not pending or not sender or sender["username"] != pending.get("sender_username"):
         return redirect(url_for("user.wallet"))
-    raw_email = sender.get("email", "") or ""
-    local = raw_email.split("@")[0] if "@" in raw_email else raw_email
-    domain = raw_email.split("@")[1] if "@" in raw_email else ""
-    if len(local) > 2:
-        masked = f"{local[:2]}{'*' * (len(local) - 2)}@{domain}"
-    else:
-        masked = f"{local[0]}{'*' * (len(local) - 1)}@{domain}"
     attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
     return render_template(
         "wallet/verify_otp.html",
         user=sender,
-        masked_email=masked,
+        masked_email=mask_email(sender.get("email", "")),
         error=error,
         attempts_left=attempts_left
     )
- 
- 
+
+
+@main.route("/verify-bank-otp")
+@main.route("/verify-bank-otp/<error>")
+@login_required
+def verify_bank_otp_page(error=None):
+    sender = get_current_user()
+    pending = session.get("pending_bank_add_money")
+    if not pending or not sender or sender["username"] != pending.get("sender_username"):
+        return redirect(url_for("user.dashboard"))
+    attempts_left = max(0, MAX_OTP_VERIFY_ATTEMPTS - int(session.get("otp_attempts", 0) or 0))
+    return render_template(
+        "wallet/verify_otp.html",
+        user=sender,
+        masked_email=mask_email(sender.get("email", "")),
+        error=error,
+        bank_add_money_mode=True,
+        attempts_left=attempts_left
+    )
+
+
 @main.route("/transaction-success")
 @login_required
 def transaction_success():
@@ -416,8 +467,32 @@ def transaction_failed():
     sender = get_current_user()
     pending = session.pop("pending_transaction", None)
     return render_template("wallet/failed.html", user=sender, pending=pending)
- 
- 
+
+
+@main.route("/bank-add-money-success")
+@login_required
+def bank_add_money_success():
+    sender = get_current_user()
+    pending = session.pop("pending_bank_add_money", None)
+    return render_template("wallet/bank_add_money_success.html", user=sender, pending=pending)
+
+
+@main.route("/bank-add-money-failed")
+@login_required
+def bank_add_money_failed():
+    sender = get_current_user()
+    pending = session.pop("pending_bank_add_money", None)
+    return render_template("wallet/bank_add_money_failed.html", user=sender, pending=pending)
+
+
+@main.route("/cancel-bank-add-money")
+@login_required
+def cancel_bank_add_money():
+    session.pop("pending_bank_add_money", None)
+    _clear_otp_session()
+    return redirect(url_for("user.dashboard"))
+
+
 @main.route("/api/request-otp", methods=["POST"])
 def request_otp():
     if "user_id" not in session:
@@ -457,8 +532,49 @@ def request_otp():
         "message": "OTP sent to your email",
         "redirect": url_for("user.verify_otp_page"),
     }), 200
- 
- 
+
+
+@main.route("/api/request-bank-otp", methods=["POST"])
+def request_bank_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    pending = session.get("pending_bank_add_money")
+    if not pending:
+        return jsonify({"success": False, "message": "No pending bank add money transaction"}), 400
+
+    sender = get_current_user()
+    sender_email = sender.get("email", "").strip() if sender else ""
+    if not sender_email:
+        return jsonify({"success": False, "message": "No email found for user"}), 400
+
+    mailer = _get_mailer()
+    if not mailer or not mailer.is_configured:
+        return jsonify({"success": False, "message": "Email service is not configured"}), 500
+
+    otp = f"{secrets.randbelow(1000000):06d}"
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    session["verified_otp"] = otp
+    session["otp_expires_at"] = expires_at.isoformat()
+    session["otp_attempts"] = 0
+
+    try:
+        sent = mailer.send_otp(sender_email, otp, async_send=False)
+        if not sent:
+            raise RuntimeError("Mailer returned false")
+        logger.info("OTP email sent to %s", sender_email)
+    except Exception as exc:
+        logger.exception("OTP email failed: %s", exc)
+        _clear_otp_session()
+        return jsonify({"success": False, "message": "Could not send OTP email. Please try again."}), 500
+
+    return jsonify({
+        "success": True,
+        "message": "OTP sent to your email",
+        "redirect": url_for("user.verify_bank_otp_page"),
+    }), 200
+
+
 @main.route("/api/verify-otp", methods=["POST"])
 def verify_otp():
     if "user_id" not in session:
@@ -574,6 +690,77 @@ def verify_otp():
     session.pop("pending_transaction", None)
 
     return redirect(url_for("user.transaction_success"))
+
+
+@main.route("/api/verify-bank-otp", methods=["POST"])
+def verify_bank_otp():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+    if request.is_json:
+        payload = request.get_json(silent=True) or {}
+        code = (payload.get("otp") or "").strip()
+    else:
+        code = (request.form.get("otp") or "").strip()
+    stored_otp = session.get("verified_otp")
+    expires_at = session.get("otp_expires_at")
+    attempts = int(session.get("otp_attempts", 0) or 0) + 1
+    session["otp_attempts"] = attempts
+    if attempts > MAX_OTP_VERIFY_ATTEMPTS:
+        pending = session.get("pending_bank_add_money")
+        _record_failed_bank_add_money_transaction(pending)
+        _clear_otp_session()
+        session.pop("pending_bank_add_money", None)
+        return redirect(url_for("user.bank_add_money_failed"))
+    if not code or len(code) != 6 or not code.isdigit():
+        return redirect(url_for("user.verify_bank_otp_page", error="invalid"))
+    if not stored_otp or stored_otp != code:
+        return redirect(url_for("user.verify_bank_otp_page", error="invalid"))
+    if expires_at and datetime.fromisoformat(expires_at) < datetime.utcnow():
+        pending = session.get("pending_bank_add_money")
+        _record_failed_bank_add_money_transaction(pending)
+        _clear_otp_session()
+        session.pop("pending_bank_add_money", None)
+        return redirect(url_for("user.bank_add_money_failed"))
+
+    pending = session.get("pending_bank_add_money")
+    if not pending:
+        return redirect(url_for("user.bank_add_money_failed"))
+
+    sender_username = pending.get("sender_username") or session.get("user_id")
+    amount = float(pending.get("amount", 0))
+    bank_code = pending.get("recipient_epaisa", "") or pending.get("bank_code", "")
+
+    user = get_current_user()
+    if not user or user["username"] != sender_username:
+        _record_failed_bank_add_money_transaction(pending)
+        _clear_otp_session()
+        session.pop("pending_bank_add_money", None)
+        return redirect(url_for("user.bank_add_money_failed"))
+
+    sender_balance = float(user.get("balance", 0) or 0)
+    if sender_balance < amount:
+        _record_failed_bank_add_money_transaction(pending)
+        _clear_otp_session()
+        session.pop("pending_bank_add_money", None)
+        return redirect(url_for("user.bank_add_money_failed"))
+
+    sender_balance = sender_balance + amount
+    bank = pending.get("bank") or "Bank"
+    db = Database()
+    db.execute("UPDATE register SET balance = %s WHERE username = %s", (sender_balance, user["username"]))
+    sender_email = user.get("email") or ""
+    sender_epaisa_id = user.get("epaisa_id") or user.get("username") or ""
+    receiver_email = ""
+    receiver_epaisa_id = bank_code
+    db.execute(
+        "INSERT INTO transactions (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+        (sender_email, sender_epaisa_id, receiver_email, receiver_epaisa_id, amount, bank)
+    )
+    db.close()
+    _clear_otp_session()
+    session.pop("pending_bank_add_money", None)
+
+    return redirect(url_for("user.bank_add_money_success"))
 
 
 @main.route("/recharge")
@@ -728,6 +915,66 @@ def initiate_recharge():
         "message": "OK",
         "next": "otp",
         "redirect": url_for("user.verify_recharge_otp_page")
+    }), 200
+
+
+@main.route("/api/initiate-bank-add-money", methods=["POST"])
+def initiate_bank_add_money():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    raw_data = request.get_data(as_text=True)
+    if not raw_data:
+        return jsonify({"success": False, "message": "Invalid request - no data received"}), 400
+
+    try:
+        data = json.loads(raw_data)
+    except Exception:
+        return jsonify({"success": False, "message": "Invalid JSON data"}), 400
+
+    bank = data.get("bank", "").strip()
+    bank_code = re.sub(r"\s+", "", data.get("bank_code") or data.get("bankCode") or "")
+    amount = data.get("amount")
+
+    if bank not in BANK_ADD_MONEY_OPTIONS:
+        return jsonify({"success": False, "message": "Invalid bank"}), 400
+
+    if not bank_code:
+        return jsonify({"success": False, "message": "Bank code / PIN is required"}), 400
+
+    try:
+        amount_val = float(amount)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Invalid amount"}), 400
+
+    if amount_val <= 0:
+        return jsonify({"success": False, "message": "Amount must be greater than 0"}), 400
+
+    user = get_current_user()
+    if not user:
+        return jsonify({"success": False, "message": "User not authenticated"}), 401
+
+    sender_balance = user.get("balance", 0.0)
+    if isinstance(sender_balance, str):
+        try:
+            sender_balance = float(sender_balance)
+        except (ValueError, TypeError):
+            sender_balance = 0.0
+
+    session["pending_bank_add_money"] = {
+        "sender_username": user["username"],
+        "sender_balance": sender_balance,
+        "bank": bank,
+        "bank_code": bank_code,
+        "recipient_epaisa": bank_code,
+        "amount": amount_val
+    }
+
+    return jsonify({
+        "success": True,
+        "message": "OK",
+        "next": "otp",
+        "redirect": url_for("user.verify_bank_otp_page")
     }), 200
 
 

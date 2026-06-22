@@ -42,7 +42,9 @@
                             <td style="padding:10px 12px;">{{ row.receiver_epaisa_id or '-' }}</td>
                             <td style="padding:10px 12px; font-weight:600;">₹ {{ "{:,.2f}".format(row.amount) if row.amount else '0.00' }}</td>
                             <td style="padding:10px 12px;">
-                                {% if row.status == 'recharge' %}
+                                {% if row.status == 'bank' %}
+                                    <span style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Bank</span>
+                                {% elif row.status == 'recharge' %}
                                     <span style="background:#e6f7ee; color:#006b27; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge</span>
                                 {% elif row.status == 'recharge_failed' %}
                                     <span style="background:#fee; color:#c00; padding:3px 8px; border-radius:6px; font-size:12px; font-weight:600;">Recharge Failed</span>

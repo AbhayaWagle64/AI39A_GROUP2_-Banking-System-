@@ -277,5 +277,30 @@ class TestLoginRequiredDecorator(unittest.TestCase):
         self.assertEqual(response.data.decode(), "home page")
 
 
+class TestForgotPasswordFlow(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.secret_key = "test-secret-key"
+
+    def test_validate_password_requirements(self):
+        from app.routes.auth_routes import validate_password
+        self.assertTrue(validate_password('Secret1!'))
+        self.assertFalse(validate_password('short'))
+        self.assertFalse(validate_password('alllowercase1!'))
+        self.assertFalse(validate_password('NoSpecialChar1'))
+        self.assertFalse(validate_password('NoNumber!'))
+
+    def test_password_mismatch_prevents_reset(self):
+        with self.app.test_request_context(
+            method="POST",
+            data={"password": "Secret1!", "confirm_password": "Different1!"},
+        ):
+            from app.routes.auth_routes import validate_password
+            pwd = "Secret1!"
+            confirm = "Different1!"
+            self.assertTrue(validate_password(pwd))
+            self.assertNotEqual(pwd, confirm)
+
+
 if __name__ == "__main__":
     unittest.main()

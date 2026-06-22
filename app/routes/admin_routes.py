@@ -15,7 +15,8 @@ main = Blueprint("admin", __name__)
 admin_model = AdminModel()
 wallet_model = WalletModel()
 
-SUCCESSFUL_STATUSES = ("completed", "merchant_payment", "recharge")
+SUCCESSFUL_STATUSES = ("completed", "merchant_payment", "recharge", "bank", "nmb", "global ime", "standard chartered")
+SUCCESSFUL_STATUS_SQL = ", ".join(f"'{status}'" for status in SUCCESSFUL_STATUSES)
 
 
 def _ensure_admin():
@@ -42,11 +43,11 @@ def _fetch_transactions(include_wrong_only=False):
     try:
         if include_wrong_only:
             rows = db.fetch_all(
-                """
+                f"""
                 SELECT id, transaction_date, sender_email, sender_epaisa_id,
                        receiver_email, receiver_epaisa_id, amount, status
                 FROM transactions
-                WHERE COALESCE(LOWER(status), '') NOT IN ('completed', 'merchant_payment', 'recharge')
+                WHERE COALESCE(LOWER(status), '') NOT IN ({SUCCESSFUL_STATUS_SQL})
                 ORDER BY transaction_date DESC
                 """
             )

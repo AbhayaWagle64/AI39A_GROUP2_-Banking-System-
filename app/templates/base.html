@@ -49,7 +49,7 @@
             <li>
                 <a href="/wallet"
                 data-route="user.wallet"
-                class="{% if request.endpoint == 'user.wallet' %}active{% endif %}">
+                class="{% if request.endpoint == 'user.wallet' or '/add-money' in request.path %}active{% endif %}">
                     Wallet
                 </a>
             </li>
@@ -94,7 +94,7 @@
             </a>
  
             <a href="/wallet"
-            class="mobile-nav-item {% if '/wallet' in request.path %}active{% endif %}">
+                class="mobile-nav-item {% if '/wallet' in request.path or '/add-money' in request.path %}active{% endif %}">
                 <span class="nav-icon">💳</span>
                 <span>Wallet</span>
             </a>

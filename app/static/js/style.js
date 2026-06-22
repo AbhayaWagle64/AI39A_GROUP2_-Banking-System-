@@ -50,8 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (qrCodeBtn) {
         qrCodeBtn.addEventListener("click", () => {
             if (qrImage) {
+                const qrCodeUrl = qrImage.dataset.src || "/qr-code";
                 qrImage.alt = "Loading QR Code...";
-                qrImage.src = "/qr-code?" + new Date().getTime();
+                qrImage.src = `${qrCodeUrl}?t=${new Date().getTime()}`;
             }
             qrCodeModal.classList.add("active");
         });

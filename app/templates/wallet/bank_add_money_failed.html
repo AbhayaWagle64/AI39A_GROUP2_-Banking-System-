@@ -1,0 +1,9 @@
+{% extends "wallet/result.html" %}
+
+{% set status = "failed" %}
+{% set title = "Transfer to Bank Failed" %}
+{% set subtitle = "The transfer to your bank account could not be completed. Please try again." %}
+
+{% block content %}
+{{ super() }}
+{% endblock %}

@@ -69,5 +69,24 @@ class TestBasicUtils(unittest.TestCase):
             self.assertEqual(user['transaction_count'], 3)
 
 
+class TestAdminReportSQL(unittest.TestCase):
+    def test_successful_status_sql_format(self):
+        from app.routes.admin_routes import SUCCESSFUL_STATUS_SQL
+        self.assertIn("'completed'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'merchant_payment'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'recharge'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'bank'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'nmb'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'global ime'", SUCCESSFUL_STATUS_SQL)
+        self.assertIn("'standard chartered'", SUCCESSFUL_STATUS_SQL)
+
+    def test_sql_query_valid_syntax(self):
+        from app.routes.admin_routes import SUCCESSFUL_STATUSES, SUCCESSFUL_STATUS_SQL
+        statuses = [status.replace("'", "''") for status in SUCCESSFUL_STATUSES]
+        for status in statuses:
+            expected_escaped = f"'{status}'"
+            self.assertIn(expected_escaped.replace("''", "'"), SUCCESSFUL_STATUS_SQL)
+
+
 if __name__ == '__main__':
     unittest.main()

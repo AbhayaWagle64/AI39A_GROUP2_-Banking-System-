@@ -59,3 +59,9 @@ class RegisterModel:
         db = Database()
         db.execute(f"DELETE FROM {self.table} WHERE username = %s", (username,))
         db.close()
+
+    def update_password(self, username, password_hash):
+        db = Database()
+        db.execute(f"UPDATE {self.table} SET password = %s WHERE username = %s", (password_hash, username))
+        db.close()
+        return True

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paisa - Verify OTP</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <style>
+        .otp-card { max-width:400px; margin:40px auto; }
+        .otp-note { color:#555; font-size:14px; margin:0 0 18px; }
+        .otp-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+        .btn-cancel { background:#dc2626; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; }
+        .btn-cancel:hover { background:#b91c1c; }
+    </style>
+</head>
+<body>
+
+    <div class="landing-wrapper">
+
+        <div class="landing-hero">
+            <div class="hero-chip">
+                <span>★</span>
+                <span>Trusted Nepali Digital Wallet</span>
+            </div>
+
+            <img
+                src="{{ url_for('static', filename='images/logo.svg') }}"
+                alt="ePaisa"
+                class="hero-logo-lg"
+                width="100"
+                height="100">
+
+            <h1 class="hero-title">Smart Banking <span>For Nepal</span></h1>
+
+            <p class="hero-subtitle">
+                Send money, pay bills, manage your wallet and experience secure digital
+                finance with E-Paisa.
+            </p>
+
+            <ul class="hero-features">
+                <li>Instant Payments</li>
+                <li>Bank-Level Security</li>
+                <li>नेपालमै विश्वास</li>
+            </ul>
+
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <div class="metric-value">50K+</div>
+                    <div class="metric-label">Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">₹10M+</div>
+                    <div class="metric-label">Transactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.9★</div>
+                    <div class="metric-label">Rating</div>
+                </div>
+            </div>
+
+            <p class="hero-footer">
+                Secure • Reliable • Fast
+            </p>
+        </div>
+
+        <div class="landing-auth">
+            <div class="auth-box otp-card">
+                <h2 style="margin:0 0 8px; font-size:20px;">Verify OTP</h2>
+                <p class="otp-note">OTP has been sent to <strong>{{ masked_email }}</strong></p>
+                
+                {% if error == 'invalid' %}
+                <p id="otpStatus" class="otp-note error" aria-live="polite" style="color:#dc2626;">
+                    Invalid OTP. Please try again.
+                    {% if attempts_left is not none %}
+                        {% if attempts_left > 0 %}
+                            You have {{ attempts_left }} attempt{% if attempts_left != 1 %}s{% endif %} left.
+                        {% else %}
+                            This is your last valid attempt before the process fails.
+                        {% endif %}
+                    {% endif %}
+                </p>
+                {% else %}
+                <p id="otpStatus" class="otp-note" aria-live="polite"></p>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="otp">
+                        <span>🔢</span>
+                        <span>Enter OTP</span>
+                    </label>
+                    <input type="text" id="otp" name="otp" class="input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+                </div>
+                <div class="otp-actions">
+                    <button type="button" class="btn btn-primary" id="verifyBtn">Verify OTP</button>
+                    <button type="button" class="btn btn-secondary" id="resendBtn">Resend OTP</button>
+                </div>
+                <div style="text-align:center; margin-top:18px;">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const otpInput = document.getElementById('otp');
+        const resendBtn = document.getElementById('resendBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const otpStatus = document.getElementById('otpStatus');
+
+        async function requestOtp() {
+            try {
+                const res = await fetch('/api/forgot-password-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (otpStatus) {
+                    otpStatus.textContent = data.message || '';
+                    otpStatus.className = data.success ? 'otp-note' : 'otp-note error';
+                    otpStatus.style.color = data.success ? '#16a34a' : '#dc2626';
+                }
+                if (data && !data.success && otpInput) {
+                    otpInput.value = '';
+                }
+            } catch (err) {
+                if (otpStatus) {
+                    otpStatus.textContent = 'Could not send OTP email. Please try again.';
+                    otpStatus.className = 'otp-note error';
+                    otpStatus.style.color = '#dc2626';
+                }
+            }
+        }
+
+        if (resendBtn) {
+            resendBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                resendBtn.disabled = true;
+                resendBtn.textContent = 'Resending...';
+                await requestOtp();
+                resendBtn.disabled = false;
+                resendBtn.textContent = 'Resend OTP';
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                window.location.href = '/login';
+            });
+        }
+
+        if (verifyBtn) {
+            verifyBtn.addEventListener('click', async () => {
+                const otp = otpInput.value.trim();
+                if (!otp || otp.length !== 6) {
+                    otpStatus.textContent = 'Please enter a valid 6-digit OTP.';
+                    otpStatus.className = 'otp-note error';
+                    otpStatus.style.color = '#dc2626';
+                    return;
+                }
+                verifyBtn.disabled = true;
+                verifyBtn.textContent = 'Verifying...';
+                try {
+                    const res = await fetch('/api/verify-reset-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ otp: otp })
+                    });
+                    const data = await res.json();
+                    if (data && data.success && data.redirect) {
+                        window.location.href = data.redirect;
+                    } else if (data && data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        otpStatus.textContent = data.message || 'Invalid OTP. Please try again.';
+                        otpStatus.className = 'otp-note error';
+                        otpStatus.style.color = '#dc2626';
+                        otpInput.value = '';
+                        verifyBtn.disabled = false;
+                        verifyBtn.textContent = 'Verify OTP';
+                    }
+                } catch (err) {
+                    otpStatus.textContent = 'Verification failed. Please try again.';
+                    otpStatus.className = 'otp-note error';
+                    otpStatus.style.color = '#dc2626';
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = 'Verify OTP';
+                }
+            });
+        }
+    });
+    </script>
+
+</body>
+</html>
